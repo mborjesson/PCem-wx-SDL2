@@ -565,6 +565,34 @@ void closepc()
 
 END_OF_MAIN();*/
 
+typedef struct config_callback_t
+{
+        void(*loadconfig)();
+        void(*saveconfig)();
+        struct config_callback_t* next;
+} config_callback_t;
+config_callback_t* config_callback = 0;
+
+void add_config_callback(void(*loadconfig)(), void(*saveconfig)())
+{
+        config_callback_t* callback = config_callback;
+        if (!callback)
+        {
+                config_callback = malloc(sizeof(config_callback_t));
+                callback = config_callback;
+        }
+        else
+        {
+                config_callback_t* parent = callback;
+                while (parent->next)
+                        callback = parent->next;
+                parent->next = malloc(sizeof(config_callback_t));
+                callback = parent->next;
+        }
+        callback->loadconfig = loadconfig;
+        callback->saveconfig = saveconfig;
+        callback->next = 0;
+}
 
 void loadconfig(char *fn)
 {
@@ -706,6 +734,13 @@ void loadconfig(char *fn)
         }
 
         enable_sync = config_get_int(NULL, "enable_sync", 1);
+
+        config_callback_t* callback = config_callback;
+        while (callback)
+        {
+                callback->loadconfig();
+                callback = callback->next;
+        }
 }
 
 void saveconfig()
@@ -802,6 +837,13 @@ void saveconfig()
         }
         
         config_set_int(NULL, "enable_sync", enable_sync);
+
+        config_callback_t* callback = config_callback;
+        while (callback)
+        {
+                callback->saveconfig();
+                callback = callback->next;
+        }
 
         config_save(config_file_default);
 }
