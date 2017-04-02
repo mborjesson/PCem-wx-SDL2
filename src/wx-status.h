@@ -1,0 +1,47 @@
+#ifndef SRC_WX_STATUS_H_
+#define SRC_WX_STATUS_H_
+
+#include <wx/wx.h>
+#include <wx/timer.h>
+
+#define DEFAULT_WINDOW_WIDTH 250
+#define DEFAULT_WINDOW_HEIGHT 25
+
+#define SPEED_HISTORY_LENGTH 240
+
+class StatusPane;
+
+class StatusTimer : public wxTimer
+{
+public:
+        StatusTimer(StatusPane* pane);
+        virtual ~StatusTimer() {};
+
+        void Notify();
+        void Start();
+private:
+        StatusPane* pane;
+};
+
+class StatusPane : public wxPanel
+{
+
+public:
+    StatusPane(wxFrame* parent);
+    virtual ~StatusPane();
+
+    void PaintEvent(wxPaintEvent& evt);
+    void PaintNow();
+    void Render( wxDC& dc );
+
+private:
+    char machineInfoText[4096];
+    char statusMachineText[4096];
+    char statusDeviceText[4096];
+    wxLongLong lastSpeedUpdate;
+    char speedHistory[SPEED_HISTORY_LENGTH];
+
+    DECLARE_EVENT_TABLE()
+};
+
+#endif /* SRC_WX_STATUS_H_ */
