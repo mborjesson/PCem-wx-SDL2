@@ -1,4 +1,4 @@
-#ifdef __unix
+#ifdef PCEM_ALLEGRO
 
 #include "allegro-main.h"
 
