@@ -1,5 +1,6 @@
 .project
 .cproject
+.settings/
 .hg/
 src/*.o
 src/PCem*
