@@ -4,4 +4,7 @@
 .hg/
 src/*.o
 src/PCem*
-src/pcem.log
+src/pclog.txt
+src/*.dmp
+src/*.cfg
+pclog.txt
