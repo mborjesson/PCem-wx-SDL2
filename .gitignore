@@ -1,0 +1,6 @@
+.project
+.cproject
+.hg/
+src/*.o
+src/PCem*
+src/pcem.log
