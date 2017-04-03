@@ -2,5 +2,8 @@ extern int show_machine_info;
 extern int show_status;
 extern int show_speed_history;
 extern int show_disc_activity;
+extern int hide_on_close;
+extern int hide_on_close_first;
+extern int hide_on_start;
 extern int wx_window_x;
 extern int wx_window_y;

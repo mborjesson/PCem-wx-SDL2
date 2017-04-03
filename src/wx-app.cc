@@ -8,16 +8,21 @@ extern "C"
 int wx_start(void*);
 void wx_stop(void*);
 void wx_show(void*);
-void wx_handle_menu(void*, int);
+void wx_handle_menu(void*, int, int);
 int window_remember;
 }
 
 int wx_window_x = 0;
 int wx_window_y = 0;
 
+int hide_on_close = 0;
+int hide_on_close_first = 1;
+int hide_on_start = 0;
+
 extern void InitXmlResource();
 
 wxDEFINE_EVENT(WX_EXIT_EVENT, wxCommandEvent);
+wxDEFINE_EVENT(WX_SHOW_EVENT, wxCommandEvent);
 
 wxBEGIN_EVENT_TABLE(Frame, wxFrame)
 wxEND_EVENT_TABLE()
@@ -62,7 +67,8 @@ Frame::Frame(App* app, const wxString& title, const wxPoint& pos,
         Bind(wxEVT_MENU, &Frame::OnCommand, this);
         Bind(wxEVT_SHOW, &Frame::OnShow, this);
         Bind(wxEVT_MOVE, &Frame::OnMoveWindow, this);
-        Bind(WX_EXIT_EVENT, &Frame::OnExit, this);
+        Bind(WX_SHOW_EVENT, &Frame::OnShowEvent, this);
+        Bind(WX_EXIT_EVENT, &Frame::OnExitEvent, this);
 
         wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
         sizer->Add(statusPane, 1, wxEXPAND);
@@ -72,36 +78,46 @@ Frame::Frame(App* app, const wxString& title, const wxPoint& pos,
 }
 
 void Frame::Start() {
-        Show();
-}
-
-void Frame::OnShow(wxShowEvent& event) {
-        if (wx_start(this)) {
+        if (wx_start(this))
+        {
+                if (!hide_on_start)
+                        Show();
                 statusTimer->Start();
-                if (window_remember) {
+                if (window_remember)
                         SetPosition(wxPoint(wx_window_x, wx_window_y));
-                } else {
+                else
                         CenterOnScreen();
-                }
-        } else {
-                Quit();
         }
+        else
+                Quit(0);
 
 }
 
-void Frame::OnExit(wxCommandEvent& event)
+void Frame::OnShow(wxShowEvent& event)
+{
+}
+
+void Frame::OnExitEvent(wxCommandEvent& event)
 {
         Quit();
+}
+
+void Frame::OnShowEvent(wxCommandEvent& event)
+{
+        ((wxWindow*)event.GetEventObject())->Show(event.GetInt());
 }
 
 void Frame::OnCommand(wxCommandEvent& event)
 {
-        wx_handle_menu(this, event.GetId());
+        wx_handle_menu(this, event.GetId(), event.IsChecked());
 }
 
 void Frame::OnClose(wxCloseEvent& event)
 {
-        Quit();
+        if (hide_on_close)
+                Show(false);
+        else
+                Quit();
 }
 
 void Frame::Quit(bool stop_emulator) {

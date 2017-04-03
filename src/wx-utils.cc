@@ -68,13 +68,9 @@ void wx_setdlgitemtext(void* window, int id, char* str)
 {
         wxWindow* w = ((wxWindow*) window)->FindWindow(id);
         if (w->GetClassInfo()->IsKindOf(CLASSINFO(wxTextCtrl)))
-        {
                 ((wxTextCtrl*) w)->SetValue(str);
-        }
         else
-        {
                 ((wxStaticText*) w)->SetLabel(str);
-        }
 }
 
 void wx_enablewindow(void* window, int enabled)
@@ -84,7 +80,11 @@ void wx_enablewindow(void* window, int enabled)
 
 void wx_showwindow(void* window, int show)
 {
-        ((wxWindow*) window)->Show(show);
+//        ((wxWindow*) window)->Show(show);
+        wxCommandEvent* event = new wxCommandEvent(WX_SHOW_EVENT, ((wxWindow*)window)->GetId());
+        event->SetEventObject((wxWindow*)window);
+        event->SetInt(show);
+        wxQueueEvent((wxWindow*)window, event);
 }
 
 void wx_enddialog(void* window, int ret_code)
@@ -120,26 +120,16 @@ int wx_sendmessage(void* window, int type, INT_PARAM param1, LONG_PARAM param2)
         case WX_WM_SETTEXT:
         {
                 if (((wxWindow*) window)->GetClassInfo()->IsKindOf(CLASSINFO(wxTextCtrl)))
-                {
                         ((wxTextCtrl*) window)->SetValue((char*) param2);
-                }
                 else
-                {
                         ((wxStaticText*) window)->SetLabel((char*) param2);
-                }
         }
                 break;
         case WX_WM_GETTEXT:
                 if (((wxWindow*) window)->GetClassInfo()->IsKindOf(CLASSINFO(wxTextCtrl)))
-                {
-                        strcpy((char*) param2,
-                                        ((wxTextCtrl*) window)->GetValue());
-                }
+                        strcpy((char*) param2, ((wxTextCtrl*) window)->GetValue());
                 else
-                {
-                        strcpy((char*) param2,
-                                        ((wxStaticText*) window)->GetLabel());
-                }
+                        strcpy((char*) param2, ((wxStaticText*) window)->GetLabel());
                 break;
         case WX_UDM_SETPOS:
                 ((wxSpinCtrl*) window)->SetValue(param2);
@@ -183,3 +173,4 @@ void wx_exit(void* window, int value) {
         event->SetInt(value);
         wxQueueEvent((wxWindow*)window, event);
 }
+

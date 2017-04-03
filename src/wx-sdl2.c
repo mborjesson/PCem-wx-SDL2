@@ -275,15 +275,20 @@ int renderer_thread(void* params)
                                         }
                                         break;
                                 case SDL_KEYDOWN:
-                                        if (event.key.keysym.scancode == SDL_SCANCODE_PAGEDOWN && (event.key.keysym.mod&KMOD_CTRL) && (event.key.keysym.mod&KMOD_ALT)) {
+                                        if (event.key.keysym.scancode == SDL_SCANCODE_PAGEDOWN && (event.key.keysym.mod&KMOD_CTRL) && (event.key.keysym.mod&KMOD_ALT))
+                                        {
                                                 window_doinputrelease = 1;
-                                                if (is_fullscreen()) {
+                                                if (is_fullscreen())
                                                         window_dowindowed = 1;
-                                                }
-                                        } else if (event.key.keysym.scancode == SDL_SCANCODE_END && (event.key.keysym.mod&KMOD_CTRL)) {
-                                                if (!is_fullscreen()) {
+                                        }
+                                        else if (event.key.keysym.scancode == SDL_SCANCODE_PAGEUP && (event.key.keysym.mod&KMOD_CTRL) && (event.key.keysym.mod&KMOD_ALT))
+                                        {
+                                                wx_showwindow(ghwnd, 1);
+                                        }
+                                        else if (event.key.keysym.scancode == SDL_SCANCODE_END && (event.key.keysym.mod&KMOD_CTRL))
+                                        {
+                                                if (!is_fullscreen())
                                                         window_doinputrelease = 1;
-                                                }
                                         }
                                         break;
                                 }
@@ -579,6 +584,8 @@ int wx_start(void* hwnd)
         wx_checkmenuitem(menu, WX_ID("IDM_STATUS"), show_status);
         wx_checkmenuitem(menu, WX_ID("IDM_SPEED_HISTORY"), show_speed_history);
         wx_checkmenuitem(menu, WX_ID("IDM_DISC_ACTIVITY"), show_disc_activity);
+        wx_checkmenuitem(menu, WX_ID("IDM_HIDE_ON_CLOSE"), hide_on_close);
+        wx_checkmenuitem(menu, WX_ID("IDM_HIDE_ON_START"), hide_on_start);
         sprintf(menuitem, "IDM_VID_SCALE_MODE[%d]", video_scale_mode);
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
         sprintf(menuitem, "IDM_VID_SCALE[%d]", video_scale);
@@ -766,7 +773,7 @@ int confirm()
                         "PCem", WX_MB_OKCANCEL) == WX_IDOK;
 }
 
-int wx_handle_menu(void* hwnd, int wParam)
+int wx_handle_menu(void* hwnd, int wParam, int checked)
 {
         SDL_Rect rect;
         void* hmenu;
@@ -835,7 +842,7 @@ int wx_handle_menu(void* hwnd, int wParam)
         }
         else if (ID_IS("IDM_BPB_DISABLE"))
         {
-                bpb_disable = !bpb_disable;
+                bpb_disable = checked;
                 wx_checkmenuitem(hmenu, WX_ID("IDM_BPB_DISABLE"), bpb_disable ? WX_MB_CHECKED : WX_MB_UNCHECKED);
                 saveconfig();
         }
@@ -849,30 +856,52 @@ int wx_handle_menu(void* hwnd, int wParam)
         }
         else if (ID_IS("IDM_STATUS"))
         {
-                show_status = !show_status;
-                wx_checkmenuitem(hmenu, wParam, show_status);
+                show_status = checked;
+                saveconfig();
         }
         else if (ID_IS("IDM_SPEED_HISTORY"))
         {
-                show_speed_history = !show_speed_history;
-                wx_checkmenuitem(hmenu, wParam, show_speed_history);
+                show_speed_history = checked;
+                saveconfig();
         }
         else if (ID_IS("IDM_DISC_ACTIVITY"))
         {
-                show_disc_activity = !show_disc_activity;
-                wx_checkmenuitem(hmenu, wParam, show_disc_activity);
+                show_disc_activity = checked;
+                saveconfig();
+        }
+        else if (ID_IS("IDM_HIDE_ON_CLOSE"))
+        {
+                if (hide_on_close_first)
+                {
+                        hide_on_close_first = 0;
+                        wx_messagebox(hwnd,
+                                        "Press CTRL + ALT + PAGE UP to show the machine window",
+                                        "PCem", WX_MB_OK);
+                }
+                hide_on_close = checked;
+                saveconfig();
+        }
+        else if (ID_IS("IDM_HIDE_ON_START"))
+        {
+                if (hide_on_close_first)
+                {
+                        hide_on_close_first = 0;
+                        wx_messagebox(hwnd,
+                                        "Press CTRL + ALT + PAGE UP to show the machine window",
+                                        "PCem", WX_MB_OK);
+                }
+                hide_on_start = checked;
+                saveconfig();
         }
         else if (ID_IS("IDM_VID_RESIZE"))
         {
-                vid_resize = !vid_resize;
-                wx_checkmenuitem(hmenu, WX_ID("IDM_VID_RESIZE"),
-                                (vid_resize) ? WX_MB_CHECKED : WX_MB_UNCHECKED);
+                vid_resize = checked;
                 window_doreset = 1;
                 saveconfig();
         }
         else if (ID_IS("IDM_VID_REMEMBER"))
         {
-                window_remember = !window_remember;
+                window_remember = checked;
                 wx_checkmenuitem(hmenu, WX_ID("IDM_VID_REMEMBER"),
                                 window_remember ? WX_MB_CHECKED : WX_MB_UNCHECKED);
                 window_doremember = 1;
@@ -887,8 +916,7 @@ int wx_handle_menu(void* hwnd, int wParam)
                                         "Use CTRL + ALT + PAGE DOWN to return to windowed mode",
                                         "PCem", WX_MB_OK);
                 }
-                video_fullscreen = !video_fullscreen;
-                wx_checkmenuitem(hmenu, wParam, video_fullscreen);
+                video_fullscreen = checked;
                 saveconfig();
         }
         else if (ID_RANGE("IDM_VID_FS[start]", "IDM_VID_FS[end]"))
@@ -920,15 +948,13 @@ int wx_handle_menu(void* hwnd, int wParam)
         }
         else if (ID_IS("IDM_VID_VSYNC"))
         {
-                video_vsync = !video_vsync;
-                wx_checkmenuitem(hmenu, wParam, video_vsync);
+                video_vsync = checked;
                 renderer_doreset = 1;
                 saveconfig();
         }
         else if (ID_IS("IDM_VID_LOST_FOCUS_DIM"))
         {
-                video_focus_dim = !video_focus_dim;
-                wx_checkmenuitem(hmenu, wParam, video_focus_dim);
+                video_focus_dim = checked;
                 saveconfig();
         }
         else if (ID_IS("IDM_CONFIG_LOAD"))

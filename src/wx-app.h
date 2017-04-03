@@ -9,6 +9,7 @@
 #include "wx-status.h"
 
 wxDECLARE_EVENT(WX_EXIT_EVENT, wxCommandEvent);
+wxDECLARE_EVENT(WX_SHOW_EVENT, wxCommandEvent);
 
 class Frame;
 
@@ -38,7 +39,8 @@ public:
 
 private:
         void OnCommand(wxCommandEvent& event);
-        void OnExit(wxCommandEvent& event);
+        void OnExitEvent(wxCommandEvent& event);
+        void OnShowEvent(wxCommandEvent& event);
         void OnClose(wxCloseEvent& event);
         void OnShow(wxShowEvent& event);
         void OnMoveWindow(wxMoveEvent& event);
