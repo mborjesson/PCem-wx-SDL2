@@ -193,6 +193,15 @@
 				<label>Speed history</label>
 				<checkable>1</checkable>
 			</object>
+			<object class="separator"/>
+			<object class="wxMenuItem" name="IDM_HIDE_ON_CLOSE">
+				<label>Hide on close</label>
+				<checkable>1</checkable>
+			</object>
+			<object class="wxMenuItem" name="IDM_HIDE_ON_START">
+				<label>Hide on start</label>
+				<checkable>1</checkable>
+			</object>
 		</object>
 	</object>
 
