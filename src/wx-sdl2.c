@@ -179,6 +179,15 @@ int is_input_grab() {
         return SDL_GetWindowGrab(window);
 }
 
+int get_border_size(int* top, int* left, int* bottom, int* right)
+{
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+        return SDL_GetWindowBordersSize(window, top, left, bottom, right);
+#else
+        return 0;
+#endif
+}
+
 uint64_t render_time;
 int render_fps = 0;
 
@@ -284,7 +293,7 @@ int renderer_thread(void* params)
                                                 int flags = SDL_GetWindowFlags(window);
                                                 if (!(flags&SDL_WINDOW_FULLSCREEN) && !(flags&SDL_WINDOW_FULLSCREEN_DESKTOP)) {
                                                         if (event.window.event == SDL_WINDOWEVENT_MOVED) {
-                                                                SDL_GetWindowBordersSize(window, &border_y, &border_x, 0, 0);
+                                                                get_border_size(&border_x, &border_y, 0, 0);
                                                                 window_x = event.window.data1-border_x;
                                                                 window_y = event.window.data2-border_y;
                                                         } else if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
@@ -316,7 +325,7 @@ int renderer_thread(void* params)
                                 window_doremember = 0;
                                 SDL_GetWindowPosition(window, &window_x, &window_y);
                                 SDL_GetWindowSize(window, &window_w, &window_h);
-                                SDL_GetWindowBordersSize(window, &border_y, &border_x, 0, 0);
+                                get_border_size(&border_y, &border_x, 0, 0);
                                 window_x -= border_x;
                                 window_y -= border_y;
                                 saveconfig();
@@ -345,7 +354,7 @@ int renderer_thread(void* params)
                                 SDL_RaiseWindow(window);
                                 SDL_GetGlobalMouseState(&remembered_mouse_x, &remembered_mouse_y);
                                 SDL_GetWindowPosition(window, &remembered_rect.x, &remembered_rect.y);
-                                SDL_GetWindowBordersSize(window, &border_y, &border_x, 0, 0);
+                                get_border_size(&border_y, &border_x, 0, 0);
                                 remembered_rect.x -= border_x;
                                 remembered_rect.y -= border_y;
                                 SDL_GetWindowSize(window, &remembered_rect.w, &remembered_rect.h);
@@ -409,7 +418,7 @@ int renderer_thread(void* params)
                         if (rendering) { /* save current position and size of the window */
                                 SDL_GetWindowPosition(window, &rect.x, &rect.y);
                                 SDL_GetWindowSize(window, &rect.w, &rect.h);
-                                SDL_GetWindowBordersSize(window, &border_y, &border_x, 0, 0);
+                                get_border_size(&border_y, &border_x, 0, 0);
                                 rect.x -= border_x;
                                 rect.y -= border_y;
                         }
