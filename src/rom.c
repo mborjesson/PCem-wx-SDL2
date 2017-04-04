@@ -4,24 +4,57 @@
 #include "mem.h"
 #include "rom.h"
 
+#ifdef __linux__
+#include <dirent.h>
+#include <libgen.h>
+#include <ctype.h>
+#define TOLOWER(s) for (int i = 0; s[i]; ++i) s[i] = tolower(s[i]);
+#endif
+
 FILE *romfopen(char *fn, char *mode)
 {
         char s[512];
         strcpy(s, pcempath);
         put_backslash(s);
         strcat(s, fn);
-        return fopen(s, mode);
+        FILE* file = fopen(s, mode);
+#ifdef __linux__
+        if (!file)
+        {
+                char s2[512];
+                char* filename = basename(s);
+                char* path = dirname(s);
+                TOLOWER(filename);
+                DIR* d = opendir(path);
+                struct dirent *dir;
+                if (d)
+                {
+                        while (!file && ((dir = readdir(d)) != NULL))
+                        {
+                                char* name = dir->d_name;
+                                strcpy(s2, name);
+                                TOLOWER(s2);
+                                if (!strcmp(s2, filename))
+                                {
+                                        strcpy(s2, path);
+                                        if (path[sizeof(path)-1] != '/' && path[sizeof(path)-1] != '\\')
+                                                strcat(s2, "/");
+                                        strcat(s2, dir->d_name);
+                                        pclog("Found match for %s: %s\n", fn, s2);
+                                        file = fopen(s2, mode);
+                                }
+
+                        }
+                        closedir(d);
+                }
+        }
+#endif
+        return file;
 }
 
 int rom_present(char *fn)
 {
-        FILE *f;
-        char s[512];
-        
-        strcpy(s, pcempath);
-        put_backslash(s);
-        strcat(s, fn);
-        f = fopen(s, "rb");
+        FILE *f = romfopen(fn, "rb");
         if (f)
         {
                 fclose(f);
