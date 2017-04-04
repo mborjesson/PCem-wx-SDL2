@@ -78,8 +78,11 @@
 					<checkable>1</checkable>
 				</object>
 				<object class="separator" />
+				<object class="wxMenuItem" name="IDM_VID_FULLSCREEN_TOGGLE">
+					<label>Toggle fullscreen\tCtrl+Alt+PageDown</label>
+				</object>
 				<object class="wxMenuItem" name="IDM_VID_FULLSCREEN">
-					<label>Fullscreen</label>
+					<label>Fullscreen on input grab</label>
 					<checkable>1</checkable>
 				</object>
 				<object class="wxMenu">
@@ -194,6 +197,9 @@
 				<checkable>1</checkable>
 			</object>
 			<object class="separator"/>
+			<object class="wxMenuItem" name="IDM_MACHINE_TOGGLE">
+				<label>Toggle machine window\tCtrl+Alt+PageUp</label>
+			</object>
 			<object class="wxMenuItem" name="IDM_HIDE_ON_CLOSE">
 				<label>Hide on close</label>
 				<checkable>1</checkable>

@@ -80,10 +80,13 @@ void wx_enablewindow(void* window, int enabled)
 
 void wx_showwindow(void* window, int show)
 {
-//        ((wxWindow*) window)->Show(show);
-        wxCommandEvent* event = new wxCommandEvent(WX_SHOW_EVENT, ((wxWindow*)window)->GetId());
+        ((wxWindow*) window)->Show(show);
+}
+
+void wx_togglewindow(void* window)
+{
+        wxCommandEvent* event = new wxCommandEvent(WX_TOGGLE_WINDOW_EVENT, ((wxWindow*)window)->GetId());
         event->SetEventObject((wxWindow*)window);
-        event->SetInt(show);
         wxQueueEvent((wxWindow*)window, event);
 }
 

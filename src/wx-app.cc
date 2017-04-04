@@ -2,6 +2,7 @@
 
 #include <wx/xrc/xmlres.h>
 #include <wx/event.h>
+#include "wx-utils.h"
 
 extern "C"
 {
@@ -22,7 +23,7 @@ int hide_on_start = 0;
 extern void InitXmlResource();
 
 wxDEFINE_EVENT(WX_EXIT_EVENT, wxCommandEvent);
-wxDEFINE_EVENT(WX_SHOW_EVENT, wxCommandEvent);
+wxDEFINE_EVENT(WX_TOGGLE_WINDOW_EVENT, wxCommandEvent);
 
 wxBEGIN_EVENT_TABLE(Frame, wxFrame)
 wxEND_EVENT_TABLE()
@@ -55,6 +56,27 @@ int App::OnRun()
         return wxApp::OnRun();
 }
 
+int App::FilterEvent(wxEvent& event)
+{
+        int type = event.GetEventType();
+        if (type == wxEVT_KEY_DOWN && wx_keydown_func)
+        {
+                wxKeyEvent e = (wxKeyEvent&)event;
+                if (wx_keydown_func(this, e.GetKeyCode(), e.GetModifiers()))
+                        return Event_Processed;
+        }
+        else if (type == wxEVT_KEY_UP && wx_keyup_func)
+        {
+                wxKeyEvent e = (wxKeyEvent&)event;
+                if (wx_keyup_func(this, e.GetKeyCode(), e.GetModifiers()))
+                        return Event_Processed;
+        }
+
+        return Event_Skip;
+}
+
+
+
 Frame::Frame(App* app, const wxString& title, const wxPoint& pos,
                 const wxSize& size) :
                 wxFrame(NULL, wxID_ANY, title, pos, size, wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER))
@@ -65,9 +87,8 @@ Frame::Frame(App* app, const wxString& title, const wxPoint& pos,
 
         Bind(wxEVT_CLOSE_WINDOW, &Frame::OnClose, this);
         Bind(wxEVT_MENU, &Frame::OnCommand, this);
-        Bind(wxEVT_SHOW, &Frame::OnShow, this);
         Bind(wxEVT_MOVE, &Frame::OnMoveWindow, this);
-        Bind(WX_SHOW_EVENT, &Frame::OnShowEvent, this);
+        Bind(WX_TOGGLE_WINDOW_EVENT, &Frame::OnToggleWindowEvent, this);
         Bind(WX_EXIT_EVENT, &Frame::OnExitEvent, this);
 
         wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -77,7 +98,8 @@ Frame::Frame(App* app, const wxString& title, const wxPoint& pos,
         statusTimer = new StatusTimer(statusPane);
 }
 
-void Frame::Start() {
+void Frame::Start()
+{
         if (wx_start(this))
         {
                 if (!hide_on_start)
@@ -93,18 +115,18 @@ void Frame::Start() {
 
 }
 
-void Frame::OnShow(wxShowEvent& event)
-{
-}
-
 void Frame::OnExitEvent(wxCommandEvent& event)
 {
         Quit();
 }
 
-void Frame::OnShowEvent(wxCommandEvent& event)
+void Frame::OnToggleWindowEvent(wxCommandEvent& event)
 {
-        ((wxWindow*)event.GetEventObject())->Show(event.GetInt());
+        wxWindow* window = (wxWindow*)event.GetEventObject();
+        int shown = window->IsShown();
+        window->Show(!shown);
+        if (!shown)
+                window->Refresh();
 }
 
 void Frame::OnCommand(wxCommandEvent& event)
@@ -120,11 +142,10 @@ void Frame::OnClose(wxCloseEvent& event)
                 Quit();
 }
 
-void Frame::Quit(bool stop_emulator) {
+void Frame::Quit(bool stop_emulator)
+{
         if (closed)
-        {
                 return;
-        }
         closed = true;
         if (stop_emulator)
         {

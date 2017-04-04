@@ -1,6 +1,7 @@
 #include "wx-sdl2.h"
 
 #include <SDL2/SDL.h>
+#include <wx/defs.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -77,6 +78,7 @@ static int window_dowindowed = 0;
 static int window_doremember = 0;
 static int window_doinputgrab = 0;
 static int window_doinputrelease = 0;
+static int window_dotogglefullscreen = 0;
 
 SDL_Rect remembered_rect;
 int remembered_mouse_x = 0;
@@ -152,10 +154,29 @@ void endblit()
         SDL_UnlockMutex(ghMutex);
 }
 
+void enter_fullscreen()
+{
+        window_dofullscreen = window_doinputgrab = 1;
+}
+
+void leave_fullscreen()
+{
+        window_dowindowed = window_doinputrelease = 1;
+}
+
+void toggle_fullscreen()
+{
+        window_dotogglefullscreen = 1;
+}
+
 int is_fullscreen()
 {
         int flags = SDL_GetWindowFlags(window);
         return (flags&SDL_WINDOW_FULLSCREEN) || (flags&SDL_WINDOW_FULLSCREEN_DESKTOP);
+}
+
+int is_input_grab() {
+        return SDL_GetWindowGrab(window);
 }
 
 uint64_t render_time;
@@ -274,16 +295,14 @@ int renderer_thread(void* params)
                                                 }
                                         }
                                         break;
-                                case SDL_KEYDOWN:
+                                case SDL_KEYUP:
                                         if (event.key.keysym.scancode == SDL_SCANCODE_PAGEDOWN && (event.key.keysym.mod&KMOD_CTRL) && (event.key.keysym.mod&KMOD_ALT))
                                         {
-                                                window_doinputrelease = 1;
-                                                if (is_fullscreen())
-                                                        window_dowindowed = 1;
+                                                toggle_fullscreen();
                                         }
                                         else if (event.key.keysym.scancode == SDL_SCANCODE_PAGEUP && (event.key.keysym.mod&KMOD_CTRL) && (event.key.keysym.mod&KMOD_ALT))
                                         {
-                                                wx_showwindow(ghwnd, 1);
+                                                wx_togglewindow(ghwnd);
                                         }
                                         else if (event.key.keysym.scancode == SDL_SCANCODE_END && (event.key.keysym.mod&KMOD_CTRL))
                                         {
@@ -303,10 +322,27 @@ int renderer_thread(void* params)
                                 saveconfig();
                         }
 
+                        if (window_dotogglefullscreen)
+                        {
+                                window_dotogglefullscreen = 0;
+                                if (is_input_grab() || is_fullscreen())
+                                {
+                                        window_doinputrelease = 1;
+                                        if (is_fullscreen())
+                                                window_dowindowed = 1;
+                                }
+                                else
+                                {
+                                        window_doinputgrab = 1;
+                                        window_dofullscreen = 1;
+                                }
+                        }
+
                         if (window_dofullscreen)
                         {
                                 window_dofullscreen = 0;
                                 video_wait_for_blit();
+                                SDL_RaiseWindow(window);
                                 SDL_GetGlobalMouseState(&remembered_mouse_x, &remembered_mouse_y);
                                 SDL_GetWindowPosition(window, &remembered_rect.x, &remembered_rect.y);
                                 SDL_GetWindowBordersSize(window, &border_y, &border_x, 0, 0);
@@ -552,10 +588,49 @@ int pc_main(int argc, char** argv)
         return TRUE;
 }
 
+int wx_keydown(void* window, int keycode, int modifiers)
+{
+        return 1;
+}
+
+int wx_keyup(void* window, int keycode, int modifiers)
+{
+        // translate the necessary keys
+        SDL_Scancode scancode = SDL_SCANCODE_UNKNOWN;
+        switch (keycode)
+        {
+        case WXK_PAGEUP:
+                scancode = SDL_SCANCODE_PAGEUP;
+                break;
+        case WXK_PAGEDOWN:
+                scancode = SDL_SCANCODE_PAGEDOWN;
+                break;
+        }
+        int mod = 0;
+        if (modifiers&wxMOD_ALT)
+                mod |= KMOD_ALT;
+        if (modifiers&wxMOD_CONTROL)
+                mod |= KMOD_CTRL;
+        if (scancode != SDL_SCANCODE_UNKNOWN)
+        {
+                SDL_Event event;
+                event.type = SDL_KEYUP;
+                event.key.keysym.scancode = scancode;
+                event.key.keysym.mod = mod;
+                SDL_PushEvent(&event);
+                return 1;
+        }
+        return 0;
+}
+
 int wx_start(void* hwnd)
 {
         int c, d;
         ghwnd = hwnd;
+
+        wx_keydown_func = wx_keydown;
+        wx_keyup_func = wx_keyup;
+
         menu = wx_getmenu(hwnd);
 
         if (!cdrom_enabled)
@@ -575,7 +650,7 @@ int wx_start(void* hwnd)
                 wx_checkmenuitem(menu, WX_ID("IDM_VID_RESIZE"), WX_MB_CHECKED);
         sprintf(menuitem, "IDM_VID_FS[%d]", video_fullscreen_scale);
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
-        wx_checkmenuitem(menu, WX_ID("IDM_VID_FULLSCREEN"), video_fullscreen || start_in_fullscreen);
+        wx_checkmenuitem(menu, WX_ID("IDM_VID_FULLSCREEN"), video_fullscreen);
         wx_checkmenuitem(menu, WX_ID("IDM_VID_REMEMBER"),
                         window_remember ? WX_MB_CHECKED : WX_MB_UNCHECKED);
         wx_checkmenuitem(menu, WX_ID("IDM_BPB_DISABLE"), bpb_disable ? WX_MB_CHECKED : WX_MB_UNCHECKED);
@@ -893,6 +968,10 @@ int wx_handle_menu(void* hwnd, int wParam, int checked)
                 hide_on_start = checked;
                 saveconfig();
         }
+        else if (ID_IS("IDM_MACHINE_TOGGLE"))
+        {
+                wx_togglewindow(hwnd);
+        }
         else if (ID_IS("IDM_VID_RESIZE"))
         {
                 vid_resize = checked;
@@ -918,6 +997,10 @@ int wx_handle_menu(void* hwnd, int wParam, int checked)
                 }
                 video_fullscreen = checked;
                 saveconfig();
+        }
+        else if (ID_IS("IDM_VID_FULLSCREEN_TOGGLE"))
+        {
+                toggle_fullscreen();
         }
         else if (ID_RANGE("IDM_VID_FS[start]", "IDM_VID_FS[end]"))
         {

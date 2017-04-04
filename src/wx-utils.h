@@ -24,12 +24,16 @@ void* wx_getdlgitem(void* window, int id);
 void wx_setdlgitemtext(void* window, int id, char* str);
 void wx_enablewindow(void* window, int enabled);
 void wx_showwindow(void* window, int show);
+void wx_togglewindow(void* window);
 
 void wx_enddialog(void* window, int ret_code);
 
 int wx_dialogbox(void* window, char* name, int(*callback)(void* window, int message, INT_PARAM param1, LONG_PARAM param2));
 
 void wx_exit(void* window, int value);
+
+int (*wx_keydown_func)(void* window, int keycode, int modifiers);
+int (*wx_keyup_func)(void* window, int keycode, int modifiers);
 #ifdef __cplusplus
 }
 #endif
