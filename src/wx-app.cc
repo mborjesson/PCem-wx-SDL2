@@ -20,6 +20,9 @@ int hide_on_close = 0;
 int hide_on_close_first = 1;
 int hide_on_start = 0;
 
+int (*wx_keydown_func)(void* window, int keycode, int modifiers);
+int (*wx_keyup_func)(void* window, int keycode, int modifiers);
+
 extern void InitXmlResource();
 
 wxDEFINE_EVENT(WX_EXIT_EVENT, wxCommandEvent);

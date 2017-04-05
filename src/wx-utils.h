@@ -31,12 +31,12 @@ void wx_enddialog(void* window, int ret_code);
 int wx_dialogbox(void* window, char* name, int(*callback)(void* window, int message, INT_PARAM param1, LONG_PARAM param2));
 
 void wx_exit(void* window, int value);
-
-int (*wx_keydown_func)(void* window, int keycode, int modifiers);
-int (*wx_keyup_func)(void* window, int keycode, int modifiers);
 #ifdef __cplusplus
 }
 #endif
+
+extern int (*wx_keydown_func)(void* window, int keycode, int modifiers);
+extern int (*wx_keyup_func)(void* window, int keycode, int modifiers);
 
 #define WX_ID wx_xrcid
 
