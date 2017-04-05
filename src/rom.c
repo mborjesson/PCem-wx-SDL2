@@ -7,8 +7,6 @@
 #ifdef __linux__
 #include <dirent.h>
 #include <libgen.h>
-#include <ctype.h>
-#define TOLOWER(s) for (int i = 0; s[i]; ++i) s[i] = tolower(s[i]);
 #endif
 
 FILE *romfopen(char *fn, char *mode)
@@ -24,24 +22,20 @@ FILE *romfopen(char *fn, char *mode)
                 char s2[512];
                 char* filename = basename(s);
                 char* path = dirname(s);
-                TOLOWER(filename);
                 DIR* d = opendir(path);
                 struct dirent *dir;
                 if (d)
                 {
                         while (!file && ((dir = readdir(d)) != NULL))
                         {
-                                char* name = dir->d_name;
-                                strcpy(s2, name);
-                                TOLOWER(s2);
-                                if (!strcmp(s2, filename))
+                                if (!strcasecmp(dir->d_name, filename))
                                 {
                                         strcpy(s2, path);
-                                        if (path[sizeof(path)-1] != '/' && path[sizeof(path)-1] != '\\')
+                                        if (path[sizeof(path)-1] != '/')
                                                 strcat(s2, "/");
                                         strcat(s2, dir->d_name);
-                                        pclog("Found match for %s: %s\n", fn, s2);
                                         file = fopen(s2, mode);
+                                        if (file) pclog("romfopen() found match for %s: %s\n", fn, s2);
                                 }
 
                         }
