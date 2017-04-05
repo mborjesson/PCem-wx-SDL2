@@ -601,12 +601,7 @@ int pc_main(int argc, char** argv)
         return TRUE;
 }
 
-int wx_keydown(void* window, int keycode, int modifiers)
-{
-        return 1;
-}
-
-int wx_keyup(void* window, int keycode, int modifiers)
+int wx_createkeyevent(int keycode, int modifiers, SDL_Event* event)
 {
         // translate the necessary keys
         SDL_Scancode scancode = SDL_SCANCODE_UNKNOWN;
@@ -626,10 +621,28 @@ int wx_keyup(void* window, int keycode, int modifiers)
                 mod |= KMOD_CTRL;
         if (scancode != SDL_SCANCODE_UNKNOWN)
         {
-                SDL_Event event;
-                event.type = SDL_KEYUP;
-                event.key.keysym.scancode = scancode;
-                event.key.keysym.mod = mod;
+                event->key.keysym.scancode = scancode;
+                event->key.keysym.mod = mod;
+                return 1;
+        }
+        return 0;
+}
+
+int wx_keydown(void* window, int keycode, int modifiers)
+{
+        SDL_Event event;
+        event.type = SDL_KEYDOWN;
+        if (wx_createkeyevent(keycode, modifiers, &event))
+                return 1;
+        return 0;
+}
+
+int wx_keyup(void* window, int keycode, int modifiers)
+{
+        SDL_Event event;
+        event.type = SDL_KEYUP;
+        if (wx_createkeyevent(keycode, modifiers, &event))
+        {
                 SDL_PushEvent(&event);
                 return 1;
         }
