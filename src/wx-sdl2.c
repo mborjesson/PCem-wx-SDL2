@@ -184,6 +184,10 @@ int get_border_size(int* top, int* left, int* bottom, int* right)
 #if SDL_VERSION_ATLEAST(2, 0, 5)
         return SDL_GetWindowBordersSize(window, top, left, bottom, right);
 #else
+        if (top) *top = 0;
+        if (left) *left = 0;
+        if (bottom) *bottom = 0;
+        if (right) *right = 0;
         return 0;
 #endif
 }
