@@ -310,7 +310,9 @@ int iso_open(char *fn)
 	/* Make sure iso_changed stays when changing from ISO to another ISO. */
         if (cdrom_drive != CDROM_ISO)
                 iso_changed = 1;
-        strcpy(iso_path, fn);
+        /* strcpy fails on OSX if both parameters are pointing to the same address */
+        if (iso_path != fn)
+        		strcpy(iso_path, fn);
 
         iso_image = fopen(iso_path, "rb");
         atapi = &iso_atapi;
