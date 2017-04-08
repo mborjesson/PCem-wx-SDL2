@@ -37,6 +37,39 @@ static int mouse_valid(int type, int model)
         return 1;
 }
 
+static void recalc_snd_list(void* hdlg, int model)
+{
+        void* h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOSND"));
+        int c = 0, d = 0;
+
+        wx_sendmessage(h, WX_CB_RESETCONTENT, 0, 0);
+
+        while (1)
+        {
+                char *s = sound_card_getname(c);
+
+                if (!s[0])
+                        break;
+
+                settings_sound_to_list[c] = d;
+
+                if (sound_card_available(c))
+                {
+                        device_t *sound_dev = sound_card_getdevice(c);
+
+                        if (!sound_dev || (sound_dev->flags & DEVICE_MCA) == (models[model].flags & MODEL_MCA))
+                        {
+                                wx_sendmessage(h, WX_CB_ADDSTRING, 0, s);
+                                settings_list_to_sound[d] = c;
+                                d++;
+                        }
+                }
+
+                c++;
+        }
+        wx_sendmessage(h, WX_CB_SETCURSEL, settings_sound_to_list[sound_card_current], 0);
+}
+
 static void recalc_hdd_list(void* hdlg, int model, int use_selected_hdd)
 {
         void* h;
@@ -76,7 +109,8 @@ static void recalc_hdd_list(void* hdlg, int model, int use_selected_hdd)
                         s = hdd_controller_get_name(c);
                         if (s[0] == 0)
                         break;
-                        if ((hdd_controller_get_flags(c) & DEVICE_AT) && !(models[model].flags & MODEL_AT))
+                        if ((((hdd_controller_get_flags(c) & DEVICE_AT) && !(models[model].flags & MODEL_AT)) ||
+                             (hdd_controller_get_flags(c) & DEVICE_MCA) != (models[model].flags & MODEL_MCA)) && c)
                         {
                                 c++;
                                 continue;
@@ -196,28 +230,7 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                         wx_enablewindow(h, TRUE);
                         wx_sendmessage(h, WX_CB_SETCURSEL, cpu, 0);
 
-                        h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOSND"));
-                        c = d = 0;
-                        while (1)
-                        {
-                                char *s = sound_card_getname(c);
-
-                                if (!s[0])
-                                break;
-
-                                settings_sound_to_list[c] = d;
-
-                                if (sound_card_available(c))
-                                {
-                                        wx_sendmessage(h, WX_CB_ADDSTRING, 0, (LONG_PARAM) s);
-                                        settings_list_to_sound[d] = c;
-                                        d++;
-                                }
-
-                                c++;
-                        }
-                        wx_sendmessage(h, WX_CB_SETCURSEL, settings_sound_to_list[sound_card_current],
-                        0);
+                        recalc_snd_list(hdlg, romstomodel[romset]);
 
                         h = wx_getdlgitem(hdlg, WX_ID("IDC_CHECK3"));
                         wx_sendmessage(h, WX_BM_SETCHECK, GAMEBLASTER, 0);
@@ -372,9 +385,14 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 c++;
                         }
 
-                        wx_sendmessage(h, WX_CB_SETCURSEL, settings_mouse_to_list[mouse_type], 0);
+                        if (mouse_valid(temp_mouse_type, temp_model))
+                                wx_sendmessage(h, WX_CB_SETCURSEL, settings_mouse_to_list[temp_mouse_type], 0);
+                        else
+                                wx_sendmessage(h, WX_CB_SETCURSEL, 0, 0);
 
                         recalc_hdd_list(hdlg, romstomodel[romset], 0);
+
+                        recalc_snd_list(hdlg, temp_model);
 
                         return TRUE;
                 }
