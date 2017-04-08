@@ -1,6 +1,12 @@
 .project
 .cproject
+.settings/
 .hg/
 src/*.o
 src/PCem*
-src/pcem.log
+src/pclog.txt
+src/pcem.cfg
+src/roms/
+src/nvr
+src/*.dmp
+pclog.txt

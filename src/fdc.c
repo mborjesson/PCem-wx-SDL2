@@ -686,6 +686,11 @@ uint8_t fdc_read(uint16_t addr, void *priv)
                         temp &= ~0x40;
                 else
                         temp &= ~0x20;
+                        
+                if (fdc.dor & 0x10)
+                        temp |= 1;
+                if (fdc.dor & 0x20)
+                        temp |= 2;
                 break;
                 case 3:
                 drive = (fdc.dor & 1) ^ fdd_swap;
@@ -765,6 +770,7 @@ uint8_t fdc_read(uint16_t addr, void *priv)
                 if (fdc.dskchg_activelow)  /*PC2086/3086 seem to reverse this bit*/
                    temp ^= 0x80;
 //                printf("- DC %i %02X %02X %i %i - ",fdc.dor & 1, fdc.dor, 0x10 << (fdc.dor & 1), discchanged[fdc.dor & 1], driveempty[fdc.dor & 1]);
+                temp |= 1;
 //                discchanged[fdc.dor&1]=0;
                 break;
                 default:
@@ -781,6 +787,7 @@ void fdc_callback()
 {
         int temp;
         int doseek = 0;
+        int drive;
         
         disctime = 0;
 //        pclog("fdc_callback %i %i\n", discint, disctime);
@@ -830,11 +837,19 @@ void fdc_callback()
                 fdc.inread = 1;
                 return;
                 case 4: /*Sense drive status*/
-                fdc.res[10] = (fdc.params[0] & 7) | 0x28;
-                if (fdd_track0(fdc.drive))
+                drive = fdc.params[0] & 1;
+                if (fdd_get_type(drive))
+                {
+                        fdc.res[10] = (fdc.params[0] & 7) | 0x28;
+                        if (fdd_track0(drive))
                         fdc.res[10] |= 0x10;
-                if (writeprot[fdc.drive])
-                        fdc.res[10] |= 0x40;
+                        if (writeprot[drive])
+                                fdc.res[10] |= 0x40;
+                }
+                else
+                {
+                        fdc.res[10] = 0x80 | (fdc.params[0] & 3);
+                }
 
                 fdc.stat = (fdc.stat & 0xf) | 0xd0;
                 paramstogo = 1;
@@ -943,9 +958,10 @@ void fdc_callback()
                 return;
 
                 case 7: /*Recalibrate*/
+                drive = fdc.params[0] & 1;
                 fdc.track[fdc.drive]=0;
 //                if (!driveempty[fdc.dor & 1]) discchanged[fdc.dor & 1] = 0;
-                if (fdc.drive <= 1)
+                if (fdc.drive <= 1 && fdd_get_type(drive))
                         fdc.st0 = 0x20 | (fdc.params[0] & 3) | (fdc.head?4:0);
                 else
                         fdc.st0 = 0x68 | (fdc.params[0] & 3) | (fdc.head?4:0);
@@ -1027,10 +1043,11 @@ void fdc_callback()
                 return;
                 
                 case 15: /*Seek*/
+                drive = fdc.params[0] & 1;
                 fdc.track[fdc.drive]=fdc.params[1];
 //                if (!driveempty[fdc.dor & 1]) discchanged[fdc.dor & 1] = 0;
 //                printf("Seeked to track %i %i\n",fdc.track[fdc.drive], fdc.drive);
-                if (fdc.drive <= 1)
+                if (fdc.drive <= 1 && fdd_get_type(drive))
                         fdc.st0 = 0x20 | (fdc.params[0] & 3) | (fdc.head?4:0);
                 else
                         fdc.st0 = 0x68 | (fdc.params[0] & 3) | (fdc.head?4:0);
