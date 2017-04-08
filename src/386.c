@@ -214,6 +214,7 @@ void exec386(int cycs)
         int tempi;
         int cycdiff;
         int oldcyc;
+        int cycle_period = cycs / 2000; /*Use a 5us timing granularity*/
 
         cycles+=cycs;
 //        output=3;
@@ -223,7 +224,7 @@ void exec386(int cycs)
                 oldcyc=cycles;
                 timer_start_period(cycles << TIMER_SHIFT);
 //                pclog("%i %02X\n", ins, ram[8]);
-                while (cycdiff<100)
+                while (cycdiff < cycle_period)
                 {
             /*            testr[0]=EAX; testr[1]=EBX; testr[2]=ECX; testr[3]=EDX;
                         testr[4]=ESI; testr[5]=EDI; testr[6]=EBP; testr[7]=ESP;*/
@@ -324,6 +325,11 @@ opcodestart:
 //                        pclog("NMI\n");
                         x86_int(2);
                         nmi_enable = 0;
+                        if (nmi_auto_clear)
+                        {
+                                nmi_auto_clear = 0;
+                                nmi = 0;
+                        }
                 }
                 else if ((flags&I_FLAG) && pic_intpending)
                 {
