@@ -1,5 +1,3 @@
-extern int mousecapture;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -21,7 +19,3 @@ void joystickconfig_open(void* hwnd, int joy_nr, int type);
 
 extern int pause;
 
-extern int video_scale_mode;
-extern int video_vsync;
-extern int video_focus_dim;
-extern int video_fullscreen_mode;

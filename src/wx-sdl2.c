@@ -22,12 +22,10 @@
 #include "disc.h"
 #include "disc_img.h"
 
-#include "plat-midi.h"
-#include "plat-keyboard.h"
-
 #include "wx-sdl2-video.h"
 #include "wx-utils.h"
 #include "wx-common.h"
+#include "wx-display.h"
 
 #define ID_IS(s) wParam == wx_xrcid(s)
 #define ID_RANGE(a, b) wParam >= wx_xrcid(a) && wParam <= wx_xrcid(b)
@@ -36,24 +34,17 @@ static int save_window_pos = 0;
 uint64_t timer_freq;
 
 
-int winsizex = 640, winsizey = 480;
 int gfx_present[GFX_MAX];
 
 SDL_mutex* ghMutex;
-SDL_mutex* rendererMutex;
 SDL_mutex* mainMutex;
-SDL_cond* rendererCond;
 SDL_cond* mainCond;
 
 SDL_Thread* mainthreadh = NULL;
-SDL_Thread* renderthread = NULL;
 
 SDL_TimerID onesectimer;
 
-SDL_Window* window = NULL;
-
 int running = 0;
-int rendering = 0;
 
 int drawits = 0;
 
@@ -61,28 +52,22 @@ int romspresent[ROM_MAX];
 int quited = 0;
 
 SDL_Rect oldclip;
-int mousecapture = 0;
 
 void* ghwnd;
 
 void* menu;
 
 int pause = 0;
+int old_cdrom_drive = 0;
 
-static int win_doresize = 0;
-
-static int window_doreset = 0;
-static int renderer_doreset = 0;
-static int window_dofullscreen = 0;
-static int window_dowindowed = 0;
-static int window_doremember = 0;
-static int window_doinputgrab = 0;
-static int window_doinputrelease = 0;
-static int window_dotogglefullscreen = 0;
-
-SDL_Rect remembered_rect;
-int remembered_mouse_x = 0;
-int remembered_mouse_y = 0;
+int window_doreset = 0;
+int renderer_doreset = 0;
+int window_dofullscreen = 0;
+int window_dowindowed = 0;
+int window_doremember = 0;
+int window_doinputgrab = 0;
+int window_doinputrelease = 0;
+int window_dotogglefullscreen = 0;
 
 int video_scale = 1;
 
@@ -102,6 +87,7 @@ void warning(const char *format, ...)
 
 void updatewindowsize(int x, int y)
 {
+        int winsizex = 640, winsizey = 480;
         switch(video_scale)
         {
                 case 0:
@@ -131,17 +117,7 @@ void updatewindowsize(int x, int y)
         winsizex = rect.w;
         winsizey = rect.h;
 
-        win_doresize = 1;
-}
-
-void releasemouse()
-{
-        if (mousecapture)
-        {
-                SDL_SetWindowGrab(window, SDL_FALSE);
-                SDL_SetRelativeMouseMode(SDL_FALSE);
-                mousecapture = 0;
-        }
+        display_resize(winsizex, winsizey);
 }
 
 void startblit()
@@ -169,312 +145,6 @@ void toggle_fullscreen()
         window_dotogglefullscreen = 1;
 }
 
-int is_fullscreen()
-{
-        int flags = SDL_GetWindowFlags(window);
-        return (flags&SDL_WINDOW_FULLSCREEN) || (flags&SDL_WINDOW_FULLSCREEN_DESKTOP);
-}
-
-int is_input_grab() {
-        return SDL_GetWindowGrab(window);
-}
-
-int get_border_size(int* top, int* left, int* bottom, int* right)
-{
-#if SDL_VERSION_ATLEAST(2, 0, 5)
-        return SDL_GetWindowBordersSize(window, top, left, bottom, right);
-#else
-        if (top) *top = 0;
-        if (left) *left = 0;
-        if (bottom) *bottom = 0;
-        if (right) *right = 0;
-        return 0;
-#endif
-}
-
-uint64_t render_time;
-int render_fps = 0;
-
-int renderer_thread(void* params)
-{
-        SDL_Event event;
-        SDL_Rect rect;
-        int border_x, border_y;
-        int internal_rendering;
-
-        SDL_LockMutex(rendererMutex);
-        SDL_CondSignal(rendererCond);
-        SDL_UnlockMutex(rendererMutex);
-
-        SDL_SetHint(SDL_HINT_GRAB_KEYBOARD, "1");
-
-        if (start_in_fullscreen) {
-                start_in_fullscreen = 0;
-                window_dofullscreen = 1;
-                window_doinputgrab = 1;
-        }
-
-        if (window_remember)
-        {
-                rect.x = window_x;
-                rect.y = window_y;
-                rect.w = window_w;
-                rect.h = window_h;
-        }
-        else
-        {
-                rect.x = SDL_WINDOWPOS_CENTERED;
-                rect.y = SDL_WINDOWPOS_CENTERED;
-                rect.w = 640;
-                rect.h = 480;
-        }
-
-        window_doreset = 1;
-        rendering = 1;
-        while (rendering) {
-
-                window = SDL_CreateWindow("PCem Display",
-                                rect.x, rect.y, rect.w, rect.h,
-                                vid_resize ? SDL_WINDOW_RESIZABLE : 0);
-                if (!window)
-                {
-                        char message[200];
-                        sprintf(message,
-                                        "SDL window could not be created! Error: %s\n",
-                                        SDL_GetError());
-                        wx_messagebox(ghwnd, message, "SDL Error", WX_MB_OK);
-                        rendering = 0;
-                        wx_exit(ghwnd, 1);
-                }
-
-                uint32_t frame_time = SDL_GetTicks();
-                uint32_t frames = 0;
-
-                renderer_doreset = 1;
-                internal_rendering = 1;
-                while (rendering && internal_rendering)
-                {
-                        uint64_t start_time = timer_read();
-                        uint64_t end_time;
-
-                        if (window_doreset)
-                        {
-                                pclog("window_doreset\n");
-                                window_doreset = 0;
-                                renderer_doreset = 0;
-                                internal_rendering = 0;
-                                continue;
-                        }
-                        if (renderer_doreset)
-                        {
-                                pclog("renderer_doreset\n");
-                                renderer_doreset = 0;
-                                sdl_renderer_close();
-                                sdl_renderer_init(window);
-
-                                device_force_redraw();
-                                video_wait_for_blit();
-                        }
-                        while(SDL_PollEvent(&event))
-                        {
-                                switch (event.type) {
-                                case SDL_MOUSEBUTTONUP:
-                                        if (!mousecapture && event.button.button == SDL_BUTTON_LEFT) {
-                                                window_doinputgrab = 1;
-                                                if (video_fullscreen) {
-                                                        window_dofullscreen = 1;
-                                                }
-                                        }
-                                        break;
-                                case SDL_MOUSEWHEEL:
-                                        if (mousecapture) mouse_wheel_update(event.wheel.y);
-                                        break;
-                                case SDL_WINDOWEVENT:
-                                        if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
-                                                wx_exit(ghwnd, 0);
-                                        }
-                                        if (window_remember) {
-                                                int flags = SDL_GetWindowFlags(window);
-                                                if (!(flags&SDL_WINDOW_FULLSCREEN) && !(flags&SDL_WINDOW_FULLSCREEN_DESKTOP)) {
-                                                        if (event.window.event == SDL_WINDOWEVENT_MOVED) {
-                                                                get_border_size(&border_x, &border_y, 0, 0);
-                                                                window_x = event.window.data1-border_x;
-                                                                window_y = event.window.data2-border_y;
-                                                        } else if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                                                                window_w = event.window.data1;
-                                                                window_h = event.window.data2;
-                                                        }
-                                                        save_window_pos = 1;
-                                                }
-                                        }
-                                        break;
-                                case SDL_KEYUP:
-                                        if (event.key.keysym.scancode == SDL_SCANCODE_PAGEDOWN && (event.key.keysym.mod&KMOD_CTRL) && (event.key.keysym.mod&KMOD_ALT))
-                                        {
-                                                toggle_fullscreen();
-                                        }
-                                        else if (event.key.keysym.scancode == SDL_SCANCODE_PAGEUP && (event.key.keysym.mod&KMOD_CTRL) && (event.key.keysym.mod&KMOD_ALT))
-                                        {
-                                                wx_togglewindow(ghwnd);
-                                        }
-                                        else if (event.key.keysym.scancode == SDL_SCANCODE_END && (event.key.keysym.mod&KMOD_CTRL))
-                                        {
-                                                if (!is_fullscreen())
-                                                        window_doinputrelease = 1;
-                                        }
-                                        break;
-                                }
-                        }
-                        if (window_doremember) {
-                                window_doremember = 0;
-                                SDL_GetWindowPosition(window, &window_x, &window_y);
-                                SDL_GetWindowSize(window, &window_w, &window_h);
-                                get_border_size(&border_y, &border_x, 0, 0);
-                                window_x -= border_x;
-                                window_y -= border_y;
-                                saveconfig();
-                        }
-
-                        if (window_dotogglefullscreen)
-                        {
-                                window_dotogglefullscreen = 0;
-                                if (is_input_grab() || is_fullscreen())
-                                {
-                                        window_doinputrelease = 1;
-                                        if (is_fullscreen())
-                                                window_dowindowed = 1;
-                                }
-                                else
-                                {
-                                        window_doinputgrab = 1;
-                                        window_dofullscreen = 1;
-                                }
-                        }
-
-                        if (window_dofullscreen)
-                        {
-                                window_dofullscreen = 0;
-                                video_wait_for_blit();
-                                SDL_RaiseWindow(window);
-                                SDL_GetGlobalMouseState(&remembered_mouse_x, &remembered_mouse_y);
-                                SDL_GetWindowPosition(window, &remembered_rect.x, &remembered_rect.y);
-                                get_border_size(&border_y, &border_x, 0, 0);
-                                remembered_rect.x -= border_x;
-                                remembered_rect.y -= border_y;
-                                SDL_GetWindowSize(window, &remembered_rect.w, &remembered_rect.h);
-                                SDL_SetWindowFullscreen(window, video_fullscreen_mode == 0 ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN);
-                        }
-                        if (window_doinputgrab) {
-                                window_doinputgrab = 0;
-                                mousecapture = 1;
-                                SDL_GetRelativeMouseState(0, 0);
-                                SDL_SetWindowGrab(window, SDL_TRUE);
-                                SDL_SetRelativeMouseMode(SDL_TRUE);
-                        }
-
-                        if (window_doinputrelease) {
-                                window_doinputrelease = 0;
-                                mousecapture = 0;
-                                SDL_SetWindowGrab(window, SDL_FALSE);
-                                SDL_SetRelativeMouseMode(SDL_FALSE);
-                        }
-                        if (window_dowindowed)
-                        {
-                                window_dowindowed = 0;
-                                SDL_SetWindowFullscreen(window, 0);
-                                SDL_SetWindowSize(window, remembered_rect.w, remembered_rect.h);
-                                SDL_SetWindowPosition(window, remembered_rect.x, remembered_rect.y);
-                                SDL_WarpMouseGlobal(remembered_mouse_x, remembered_mouse_y);
-                        }
-
-                        if (win_doresize)
-                        {
-                                win_doresize = 0;
-                                if (!vid_resize || (flags&SDL_WINDOW_FULLSCREEN)) {
-                                        SDL_GetWindowSize(window, &rect.w, &rect.h);
-                                        if (rect.w != winsizex || rect.h != winsizey) {
-                                                SDL_GetWindowPosition(window, &rect.x, &rect.y);
-                                                SDL_SetWindowSize(window, winsizex, winsizey);
-                                                SDL_SetWindowPosition(window, rect.x, rect.y);
-                                                device_force_redraw();
-                                        }
-                                }
-                        }
-
-                        if (sdl_renderer_update(window)) sdl_renderer_present(window);
-
-                        end_time = timer_read();
-                        render_time += end_time - start_time;
-
-                        ++frames;
-                        uint32_t ticks = SDL_GetTicks();
-                        if (ticks-frame_time >= 1000) {
-                                render_fps = frames/((ticks-frame_time)/1000.0);
-                                frames = 0;
-                                frame_time = ticks;
-                        }
-
-                        SDL_Delay(1);
-                }
-                sdl_renderer_close();
-
-                if (window) {
-                        if (rendering) { /* save current position and size of the window */
-                                SDL_GetWindowPosition(window, &rect.x, &rect.y);
-                                SDL_GetWindowSize(window, &rect.w, &rect.h);
-                                get_border_size(&border_y, &border_x, 0, 0);
-                                rect.x -= border_x;
-                                rect.y -= border_y;
-                        }
-
-                        SDL_DestroyWindow(window);
-                }
-        }
-
-        SDL_LockMutex(rendererMutex);
-        SDL_CondSignal(rendererCond);
-        SDL_UnlockMutex(rendererMutex);
-
-        return SDL_TRUE;
-}
-
-void renderer_start()
-{
-        if (!rendering)
-        {
-                // we need to wait for renderer to have started in the thread or pumpevents may not work
-                SDL_LockMutex(rendererMutex);
-
-                renderthread = SDL_CreateThread(renderer_thread, "SDL2 Thread",
-                                NULL);
-
-                SDL_CondWait(rendererCond, rendererMutex);
-
-                SDL_UnlockMutex(rendererMutex);
-        }
-}
-
-void renderer_stop(int timeout)
-{
-        if (rendering)
-        {
-                SDL_LockMutex(rendererMutex);
-                rendering = 0;
-                if (timeout)
-                {
-                        SDL_CondWaitTimeout(rendererCond, rendererMutex,
-                                        timeout);
-                }
-                else
-                {
-                        SDL_CondWait(rendererCond, rendererMutex);
-                }
-                SDL_UnlockMutex(rendererMutex);
-
-                renderthread = NULL;
-        }
-}
-
 uint64_t main_time;
 
 int mainthread(void* param)
@@ -490,7 +160,6 @@ int mainthread(void* param)
 //        Sleep(500);
         drawits = 0;
         old_time = SDL_GetTicks();
-        SDL_Rect rect;
         running = 1;
         while (running)
         {
@@ -521,8 +190,6 @@ int mainthread(void* param)
                 else
                         SDL_Delay(1);
         }
-
-        renderer_stop(10 * 1000);
 
         SDL_LockMutex(mainMutex);
         SDL_CondSignal(mainCond);
@@ -581,16 +248,9 @@ extern void wx_saveconfig();
 
 int pc_main(int argc, char** argv)
 {
-        if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0)
-        {
-                printf("SDL could not initialize! Error: %s\n", SDL_GetError());
-                return 1;
-        }
-
-        SDL_version ver;
-        SDL_GetVersion(&ver);
-        printf("SDL %i.%i.%i initialized.\n", ver.major, ver.minor, ver.patch);
-
+#ifndef __APPLE__
+        display_init();
+#endif
         sdl_video_init();
 
         add_config_callback(sdl_loadconfig, sdl_saveconfig);
@@ -601,61 +261,15 @@ int pc_main(int argc, char** argv)
         return TRUE;
 }
 
-int wx_createkeyevent(int keycode, int modifiers, SDL_Event* event)
-{
-        // translate the necessary keys
-        SDL_Scancode scancode = SDL_SCANCODE_UNKNOWN;
-        switch (keycode)
-        {
-        case WXK_PAGEUP:
-                scancode = SDL_SCANCODE_PAGEUP;
-                break;
-        case WXK_PAGEDOWN:
-                scancode = SDL_SCANCODE_PAGEDOWN;
-                break;
-        }
-        int mod = 0;
-        if (modifiers&wxMOD_ALT)
-                mod |= KMOD_ALT;
-        if (modifiers&wxMOD_CONTROL)
-                mod |= KMOD_CTRL;
-        if (scancode != SDL_SCANCODE_UNKNOWN)
-        {
-                event->key.keysym.scancode = scancode;
-                event->key.keysym.mod = mod;
-                return 1;
-        }
-        return 0;
-}
-
-int wx_keydown(void* window, int keycode, int modifiers)
-{
-        SDL_Event event;
-        event.type = SDL_KEYDOWN;
-        if (wx_createkeyevent(keycode, modifiers, &event))
-                return 1;
-        return 0;
-}
-
-int wx_keyup(void* window, int keycode, int modifiers)
-{
-        SDL_Event event;
-        event.type = SDL_KEYUP;
-        if (wx_createkeyevent(keycode, modifiers, &event))
-        {
-                SDL_PushEvent(&event);
-                return 1;
-        }
-        return 0;
-}
-
 int wx_start(void* hwnd)
 {
         int c, d;
         ghwnd = hwnd;
 
-        wx_keydown_func = wx_keydown;
-        wx_keyup_func = wx_keyup;
+#ifdef __APPLE__
+        /* OSX requires SDL to be initialized after wxWidgets. */
+        display_init();
+#endif
 
         menu = wx_getmenu(hwnd);
 
@@ -786,17 +400,11 @@ int wx_start(void* hwnd)
         loadbios();
         resetpchard();
 
-        atexit(releasemouse);
-
-        memset(rawinputkey, 0, sizeof(rawinputkey));
-
         ghMutex = SDL_CreateMutex();
-        rendererMutex = SDL_CreateMutex();
         mainMutex = SDL_CreateMutex();
-        rendererCond = SDL_CreateCond();
         mainCond = SDL_CreateCond();
 
-        renderer_start();
+        display_start(hwnd);
         mainthreadh = SDL_CreateThread(mainthread, "Main Thread", NULL);
 
         onesectimer = SDL_AddTimer(1000, timer_onesec, NULL);
@@ -816,14 +424,13 @@ void wx_stop()
         SDL_CondWaitTimeout(mainCond, mainMutex, 10 * 1000);
         SDL_UnlockMutex(mainMutex);
 
-        SDL_DestroyCond(rendererCond);
         SDL_DestroyCond(mainCond);
-        SDL_DestroyMutex(rendererMutex);
         SDL_DestroyMutex(mainMutex);
 
         startblit();
         SDL_Delay(200);
-        SDL_DetachThread(renderthread);
+        display_stop();
+
         SDL_DetachThread(mainthreadh);
         SDL_RemoveTimer(onesectimer);
         savenvr();
@@ -833,13 +440,13 @@ void wx_stop()
                 saveconfig();
         }
         closepc();
-        releasemouse();
 
         sdl_video_close();
 
+        endblit();
         SDL_DestroyMutex(ghMutex);
 
-        SDL_Quit();
+        display_close();
 
         printf("Shut down successfully!\n");
 }
@@ -847,12 +454,21 @@ void wx_stop()
 char openfilestring[260];
 int getfile(void* hwnd, char *f, char *fn)
 {
-        return wx_filedialog(hwnd, "Open", fn, f, 1, openfilestring);
+        int ret = wx_filedialog(hwnd, "Open", fn, f, 1, openfilestring);
+#ifdef __APPLE__
+        /* wxWidgets on OSX may mess up the SDL-window somehow, so just in case we reset it here */
+        window_doreset = 1;
+#endif
+        return ret;
 }
 
 int getsfile(void* hwnd, char *f, char *fn)
 {
-        return wx_filedialog(hwnd, "Save", fn, f, 0, openfilestring);
+        int ret = wx_filedialog(hwnd, "Save", fn, f, 0, openfilestring);
+#ifdef __APPLE__
+        window_doreset = 1;
+#endif
+        return ret;
 }
 
 void atapi_close(void)
