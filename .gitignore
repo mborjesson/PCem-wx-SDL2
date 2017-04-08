@@ -8,3 +8,5 @@ src/pclog.txt
 src/*.dmp
 src/*.cfg
 pclog.txt
+src/roms/
+src/nvr/
