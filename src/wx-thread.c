@@ -125,7 +125,14 @@ int thread_wait_event(event_t *handle, int timeout)
 	event_pthread_t *event = (event_pthread_t *)handle;
 	struct timespec abstime;
 
+#ifdef __linux__
 	clock_gettime(CLOCK_REALTIME, &abstime);
+#else
+        struct timeval now;
+        gettimeofday(&now, 0);
+        abstime.tv_sec = now.tv_sec;
+        abstime.tv_nsec = now.tv_usec*1000UL;
+#endif
 	abstime.tv_nsec += (timeout % 1000) * 1000000;
 	abstime.tv_sec += (timeout / 1000);
 	if (abstime.tv_nsec > 1000000000)
