@@ -31,12 +31,20 @@ void wx_enddialog(void* window, int ret_code);
 int wx_dialogbox(void* window, char* name, int(*callback)(void* window, int message, INT_PARAM param1, LONG_PARAM param2));
 
 void wx_exit(void* window, int value);
+
+void* wx_createtimer(void (*fn)());
+void wx_starttimer(void* timer, int milliseconds, int once);
+void wx_stoptimer(void* timer);
+void wx_destroytimer(void* timer);
+
+int wx_yield();
 #ifdef __cplusplus
 }
 #endif
 
-extern int (*wx_keydown_func)(void* window, int keycode, int modifiers);
-extern int (*wx_keyup_func)(void* window, int keycode, int modifiers);
+extern int (*wx_keydown_func)(void* window, void* event, int keycode, int modifiers);
+extern int (*wx_keyup_func)(void* window, void* event, int keycode, int modifiers);
+extern void (*wx_idle_func)(void* window, void* event);
 
 #define WX_ID wx_xrcid
 

@@ -112,8 +112,18 @@ int wx_sendmessage(void* window, int type, INT_PARAM param1, LONG_PARAM param2)
                 strcpy((char*) param2, ((wxComboBox*) window)->GetString(param1));
                 break;
         case WX_CB_RESETCONTENT:
+        {
+#ifndef __WXOSX_MAC__
                 ((wxComboBox*) window)->Clear();
+#else
+                /* Clear() does not work on OSX */
+                wxComboBox* cb = (wxComboBox*) window;
+                int count = cb->GetCount();
+                while (count--)
+                        cb->Delete(0);
+#endif
                 break;
+        }
         case WX_BM_SETCHECK:
                 ((wxCheckBox*) window)->SetValue(param1);
                 break;
@@ -177,3 +187,49 @@ void wx_exit(void* window, int value) {
         wxQueueEvent((wxWindow*)window, event);
 }
 
+int wx_yield()
+{
+	return wxYield();
+}
+
+/* Timer stuff */
+
+class PCemTimer : public wxTimer
+{
+public:
+        PCemTimer(void (*fn)())
+        {
+                this->fn = fn;
+        }
+        virtual ~PCemTimer() {};
+
+        void Notify()
+        {
+                fn();
+        }
+private:
+        void (*fn)();
+};
+
+void* wx_createtimer(void (*fn)())
+{
+        return new PCemTimer(fn);
+}
+
+void wx_starttimer(void* timer, int milliseconds, int once)
+{
+        wxTimer* t = (wxTimer*)timer;
+        t->Start(milliseconds, once);
+}
+
+void wx_stoptimer(void* timer)
+{
+        wxTimer* t = (wxTimer*)timer;
+        t->Stop();
+}
+
+void wx_destroytimer(void* timer)
+{
+        wx_stoptimer(timer);
+        delete (wxTimer*)timer;
+}
