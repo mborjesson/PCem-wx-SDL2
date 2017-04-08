@@ -75,7 +75,7 @@ static inline uint8_t fastreadb(uint32_t a)
                 return *((uint8_t *)&pccache2[a]);
         t = getpccache(a);
         if (cpu_state.abrt)
-                return;
+                return 0;
         pccache = a >> 12;
         pccache2 = t;
         return *((uint8_t *)&pccache2[a]);
@@ -94,7 +94,7 @@ static inline uint16_t fastreadw(uint32_t a)
         if ((a>>12)==pccache) return *((uint16_t *)&pccache2[a]);
         t = getpccache(a);
         if (cpu_state.abrt)
-                return;
+                return 0;
 
         pccache = a >> 12;
         pccache2 = t;
