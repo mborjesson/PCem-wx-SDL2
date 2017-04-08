@@ -13,19 +13,26 @@ typedef struct sdl_render_driver {
         const char* name;
 } sdl_render_driver;
 
-extern int sdl_video_init();
-extern void sdl_video_close();
-extern int sdl_renderer_init(SDL_Window* window);
-extern void sdl_renderer_close();
-extern int sdl_renderer_update(SDL_Window* window);
-extern void sdl_renderer_present(SDL_Window* window);
-extern void sdl_scale(int scale, SDL_Rect src, SDL_Rect* dst, int w, int h);
-extern int sdl_is_fullscreen(SDL_Window* window);
+#ifdef __cplusplus
+extern "C" {
+#endif
+int sdl_video_init();
+void sdl_video_close();
+int sdl_renderer_init(SDL_Window* window);
+void sdl_renderer_close();
+int sdl_renderer_update(SDL_Window* window);
+void sdl_renderer_present(SDL_Window* window);
+void sdl_scale(int scale, SDL_Rect src, SDL_Rect* dst, int w, int h);
+int sdl_is_fullscreen(SDL_Window* window);
 
-extern sdl_render_driver* sdl_get_render_drivers(int* num_renderers);
-extern sdl_render_driver sdl_get_render_driver_by_id(int id, int def);
-extern sdl_render_driver sdl_get_render_driver_by_name(const char* name, int def);
-extern sdl_render_driver* sdl_get_render_driver_by_name_ptr(const char* name);
+sdl_render_driver* sdl_get_render_drivers(int* num_renderers);
+sdl_render_driver sdl_get_render_driver_by_id(int id, int def);
+sdl_render_driver sdl_get_render_driver_by_name(const char* name, int def);
+sdl_render_driver* sdl_get_render_driver_by_name_ptr(const char* name);
+
+#ifdef __cplusplus
+}
+#endif
 
 extern sdl_render_driver requested_render_driver;
 extern char current_render_driver_name[50];
