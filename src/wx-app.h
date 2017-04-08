@@ -9,6 +9,7 @@
 #include "wx-status.h"
 
 wxDECLARE_EVENT(WX_EXIT_EVENT, wxCommandEvent);
+wxDECLARE_EVENT(WX_EXIT_COMPLETE_EVENT, wxCommandEvent);
 wxDECLARE_EVENT(WX_TOGGLE_WINDOW_EVENT, wxCommandEvent);
 
 class Frame;
@@ -28,6 +29,16 @@ private:
         int FilterEvent(wxEvent& event);
 };
 
+class ExitThread: public wxThread
+{
+public:
+	ExitThread(Frame* frame);
+    virtual ~ExitThread() {}
+private:
+    wxThread::ExitCode Entry();
+    Frame* frame;
+};
+
 class Frame: public wxFrame
 {
 public:
@@ -41,11 +52,15 @@ public:
 private:
         void OnCommand(wxCommandEvent& event);
         void OnExitEvent(wxCommandEvent& event);
+        void OnExitCompleteEvent(wxCommandEvent& event);
         void OnToggleWindowEvent(wxCommandEvent& event);
         void OnClose(wxCloseEvent& event);
         void OnMoveWindow(wxMoveEvent& event);
+        void OnIdle(wxIdleEvent& event);
         StatusPane* statusPane;
         StatusTimer* statusTimer;
+
+        ExitThread* exitThread;
 
         bool closed;
 

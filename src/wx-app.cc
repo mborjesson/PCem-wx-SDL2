@@ -20,12 +20,14 @@ int hide_on_close = 0;
 int hide_on_close_first = 1;
 int hide_on_start = 0;
 
-int (*wx_keydown_func)(void* window, int keycode, int modifiers);
-int (*wx_keyup_func)(void* window, int keycode, int modifiers);
+int (*wx_keydown_func)(void* window, void* event, int keycode, int modifiers);
+int (*wx_keyup_func)(void* window, void* event, int keycode, int modifiers);
+void (*wx_idle_func)(void* window, void* event);
 
 extern void InitXmlResource();
 
 wxDEFINE_EVENT(WX_EXIT_EVENT, wxCommandEvent);
+wxDEFINE_EVENT(WX_EXIT_COMPLETE_EVENT, wxCommandEvent);
 wxDEFINE_EVENT(WX_TOGGLE_WINDOW_EVENT, wxCommandEvent);
 
 wxBEGIN_EVENT_TABLE(Frame, wxFrame)
@@ -65,13 +67,13 @@ int App::FilterEvent(wxEvent& event)
         if (type == wxEVT_KEY_DOWN && wx_keydown_func)
         {
                 wxKeyEvent e = (wxKeyEvent&)event;
-                if (wx_keydown_func(this, e.GetKeyCode(), e.GetModifiers()))
+                if (wx_keydown_func(this, &e, e.GetKeyCode(), e.GetModifiers()))
                         return Event_Processed;
         }
         else if (type == wxEVT_KEY_UP && wx_keyup_func)
         {
                 wxKeyEvent e = (wxKeyEvent&)event;
-                if (wx_keyup_func(this, e.GetKeyCode(), e.GetModifiers()))
+                if (wx_keyup_func(this, &e, e.GetKeyCode(), e.GetModifiers()))
                         return Event_Processed;
         }
 
@@ -91,14 +93,18 @@ Frame::Frame(App* app, const wxString& title, const wxPoint& pos,
         Bind(wxEVT_CLOSE_WINDOW, &Frame::OnClose, this);
         Bind(wxEVT_MENU, &Frame::OnCommand, this);
         Bind(wxEVT_MOVE, &Frame::OnMoveWindow, this);
+        Bind(wxEVT_IDLE, &Frame::OnIdle, this);
         Bind(WX_TOGGLE_WINDOW_EVENT, &Frame::OnToggleWindowEvent, this);
         Bind(WX_EXIT_EVENT, &Frame::OnExitEvent, this);
+        Bind(WX_EXIT_COMPLETE_EVENT, &Frame::OnExitCompleteEvent, this);
 
         wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
         sizer->Add(statusPane, 1, wxEXPAND);
         SetSizer(sizer);
 
         statusTimer = new StatusTimer(statusPane);
+
+        exitThread = new ExitThread(this);
 }
 
 void Frame::Start()
@@ -118,9 +124,10 @@ void Frame::Start()
 
 }
 
-void Frame::OnExitEvent(wxCommandEvent& event)
+void Frame::OnIdle(wxIdleEvent& event)
 {
-        Quit();
+	if (wx_idle_func)
+		wx_idle_func(this, &event);
 }
 
 void Frame::OnToggleWindowEvent(wxCommandEvent& event)
@@ -142,20 +149,7 @@ void Frame::OnClose(wxCloseEvent& event)
         if (hide_on_close)
                 Show(false);
         else
-                Quit();
-}
-
-void Frame::Quit(bool stop_emulator)
-{
-        if (closed)
-                return;
-        closed = true;
-        if (stop_emulator)
-        {
-                statusTimer->Stop();
-                wx_stop(this);
-        }
-        Destroy();
+                wx_exit(this, 0);
 }
 
 void Frame::OnMoveWindow(wxMoveEvent& event)
@@ -166,3 +160,48 @@ void Frame::OnMoveWindow(wxMoveEvent& event)
         }
 }
 
+/* Exit */
+
+void Frame::Quit(bool stop_emulator)
+{
+        if (closed)
+                return;
+        closed = true;
+        if (stop_emulator)
+        {
+                statusTimer->Stop();
+                delete statusTimer;
+                wx_stop(this);
+        }
+        Destroy();
+}
+
+void Frame::OnExitEvent(wxCommandEvent& event)
+{
+        // start thread
+		if (closed)
+			return;
+		closed = true;
+		statusTimer->Stop();
+		delete statusTimer;
+		exitThread->Run();
+}
+
+void Frame::OnExitCompleteEvent(wxCommandEvent& event)
+{
+	Destroy();
+}
+
+ExitThread::ExitThread(Frame* frame)
+{
+	this->frame = frame;
+}
+
+wxThread::ExitCode ExitThread::Entry()
+{
+	wx_stop(frame);
+
+    wxCommandEvent* event = new wxCommandEvent(WX_EXIT_COMPLETE_EVENT, wxID_ANY);
+    wxQueueEvent(frame, event);
+	return 0;
+}
