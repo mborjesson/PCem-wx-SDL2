@@ -40,7 +40,9 @@ END_EVENT_TABLE()
 StatusPane::StatusPane(wxFrame* parent) :
                 wxPanel(parent)
 {
+#ifndef __WXOSX_MAC__
         SetDoubleBuffered(true);
+#endif
         machineInfoText[0] = statusMachineText[0] = statusDeviceText[0] = 0;
         lastSpeedUpdate = 0;
         memset(speedHistory, -1, sizeof(speedHistory));
