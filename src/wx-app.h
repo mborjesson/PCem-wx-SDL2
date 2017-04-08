@@ -29,11 +29,11 @@ private:
         int FilterEvent(wxEvent& event);
 };
 
-class ExitThread: public wxThread
+class CExitThread: public wxThread
 {
 public:
-	ExitThread(Frame* frame);
-    virtual ~ExitThread() {}
+	CExitThread(Frame* frame);
+    virtual ~CExitThread() {}
 private:
     wxThread::ExitCode Entry();
     Frame* frame;
@@ -60,7 +60,7 @@ private:
         StatusPane* statusPane;
         StatusTimer* statusTimer;
 
-        ExitThread* exitThread;
+        CExitThread* exitThread;
 
         bool closed;
 

@@ -104,7 +104,7 @@ Frame::Frame(App* app, const wxString& title, const wxPoint& pos,
 
         statusTimer = new StatusTimer(statusPane);
 
-        exitThread = new ExitThread(this);
+        exitThread = new CExitThread(this);
 }
 
 void Frame::Start()
@@ -192,12 +192,12 @@ void Frame::OnExitCompleteEvent(wxCommandEvent& event)
 	Destroy();
 }
 
-ExitThread::ExitThread(Frame* frame)
+CExitThread::CExitThread(Frame* frame)
 {
 	this->frame = frame;
 }
 
-wxThread::ExitCode ExitThread::Entry()
+wxThread::ExitCode CExitThread::Entry()
 {
 	wx_stop(frame);
 
