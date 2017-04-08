@@ -72,7 +72,7 @@ int wx_createkeyevent(int keycode, int modifiers, SDL_Event* event)
         return 0;
 }
 
-int wx_keydown(void* window, int keycode, int modifiers)
+int wx_keydown(void* window, void* e, int keycode, int modifiers)
 {
         SDL_Event event;
         event.type = SDL_KEYDOWN;
@@ -81,7 +81,7 @@ int wx_keydown(void* window, int keycode, int modifiers)
         return 0;
 }
 
-int wx_keyup(void* window, int keycode, int modifiers)
+int wx_keyup(void* window, void* e, int keycode, int modifiers)
 {
         SDL_Event event;
         event.type = SDL_KEYUP;
@@ -585,16 +585,16 @@ void render_timer()
 void render_start_timer()
 {
 #ifdef PCEM_RENDER_TIMER_LOOP
-		timer = wx_createtimer(render_timer);
-		wx_starttimer(timer, 500, 1);
+        timer = wx_createtimer(render_timer);
+        wx_starttimer(timer, 500, 1);
 #else
-		window_setup();
-		if (window_create())
-		{
-				rendering = 1;
-				renderer_doreset = 1;
-				wx_starttimer(timer, 1, 0);
-		}
+        window_setup();
+        if (window_create())
+        {
+                rendering = 1;
+                renderer_doreset = 1;
+                wx_starttimer(timer, 1, 0);
+        }
 #endif
 }
 
