@@ -392,8 +392,6 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
 
                         recalc_hdd_list(hdlg, romstomodel[romset], 0);
 
-                        recalc_snd_list(hdlg, temp_model);
-
                         return TRUE;
                 }
                 break;
@@ -675,6 +673,8 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 wx_sendmessage(h, WX_CB_SETCURSEL, 0, 0);
 
                                 recalc_hdd_list(hdlg, temp_model, 1);
+
+                                recalc_snd_list(hdlg, temp_model);
                         }
                         else if (wParam == WX_ID("IDC_COMBOCPUM"))
                         {
