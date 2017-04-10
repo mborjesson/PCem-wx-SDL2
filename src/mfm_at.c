@@ -516,7 +516,7 @@ void mfm_callback(void *p)
 //                pclog("Read sector callback %i %i %i offset %08X %i left %i %02X\n",ide.sector,ide.cylinder,ide.head,addr,ide.secount,ide.spt,ide.atastat[ide.board]);
 //                if (addr) output=3;
                 mfm_irq_raise(mfm);
-                readflash = 1;
+                readflash_set(READFLASH_HDC, mfm->drive_sel);
                 break;
 
                 case CMD_WRITE:
@@ -540,7 +540,7 @@ void mfm_callback(void *p)
                 }
                 else
                         mfm->status = STAT_READY | STAT_DSC;
-                readflash = 1;
+                readflash_set(READFLASH_HDC, mfm->drive_sel);
                 break;
                 
                 case CMD_VERIFY:
@@ -549,7 +549,7 @@ void mfm_callback(void *p)
                 mfm->status = STAT_READY | STAT_DSC;
 //                pclog("Read verify callback %i %i %i offset %08X %i left\n",ide.sector,ide.cylinder,ide.head,addr,ide.secount);
                 mfm_irq_raise(mfm);
-                readflash=1;
+                readflash_set(READFLASH_HDC, mfm->drive_sel);
                 break;
 
                 case CMD_FORMAT:
@@ -569,7 +569,7 @@ void mfm_callback(void *p)
                 }
                 mfm->status = STAT_READY | STAT_DSC;
                 mfm_irq_raise(mfm);
-                readflash = 1;
+                readflash_set(READFLASH_HDC, mfm->drive_sel);
                 break;
 
                 case CMD_DIAGNOSE:
