@@ -30,7 +30,7 @@ if (show_disc_activity)                                         \
         } else {                                                \
                 dc.SetBrush(wxBrush(wxColour(0,100,0)));        \
         }                                                       \
-	dc.DrawRectangle(x+bitmap.GetWidth()/2, y, w, h);       \
+	dc.DrawRectangle(x+bitmap.GetWidth()-w, y, w, h);       \
 }} while (0)
 
 StatusTimer::StatusTimer(StatusPane* pane)
