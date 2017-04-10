@@ -1,6 +1,7 @@
 #include "wx-status.h"
 #include "wx-common.h"
 #include <wx/artprov.h>
+#include <wx/xrc/xmlres.h>
 #include <sstream>
 
 extern "C" {
@@ -61,11 +62,11 @@ StatusPane::StatusPane(wxFrame* parent) :
         lastSpeedUpdate = 0;
         memset(speedHistory, -1, sizeof(speedHistory));
 
-        bitmapFDD[0] = wxArtProvider::GetBitmap(wxART_FLOPPY);
+        bitmapFDD[0] = wxXmlResource::Get()->LoadBitmap("BITMAP_FLOPPY");
         bitmapFDD[1] = bitmapFDD[0].ConvertToDisabled();
-        bitmapHDD[0] = wxArtProvider::GetBitmap(wxART_HARDDISK);
+        bitmapHDD[0] = wxXmlResource::Get()->LoadBitmap("BITMAP_HARDDISK");
         bitmapHDD[1] = bitmapHDD[0].ConvertToDisabled();
-        bitmapCDROM[0] = wxArtProvider::GetBitmap(wxART_CDROM);
+        bitmapCDROM[0] = wxXmlResource::Get()->LoadBitmap("BITMAP_CDROM");
         bitmapCDROM[1] = bitmapCDROM[0].ConvertToDisabled();
 }
 
