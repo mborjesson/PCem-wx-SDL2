@@ -419,6 +419,7 @@ int wx_start(void* hwnd)
                         }
                 }
         }
+        return TRUE;
 }
 
 int start_emulation(void* params)
