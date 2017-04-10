@@ -53,10 +53,11 @@ int quited = 0;
 
 SDL_Rect oldclip;
 
-void* ghwnd;
+void* ghwnd = 0;
 
 void* menu;
 
+emulation_state_t emulation_state = EMULATION_STOPPED;
 int pause = 0;
 int old_cdrom_drive = 0;
 
@@ -221,6 +222,13 @@ Uint32 timer_onesec(Uint32 interval, void* param)
         return interval;
 }
 
+void update_toolbar(void* toolbar)
+{
+        wx_enabletoolbaritem(toolbar, WX_ID("TOOLBAR_RUN"), emulation_state != EMULATION_RUNNING);
+        wx_enabletoolbaritem(toolbar, WX_ID("TOOLBAR_PAUSE"), emulation_state == EMULATION_RUNNING);
+        wx_enabletoolbaritem(toolbar, WX_ID("TOOLBAR_STOP"), emulation_state != EMULATION_STOPPED);
+}
+
 void sdl_loadconfig()
 {
         video_fullscreen = config_get_int("SDL2", "fullscreen", video_fullscreen);
@@ -243,35 +251,11 @@ void sdl_saveconfig()
         config_set_string("SDL2", "render_driver", (char*)requested_render_driver.sdl_id);
 }
 
-extern void wx_loadconfig();
-extern void wx_saveconfig();
-
-int pc_main(int argc, char** argv)
+void wx_setupitems()
 {
-#ifndef __APPLE__
-        display_init();
-#endif
-        sdl_video_init();
-
-        add_config_callback(sdl_loadconfig, sdl_saveconfig);
-        add_config_callback(wx_loadconfig, wx_saveconfig);
-
-        initpc(argc, argv);
-
-        return TRUE;
-}
-
-int wx_start(void* hwnd)
-{
-        int c, d;
-        ghwnd = hwnd;
-
-#ifdef __APPLE__
-        /* OSX requires SDL to be initialized after wxWidgets. */
-        display_init();
-#endif
-
-        menu = wx_getmenu(hwnd);
+        int c;
+        update_toolbar(wx_gettoolbar(ghwnd));
+        menu = wx_getmenu(ghwnd);
 
         if (!cdrom_enabled)
                 wx_checkmenuitem(menu, WX_ID("IDM_CDROM_DISABLED"), WX_MB_CHECKED);
@@ -299,8 +283,7 @@ int wx_start(void* hwnd)
         wx_checkmenuitem(menu, WX_ID("IDM_STATUS"), show_status);
         wx_checkmenuitem(menu, WX_ID("IDM_SPEED_HISTORY"), show_speed_history);
         wx_checkmenuitem(menu, WX_ID("IDM_DISC_ACTIVITY"), show_disc_activity);
-        wx_checkmenuitem(menu, WX_ID("IDM_HIDE_ON_CLOSE"), hide_on_close);
-        wx_checkmenuitem(menu, WX_ID("IDM_HIDE_ON_START"), hide_on_start);
+        wx_checkmenuitem(menu, WX_ID("IDM_MACHINE_MOUNT_PATHS"), show_mount_paths);
         sprintf(menuitem, "IDM_VID_SCALE_MODE[%d]", video_scale_mode);
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
         sprintf(menuitem, "IDM_VID_SCALE[%d]", video_scale);
@@ -332,6 +315,46 @@ int wx_start(void* hwnd)
         }
         sprintf(menuitem, "IDM_VID_RENDER_DRIVER[%d]", requested_render_driver.id);
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
+}
+
+void sdl_onconfigloaded()
+{
+        if (ghwnd)
+                wx_callback(ghwnd, wx_setupitems);
+}
+
+extern void wx_loadconfig();
+extern void wx_saveconfig();
+
+int pc_main(int argc, char** argv)
+{
+#ifndef __APPLE__
+        display_init();
+#endif
+        sdl_video_init();
+
+        add_config_callback(sdl_loadconfig, sdl_saveconfig, sdl_onconfigloaded);
+        add_config_callback(wx_loadconfig, wx_saveconfig, 0);
+
+        initpc(argc, argv);
+        resetpchard();
+
+        return TRUE;
+}
+
+int wx_start(void* hwnd)
+{
+        int c, d;
+        ghwnd = hwnd;
+
+#ifdef __APPLE__
+        /* OSX requires SDL to be initialized after wxWidgets. */
+        display_init();
+#endif
+
+        readflash = 0;
+
+        wx_setupitems();
 
         d = romset;
         for (c = 0; c < ROM_MAX; c++)
@@ -396,15 +419,28 @@ int wx_start(void* hwnd)
                         }
                 }
         }
+}
 
-        loadbios();
-        resetpchard();
+int start_emulation(void* params)
+{
+        if (emulation_state == EMULATION_PAUSED)
+        {
+                emulation_state = EMULATION_RUNNING;
+                pause = 0;
+                return TRUE;
+        }
+        pclog("Starting emulation...\n");
+        emulation_state = EMULATION_RUNNING;
+        pause = 0;
 
         ghMutex = SDL_CreateMutex();
         mainMutex = SDL_CreateMutex();
         mainCond = SDL_CreateCond();
 
-        display_start(hwnd);
+        loadbios();
+        resetpchard();
+
+        display_start(params);
         mainthreadh = SDL_CreateThread(mainthread, "Main Thread", NULL);
 
         onesectimer = SDL_AddTimer(1000, timer_onesec, NULL);
@@ -416,9 +452,18 @@ int wx_start(void* hwnd)
         return TRUE;
 }
 
-void wx_stop()
+int pause_emulation()
 {
-        pclog("Shutting down...\n");
+        pclog("Emulation paused.\n");
+        emulation_state = EMULATION_PAUSED;
+        pause = 1;
+        return TRUE;
+}
+
+int stop_emulation()
+{
+        emulation_state = EMULATION_STOPPED;
+        pclog("Stopping emulation...\n");
         SDL_LockMutex(mainMutex);
         running = 0;
         SDL_CondWaitTimeout(mainCond, mainMutex, 10 * 1000);
@@ -428,27 +473,47 @@ void wx_stop()
         SDL_DestroyMutex(mainMutex);
 
         startblit();
-        SDL_Delay(200);
         display_stop();
 
         SDL_DetachThread(mainthreadh);
+        mainthreadh = NULL;
         SDL_RemoveTimer(onesectimer);
         savenvr();
         saveconfig();
-        if (save_window_pos && window_remember)
-        {
-                saveconfig();
-        }
-        closepc();
-
-        sdl_video_close();
 
         endblit();
         SDL_DestroyMutex(ghMutex);
 
+        pclog("Emulation stopped.\n");
+
+        wx_showwindow(ghwnd, 1);
+
+        return TRUE;
+}
+
+int stop_emulation_confirm()
+{
+        if (emulation_state != EMULATION_STOPPED)
+                if (wx_messagebox(NULL, "Stop emulation?", "PCem", WX_MB_OKCANCEL) == WX_IDOK)
+                        return stop_emulation();
+                else
+                        return FALSE;
+        return TRUE;
+}
+
+
+int wx_stop()
+{
+        if (!stop_emulation_confirm())
+                return FALSE;
+        pclog("Shutting down...\n");
+        saveconfig();
+        closepc();
         display_close();
+        sdl_video_close();
 
         printf("Shut down successfully!\n");
+        return TRUE;
 }
 
 char openfilestring[260];
@@ -486,18 +551,38 @@ void atapi_close(void)
 
 int confirm()
 {
-        return wx_messagebox(NULL, "This will reset PCem!\nOkay to continue?",
-                        "PCem", WX_MB_OKCANCEL) == WX_IDOK;
+        if (emulation_state != EMULATION_STOPPED) {
+                return wx_messagebox(NULL, "This will reset PCem!\nOkay to continue?",
+                                "PCem", WX_MB_OKCANCEL) == WX_IDOK;
+        }
+        return 1;
 }
 
-int wx_handle_menu(void* hwnd, int wParam, int checked)
+int wx_handle_command(void* hwnd, int wParam, int checked)
 {
         SDL_Rect rect;
         void* hmenu;
+        void* toolbar;
         char temp_iso_path[1024];
         int new_cdrom_drive;
         hmenu = wx_getmenu(hwnd);
-        if (ID_IS("IDM_FILE_RESET"))
+        toolbar = wx_gettoolbar(hwnd);
+        if (ID_IS("TOOLBAR_RUN"))
+        {
+                start_emulation(hwnd);
+                update_toolbar(toolbar);
+        }
+        else if (ID_IS("TOOLBAR_PAUSE"))
+        {
+                pause_emulation();
+                update_toolbar(toolbar);
+        }
+        else if (ID_IS("TOOLBAR_STOP"))
+        {
+                stop_emulation_confirm();
+                update_toolbar(toolbar);
+        }
+        else if (ID_IS("IDM_FILE_RESET"))
         {
                 pause = 1;
                 SDL_Delay(100);
@@ -586,33 +671,15 @@ int wx_handle_menu(void* hwnd, int wParam, int checked)
                 show_disc_activity = checked;
                 saveconfig();
         }
-        else if (ID_IS("IDM_HIDE_ON_CLOSE"))
+        else if (ID_IS("IDM_MACHINE_MOUNT_PATHS"))
         {
-                if (hide_on_close_first)
-                {
-                        hide_on_close_first = 0;
-                        wx_messagebox(hwnd,
-                                        "Press CTRL + ALT + PAGE UP to show the machine window",
-                                        "PCem", WX_MB_OK);
-                }
-                hide_on_close = checked;
-                saveconfig();
-        }
-        else if (ID_IS("IDM_HIDE_ON_START"))
-        {
-                if (hide_on_close_first)
-                {
-                        hide_on_close_first = 0;
-                        wx_messagebox(hwnd,
-                                        "Press CTRL + ALT + PAGE UP to show the machine window",
-                                        "PCem", WX_MB_OK);
-                }
-                hide_on_start = checked;
+                show_mount_paths = checked;
                 saveconfig();
         }
         else if (ID_IS("IDM_MACHINE_TOGGLE"))
         {
-                wx_togglewindow(hwnd);
+                if (emulation_state != EMULATION_STOPPED)
+                        wx_togglewindow(hwnd);
         }
         else if (ID_IS("IDM_VID_RESIZE"))
         {
@@ -689,9 +756,7 @@ int wx_handle_menu(void* hwnd, int wParam, int checked)
                                 "Configuration (*.cfg)|*.cfg|All files (*.*)|*.*",
                                 ""))
                 {
-                        if (wx_messagebox(NULL,
-                                        "This will reset PCem!\nOkay to continue?",
-                                        "PCem", WX_MB_OKCANCEL) == WX_IDOK)
+                        if (confirm())
                         {
                                 loadconfig(openfilestring);
                                 config_save(config_file_default);

@@ -4,7 +4,7 @@
 #include <wx/wx.h>
 #include <wx/timer.h>
 
-#define DEFAULT_WINDOW_WIDTH 250
+#define DEFAULT_WINDOW_WIDTH 350
 #define DEFAULT_WINDOW_HEIGHT 25
 
 #define SPEED_HISTORY_LENGTH 240
@@ -40,6 +40,10 @@ private:
     char statusDeviceText[4096];
     wxLongLong lastSpeedUpdate;
     char speedHistory[SPEED_HISTORY_LENGTH];
+
+    wxBitmap bitmapFDD[2];
+    wxBitmap bitmapCDROM[2];
+    wxBitmap bitmapHDD[2];
 
     DECLARE_EVENT_TABLE()
 };

@@ -567,11 +567,12 @@ typedef struct config_callback_t
 {
         void(*loadconfig)();
         void(*saveconfig)();
+        void(*onloaded)();
         struct config_callback_t* next;
 } config_callback_t;
 config_callback_t* config_callback = 0;
 
-void add_config_callback(void(*loadconfig)(), void(*saveconfig)())
+void add_config_callback(void(*loadconfig)(), void(*saveconfig)(), void(*onloaded)())
 {
         config_callback_t* callback = config_callback;
         if (!callback)
@@ -589,6 +590,7 @@ void add_config_callback(void(*loadconfig)(), void(*saveconfig)())
         }
         callback->loadconfig = loadconfig;
         callback->saveconfig = saveconfig;
+        callback->onloaded = onloaded;
         callback->next = 0;
 }
 
@@ -737,6 +739,13 @@ void loadconfig(char *fn)
         while (callback)
         {
                 callback->loadconfig();
+                callback = callback->next;
+        }
+        callback = config_callback;
+        while (callback)
+        {
+                if (callback->onloaded)
+                        callback->onloaded();
                 callback = callback->next;
         }
 }

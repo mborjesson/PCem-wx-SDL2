@@ -422,6 +422,10 @@ static int hdconf_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM 
                 if (hdd_controller_current_is_mfm()) {
                         wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_PANEL[2]")), 0);
                         wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_PANEL[3]")), 0);
+                        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_HDD[0]")), 0);
+                        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_HDD[1]")), 0);
+                        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_CDROM[0]")), 0);
+                        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_CDROM[1]")), 0);
                 }
                 return TRUE;
 
@@ -430,7 +434,7 @@ static int hdconf_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM 
                 {
                         if (hd_changed || cdrom_channel != new_cdrom_channel)
                         {
-                                if (wx_messagebox(NULL, "This will reset PCem!\nOkay to continue?", "PCem", WX_MB_OKCANCEL) == WX_IDOK)
+                                if (confirm())
                                 {
                                         h = wx_getdlgitem(hdlg, WX_ID("IDC_EDIT_SPT[0]"));
                                         wx_sendmessage(h, WX_WM_GETTEXT, 255, (LONG_PARAM)s);
@@ -636,7 +640,7 @@ static int hdconf_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM 
                 }
                 else if (ID_IS("IDC_FILE[1]"))
                 {
-                        if (!getfile(hdlg, "Hard disc image (*.IMG)\0*.IMG\0All files (*.*)\0*.*\0", ""))
+                        if (!getfile(hdlg, "Hard disc image (*.img)|*.img|All files (*.*)|*.*", ""))
                         {
                                 f = fopen64(openfilestring, "rb");
                                 if (!f)

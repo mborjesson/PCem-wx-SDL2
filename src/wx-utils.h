@@ -8,6 +8,8 @@
 #define INT_PARAM wxInt32
 #endif
 
+typedef void (*WX_CALLBACK)();
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -17,6 +19,8 @@ int wx_filedialog(void* window, const char* title, const char* path, const char*
 void wx_checkmenuitem(void* window, int id, int checked);
 void wx_enablemenuitem(void* menu, int id, int enable);
 void* wx_getmenu(void* window);
+void wx_enabletoolbaritem(void* toolbar, int id, int enable);
+void* wx_gettoolbar(void* window);
 
 void wx_setwindowtitle(void* window, char* s);
 int wx_sendmessage(void* window, int type, INT_PARAM param1, LONG_PARAM param2);
@@ -24,6 +28,7 @@ void* wx_getdlgitem(void* window, int id);
 void wx_setdlgitemtext(void* window, int id, char* str);
 void wx_enablewindow(void* window, int enabled);
 void wx_showwindow(void* window, int show);
+void wx_callback(void* window, WX_CALLBACK callback);
 void wx_togglewindow(void* window);
 
 void wx_enddialog(void* window, int ret_code);
@@ -31,6 +36,7 @@ void wx_enddialog(void* window, int ret_code);
 int wx_dialogbox(void* window, char* name, int(*callback)(void* window, int message, INT_PARAM param1, LONG_PARAM param2));
 
 void wx_exit(void* window, int value);
+void wx_stop_emulation(void* window);
 
 void* wx_createtimer(void (*fn)());
 void wx_starttimer(void* timer, int milliseconds, int once);

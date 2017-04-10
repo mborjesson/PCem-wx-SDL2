@@ -324,7 +324,6 @@ int window_create()
                                 "SDL window could not be created! Error: %s\n",
                                 SDL_GetError());
                 wx_messagebox(ghwnd, message, "SDL Error", WX_MB_OK);
-                wx_exit(ghwnd, 1);
                 return 0;
         }
 
@@ -388,7 +387,7 @@ int render()
                         break;
                 case SDL_WINDOWEVENT:
                         if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
-                                wx_exit(ghwnd, 0);
+                                wx_stop_emulation(ghwnd);
                         }
                         if (window_remember) {
                                 int flags = SDL_GetWindowFlags(window);

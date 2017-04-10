@@ -1,23 +1,37 @@
 #include "wx-status.h"
 #include "wx-common.h"
+#include <wx/artprov.h>
 #include <sstream>
 
 extern "C" {
 int get_status(char*, char*);
-int readflash;
 int fps;
 int updatestatus;
-int get_machine_info(char*);
+drive_info_t* get_machine_info(char*, int*);
 }
 
 int show_status = 0;
 int show_speed_history = 0;
 int show_disc_activity = 1;
 int show_machine_info = 1;
+int show_mount_paths = 0;
 
 #define ACTIVITY_TEXT wxT("Activity")
 
-#define MAX(a, b) a > b ? a : b
+#define MAX(a, b) (a > b ? a : b)
+
+#define render_disc_activity(x, y) do {                         \
+if (show_disc_activity)                                         \
+{                                                               \
+        int w = 8;                                              \
+        int h = 8;                                              \
+        if (info.readflash) {                                   \
+                dc.SetBrush(wxBrush(wxColour(0,255,0)));        \
+        } else {                                                \
+                dc.SetBrush(wxBrush(wxColour(0,100,0)));        \
+        }                                                       \
+	dc.DrawRectangle(x+bitmap.GetWidth()/2, y, w, h);       \
+}} while (0)
 
 StatusTimer::StatusTimer(StatusPane* pane)
 {
@@ -46,6 +60,13 @@ StatusPane::StatusPane(wxFrame* parent) :
         machineInfoText[0] = statusMachineText[0] = statusDeviceText[0] = 0;
         lastSpeedUpdate = 0;
         memset(speedHistory, -1, sizeof(speedHistory));
+
+        bitmapFDD[0] = wxArtProvider::GetBitmap(wxART_FLOPPY);
+        bitmapFDD[1] = bitmapFDD[0].ConvertToDisabled();
+        bitmapHDD[0] = wxArtProvider::GetBitmap(wxART_HARDDISK);
+        bitmapHDD[1] = bitmapHDD[0].ConvertToDisabled();
+        bitmapCDROM[0] = wxArtProvider::GetBitmap(wxART_CDROM);
+        bitmapCDROM[1] = bitmapCDROM[0].ConvertToDisabled();
 }
 
 StatusPane::~StatusPane() {
@@ -77,86 +98,109 @@ void StatusPane::Render(wxDC& dc)
 
         // draw model/cpu etc
         if (show_machine_info) {
-                get_machine_info(machineInfoText);
+                int num_info;
+                drive_info_t* drive_info = get_machine_info(machineInfoText, &num_info);
                 wxSize size = dc.GetMultiLineTextExtent(machineInfoText);
-                dc.DrawText(machineInfoText, width+5, height+5);
+                dc.DrawText(machineInfoText, 5, height+5);
 
-                width = MAX(width, 5+size.x);
-                height = MAX(height, 5+size.y);
-        }
+                width = MAX(width, width+5+size.x);
+                height = MAX(height, height+5+size.y);
 
-        // draw activity
-        if (show_disc_activity) {
-                int w = 50;
-                int h = 25;
+                int x = cSize.x-5;
 
-                if (readflash) {
-                        readflash = 0;
-                        dc.SetBrush(wxBrush(wxColour(0,255,0)));
-                } else {
-                        dc.SetBrush(wxBrush(wxColour(0,100,0)));
-                }
-                dc.DrawRectangle(cSize.x-w-5, 5, w, h);
+                for (int i = 0; i < num_info; ++i)
+                {
+                        drive_info_t info = show_mount_paths ? drive_info[i] : drive_info[num_info-i-1];
+                        wxBitmap bitmap;
+                        if (info.type == DRIVE_TYPE_FDD)
+                                bitmap = info.enabled ? bitmapFDD[0] : bitmapFDD[1];
+                        else if (info.type == DRIVE_TYPE_CDROM)
+                                bitmap = info.enabled ? bitmapCDROM[0] : bitmapCDROM[1];
+                        else
+                                bitmap = info.enabled ? bitmapHDD[0] : bitmapHDD[1];
+                        if (show_mount_paths)
+                        {
+                                x = 5;
+                                dc.DrawBitmap(bitmap, x, height+5);
+                                render_disc_activity(x, height+5);
+                                x += bitmap.GetWidth()+5;
 
-                height = MAX(height, 5+25);
-        }
-
-        // draw status text
-        if (show_status) {
-                if (updatestatus) {
-                        updatestatus = 0;
-                        get_status(statusMachineText, statusDeviceText);
-                }
-                if (statusMachineText) {
-                        int statusX = 5;
-                        int statusY = height+5;
-                        wxSize size = dc.GetMultiLineTextExtent(statusMachineText);
-                        dc.DrawText(statusMachineText, statusX, statusY);
-                        width = MAX(width, statusX+size.GetWidth());
-                        height = MAX(height, statusY+size.GetHeight());
-                        if (statusDeviceText) {
-                                wxSize dSize = dc.GetMultiLineTextExtent(statusDeviceText);
-                                dc.DrawText(statusDeviceText, statusX+ceil((size.GetWidth()+50)/100.0)*100, statusY);
-                                width = MAX(width, statusX+ceil((size.GetWidth()+50)/100.0)*100+ceil((dSize.GetWidth()+50)/100.0)*100);
-                                height = MAX(height, statusY+dSize.GetHeight());
+                                std::ostringstream ss;
+                                ss << info.drive_letter << ":" << " " << info.fn;
+                                std::string s = ss.str();
+                                size = dc.GetTextExtent(s);
+                                dc.DrawText(s, x, height+5+(bitmap.GetHeight()-size.y)/2);
+                                width = MAX(width, x+size.x);
+                                height = MAX(height, height+5+MAX(bitmap.GetHeight(), size.y));
+                        } else {
+                                x -= bitmap.GetWidth();
+                                dc.DrawBitmap(bitmap, x, 5);
+                                render_disc_activity(x, 5);
+                                x -= 5;
+                                height = MAX(height, 5+bitmap.GetHeight());
                         }
                 }
         }
 
-        if (millis-lastSpeedUpdate > 500) {
-                lastSpeedUpdate = millis;
-                memmove(speedHistory+1, speedHistory, SPEED_HISTORY_LENGTH-2);
-                speedHistory[0] = fps;
-        }
-        // draw speed history
-        if (show_speed_history) {
-                int speedGraphBorder = 5;
-                int speedGraphX = 5;
-                int speedGraphY = height+5;
-                int speedGraphWidth = MAX(2*SPEED_HISTORY_LENGTH, width-5);
-                double lineLength = (double)(speedGraphWidth-2)/(SPEED_HISTORY_LENGTH-1);
-                int speedGraphHeight = 125;
-                dc.SetBrush(wxBrush(wxColour(255, 255, 255)));
-                dc.DrawRectangle(speedGraphX, speedGraphY, speedGraphWidth, speedGraphHeight+speedGraphBorder*2);
-                dc.SetPen(wxPen(wxColour(200, 200, 200)));
-                dc.DrawLine(speedGraphX, speedGraphY+speedGraphBorder+speedGraphHeight-0, speedGraphX+speedGraphWidth, speedGraphY+speedGraphHeight+speedGraphBorder-0); // 0
-                dc.DrawLine(speedGraphX, speedGraphY+speedGraphBorder+speedGraphHeight-50, speedGraphX+speedGraphWidth, speedGraphY+speedGraphHeight+speedGraphBorder-50); // 50
-                dc.DrawLine(speedGraphX, speedGraphY+speedGraphBorder+speedGraphHeight-100, speedGraphX+speedGraphWidth, speedGraphY+speedGraphHeight+speedGraphBorder-100); // 100
-                dc.DrawLine(speedGraphX, speedGraphY+speedGraphBorder+speedGraphHeight-125, speedGraphX+speedGraphWidth, speedGraphY+speedGraphHeight+speedGraphBorder-125); // 125
-                dc.SetPen(wxPen(wxColour(0, 0, 0)));
-                for (int i = 0; i < SPEED_HISTORY_LENGTH-1; ++i) {
-                        int v0 = speedHistory[i];
-                        int v1 = speedHistory[i+1];
-                        if (v0 >= 0 && v1 >= 0) {
-                                dc.DrawLine(speedGraphX+speedGraphWidth-i*lineLength-1, speedGraphY+speedGraphHeight+speedGraphBorder-v0,
-                                                speedGraphX+speedGraphWidth-(i+1)*lineLength-1, speedGraphY+speedGraphHeight+speedGraphBorder-v1);
+        if (emulation_state != EMULATION_STOPPED)
+        {
+                // draw status text
+                if (show_status) {
+                        if (updatestatus) {
+                                updatestatus = 0;
+                                get_status(statusMachineText, statusDeviceText);
+                        }
+                        if (statusMachineText) {
+                                int statusX = 5;
+                                int statusY = height+5;
+                                wxSize size = dc.GetMultiLineTextExtent(statusMachineText);
+                                dc.DrawText(statusMachineText, statusX, statusY);
+                                width = MAX(width, statusX+size.GetWidth());
+                                height = MAX(height, statusY+size.GetHeight());
+                                if (statusDeviceText) {
+                                        wxSize dSize = dc.GetMultiLineTextExtent(statusDeviceText);
+                                        dc.DrawText(statusDeviceText, statusX+ceil((size.GetWidth()+50)/100.0)*100, statusY);
+                                        width = MAX(width, statusX+ceil((size.GetWidth()+50)/100.0)*100+ceil((dSize.GetWidth()+50)/100.0)*100);
+                                        height = MAX(height, statusY+dSize.GetHeight());
+                                }
                         }
                 }
-                dc.SetBrush(wxBrush(wxColour(255, 255, 255), wxBrushStyle(wxBRUSHSTYLE_TRANSPARENT)));
-                dc.DrawRectangle(speedGraphX, speedGraphY, speedGraphWidth, speedGraphHeight+speedGraphBorder*2);
 
-                width = MAX(width, (speedGraphX+speedGraphWidth));
-                height = MAX(height, speedGraphY+speedGraphHeight+speedGraphBorder*2);
+                if (emulation_state == EMULATION_RUNNING && (millis-lastSpeedUpdate > 500)) {
+                        lastSpeedUpdate = millis;
+                        memmove(speedHistory+1, speedHistory, SPEED_HISTORY_LENGTH-2);
+                        speedHistory[0] = fps;
+                }
+                // draw speed history
+                if (show_speed_history) {
+                        int speedGraphBorder = 5;
+                        int speedGraphX = 5;
+                        int speedGraphY = height+5;
+                        int speedGraphWidth = MAX(2*SPEED_HISTORY_LENGTH, width-5);
+                        double lineLength = (double)(speedGraphWidth-2)/(SPEED_HISTORY_LENGTH-1);
+                        int speedGraphHeight = 125;
+                        dc.SetBrush(wxBrush(wxColour(255, 255, 255)));
+                        dc.DrawRectangle(speedGraphX, speedGraphY, speedGraphWidth, speedGraphHeight+speedGraphBorder*2);
+                        dc.SetPen(wxPen(wxColour(200, 200, 200)));
+                        dc.DrawLine(speedGraphX, speedGraphY+speedGraphBorder+speedGraphHeight-0, speedGraphX+speedGraphWidth, speedGraphY+speedGraphHeight+speedGraphBorder-0); // 0
+                        dc.DrawLine(speedGraphX, speedGraphY+speedGraphBorder+speedGraphHeight-50, speedGraphX+speedGraphWidth, speedGraphY+speedGraphHeight+speedGraphBorder-50); // 50
+                        dc.DrawLine(speedGraphX, speedGraphY+speedGraphBorder+speedGraphHeight-100, speedGraphX+speedGraphWidth, speedGraphY+speedGraphHeight+speedGraphBorder-100); // 100
+                        dc.DrawLine(speedGraphX, speedGraphY+speedGraphBorder+speedGraphHeight-125, speedGraphX+speedGraphWidth, speedGraphY+speedGraphHeight+speedGraphBorder-125); // 125
+                        dc.SetPen(wxPen(wxColour(0, 0, 0)));
+                        for (int i = 0; i < SPEED_HISTORY_LENGTH-1; ++i) {
+                                int v0 = speedHistory[i];
+                                int v1 = speedHistory[i+1];
+                                if (v0 >= 0 && v1 >= 0) {
+                                        dc.DrawLine(speedGraphX+speedGraphWidth-i*lineLength-1, speedGraphY+speedGraphHeight+speedGraphBorder-v0,
+                                                        speedGraphX+speedGraphWidth-(i+1)*lineLength-1, speedGraphY+speedGraphHeight+speedGraphBorder-v1);
+                                }
+                        }
+                        dc.SetBrush(wxBrush(wxColour(255, 255, 255), wxBrushStyle(wxBRUSHSTYLE_TRANSPARENT)));
+                        dc.DrawRectangle(speedGraphX, speedGraphY, speedGraphWidth, speedGraphHeight+speedGraphBorder*2);
+
+                        width = MAX(width, (speedGraphX+speedGraphWidth));
+                        height = MAX(height, speedGraphY+speedGraphHeight+speedGraphBorder*2);
+                }
         }
 
         width += 5;

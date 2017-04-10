@@ -10,6 +10,7 @@
 #include "model.h"
 #include "ide.h"
 #include "cdrom-iso.h"
+#include "wx-common.h"
 
 int status_is_open = 0;
 
@@ -20,27 +21,73 @@ extern uint64_t main_time;
 extern uint64_t render_time;
 static uint64_t status_time;
 
-int get_machine_info(char* s) {
+drive_info_t* get_machine_info(char* s, int* num_drive_info) {
         sprintf(s,
                         "Model: %s\n"
-                        "CPU: %s\n"
-                        "Emulation speed: %d%%",
+                        "CPU: %s",
                         model_getname(),
-                        models[model].cpu[cpu_manufacturer].cpus[cpu].name,
-                        fps);
-        if (strlen(discfns[0]) > 0)
+                        models[model].cpu[cpu_manufacturer].cpus[cpu].name);
+        if (emulation_state == EMULATION_RUNNING)
+                sprintf(s+strlen(s), "\nEmulation speed: %d%%", fps);
+        else if (emulation_state == EMULATION_PAUSED)
+                strcat(s, "\nEmulation is paused.");
+        else
+                strcat(s, "\nEmulation is not running.");
+
+        int pos = 0;
+        int drive;
+        for (int i = 0; i < 2; ++i)
         {
-                sprintf(s+strlen(s), "\nA: %s", discfns[0]);
+                drive = 'A'+i;
+                if (fdd_get_type(i) > 0)
+                {
+                        strcpy(drive_info[pos].fn, discfns[i]);
+                        drive_info[pos].enabled = strlen(drive_info[pos].fn) > 0;
+                        drive_info[pos].drive = i;
+                        drive_info[pos].drive_letter = drive;
+                        drive_info[pos].type = DRIVE_TYPE_FDD;
+                        drive_info[pos].readflash = readflash_get(READFLASH_FDC, i);
+                        readflash_clear(READFLASH_FDC, i);
+                        pos++;
+                }
         }
-        if (strlen(discfns[1]) > 0)
+        int num_hdds = hdd_controller_current_is_mfm() ? 2 : 4;
+        for (int i = 0; i < num_hdds; ++i)
         {
-                sprintf(s+strlen(s), "\nB: %s", discfns[1]);
+                drive = 'C'+i;
+                if (cdrom_enabled && !hdd_controller_current_is_mfm() && i == cdrom_channel)
+                {
+                        if (cdrom_drive < 0)
+                                continue;
+                        if (cdrom_drive == CDROM_ISO)
+                        {
+                                if (!strlen(iso_path))
+                                        continue;
+                                strcpy(drive_info[pos].fn, iso_path);
+                        }
+                        else
+                                strcpy(drive_info[pos].fn, "");
+                        drive_info[pos].enabled = strlen(drive_info[pos].fn) > 0;
+                        drive_info[pos].drive = i;
+                        drive_info[pos].drive_letter = drive;
+                        drive_info[pos].type = DRIVE_TYPE_CDROM;
+                        drive_info[pos].readflash = readflash_get(READFLASH_HDC, i);
+                        readflash_clear(READFLASH_HDC, i);
+                        pos++;
+                } else if (strlen(ide_fn[i]) > 0)
+                {
+                        strcpy(drive_info[pos].fn, ide_fn[i]);
+                        drive_info[pos].enabled = 1;
+                        drive_info[pos].drive = i;
+                        drive_info[pos].drive_letter = drive;
+                        drive_info[pos].type = DRIVE_TYPE_HDD;
+                        drive_info[pos].readflash = readflash_get(READFLASH_HDC, i);
+                        readflash_clear(READFLASH_HDC, i);
+                        pos++;
+                }
         }
-        if (cdrom_drive == CDROM_ISO && strlen(iso_path) > 0)
-        {
-                sprintf(s+strlen(s), "\nCD-ROM ISO: %s", iso_path);
-        }
-        return 1;
+        *num_drive_info = pos;
+        return drive_info;
 }
 
 int get_status(char* machine, char* device)

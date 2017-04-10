@@ -7,10 +7,38 @@
 #endif
 
 #include "wx-status.h"
+#include "wx-utils.h"
 
+class CallbackEvent;
+
+wxDECLARE_EVENT(WX_CALLBACK_EVENT, CallbackEvent);
 wxDECLARE_EVENT(WX_EXIT_EVENT, wxCommandEvent);
+wxDECLARE_EVENT(WX_STOP_EMULATION_EVENT, wxCommandEvent);
 wxDECLARE_EVENT(WX_EXIT_COMPLETE_EVENT, wxCommandEvent);
-wxDECLARE_EVENT(WX_TOGGLE_WINDOW_EVENT, wxCommandEvent);
+wxDECLARE_EVENT(WX_SHOW_WINDOW_EVENT, wxCommandEvent);
+
+class CallbackEvent: public wxCommandEvent
+{
+public:
+        CallbackEvent(WX_CALLBACK callback) : wxCommandEvent(WX_CALLBACK_EVENT)
+        {
+                this->callback = callback;
+        }
+        CallbackEvent(const CallbackEvent& event) : wxCommandEvent(event)
+        {
+                this->callback = event.GetCallback();
+        }
+
+        wxEvent* Clone() const { return new CallbackEvent(*this); }
+
+        WX_CALLBACK GetCallback() const { return callback; }
+
+private:
+        WX_CALLBACK callback;
+
+
+};
+
 
 class Frame;
 
@@ -53,16 +81,16 @@ private:
         void OnCommand(wxCommandEvent& event);
         void OnExitEvent(wxCommandEvent& event);
         void OnExitCompleteEvent(wxCommandEvent& event);
-        void OnToggleWindowEvent(wxCommandEvent& event);
+        void OnStopEmulationEvent(wxCommandEvent& event);
+        void OnShowWindowEvent(wxCommandEvent& event);
+        void OnCallbackEvent(CallbackEvent& event);
         void OnClose(wxCloseEvent& event);
         void OnMoveWindow(wxMoveEvent& event);
         void OnIdle(wxIdleEvent& event);
         StatusPane* statusPane;
         StatusTimer* statusTimer;
 
-        CExitThread* exitThread;
-
-        bool closed;
+        bool closing;
 
         void Quit(bool stop_emulator = 1);
 

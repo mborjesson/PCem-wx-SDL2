@@ -469,7 +469,7 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                     temp_fda_type != fdd_get_type(0) || temp_fdb_type != fdd_get_type(1) ||
                                     temp_mouse_type != mouse_type || hdd_changed)
                                 {
-                                        if (wx_messagebox(NULL,"This will reset PCem!\nOkay to continue?","PCem",WX_MB_OKCANCEL)==WX_IDOK)
+                                        if (confirm())
                                         {
                                                 savenvr();
                                                 model = temp_model;

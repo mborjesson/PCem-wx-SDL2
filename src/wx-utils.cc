@@ -13,7 +13,7 @@
 
 int wx_messagebox(void*, char* message, char* title = NULL, int style = 5)
 {
-        return wxMessageBox(message, title, style);
+        return wxMessageBox(message, title, style | wxCENTRE);
 }
 
 void wx_setwindowtitle(void* window, char* s)
@@ -52,11 +52,23 @@ void wx_enablemenuitem(void* menu, int id, int enable)
         wxMenuItem* item = ((wxMenuBar*) menu)->FindItem(id);
         if (item)
                 item->Enable(enable);
+        else
+                std::cout << "Menu item not found: " << id << std::endl;
+}
+
+void wx_enabletoolbaritem(void* toolbar, int id, int enable)
+{
+        ((wxToolBar*) toolbar)->EnableTool(id, enable);
 }
 
 void* wx_getmenu(void* window)
 {
         return ((wxFrame*) window)->GetMenuBar();
+}
+
+void* wx_gettoolbar(void* window)
+{
+        return ((wxFrame*) window)->GetToolBar();
 }
 
 void* wx_getdlgitem(void* window, int id)
@@ -80,13 +92,20 @@ void wx_enablewindow(void* window, int enabled)
 
 void wx_showwindow(void* window, int show)
 {
-        ((wxWindow*) window)->Show(show);
+        wxCommandEvent* event = new wxCommandEvent(WX_SHOW_WINDOW_EVENT, wxID_ANY);
+        event->SetEventObject((wxWindow*)window);
+        event->SetInt(show);
+        wxQueueEvent((wxWindow*)window, event);
 }
 
 void wx_togglewindow(void* window)
 {
-        wxCommandEvent* event = new wxCommandEvent(WX_TOGGLE_WINDOW_EVENT, ((wxWindow*)window)->GetId());
-        event->SetEventObject((wxWindow*)window);
+        wx_showwindow(window, -1);
+}
+
+void wx_callback(void* window, WX_CALLBACK callback)
+{
+        CallbackEvent* event = new CallbackEvent(callback);
         wxQueueEvent((wxWindow*)window, event);
 }
 
@@ -180,10 +199,18 @@ int wx_dialogbox(void* window, char* name, int (*callback)(void* window, int mes
         return ret;
 }
 
-void wx_exit(void* window, int value) {
-        wxCommandEvent* event = new wxCommandEvent(WX_EXIT_EVENT, ((wxWindow*)window)->GetId());
+void wx_exit(void* window, int value)
+{
+        wxCommandEvent* event = new wxCommandEvent(WX_EXIT_EVENT, wxID_ANY);
         event->SetEventObject((wxWindow*)window);
         event->SetInt(value);
+        wxQueueEvent((wxWindow*)window, event);
+}
+
+void wx_stop_emulation(void* window)
+{
+        wxCommandEvent* event = new wxCommandEvent(WX_STOP_EMULATION_EVENT, wxID_ANY);
+        event->SetEventObject((wxWindow*)window);
         wxQueueEvent((wxWindow*)window, event);
 }
 
