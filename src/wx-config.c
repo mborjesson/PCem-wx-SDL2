@@ -250,11 +250,10 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                         cpu_flags =
                         models[romstomodel[romset]].cpu[cpu_manufacturer].cpus[cpu].cpu_flags;
                         h = wx_getdlgitem(hdlg, WX_ID("IDC_CHECKDYNAREC"));
-                        if (!(cpu_flags & CPU_SUPPORTS_DYNAREC)
-                        || (cpu_flags & CPU_REQUIRES_DYNAREC))
-                        wx_enablewindow(h, FALSE);
+                        if (!(cpu_flags & CPU_SUPPORTS_DYNAREC) || (cpu_flags & CPU_REQUIRES_DYNAREC))
+                                wx_enablewindow(h, FALSE);
                         else
-                        wx_enablewindow(h, TRUE);
+                                wx_enablewindow(h, TRUE);
                         wx_sendmessage(h, WX_BM_SETCHECK,
                         ((cpu_flags & CPU_SUPPORTS_DYNAREC) && cpu_use_dynarec)
                         || (cpu_flags & CPU_REQUIRES_DYNAREC), 0);
@@ -275,27 +274,27 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                         | models[romstomodel[romset]].max_ram);
                         wx_sendmessage(h, WX_UDM_SETINCR, 0, models[model].ram_granularity);
                         if (!(models[model].flags & MODEL_AT))
-                        wx_sendmessage(h, WX_UDM_SETPOS, 0, mem_size);
+                                wx_sendmessage(h, WX_UDM_SETPOS, 0, mem_size);
                         else
-                        wx_sendmessage(h, WX_UDM_SETPOS, 0, mem_size / 1024);
+                                wx_sendmessage(h, WX_UDM_SETPOS, 0, mem_size / 1024);
 
                         h = wx_getdlgitem(hdlg, WX_ID("IDC_CONFIGUREMOD"));
                         if (model_getdevice(model))
-                        wx_enablewindow(h, TRUE);
+                                wx_enablewindow(h, TRUE);
                         else
-                        wx_enablewindow(h, FALSE);
+                                wx_enablewindow(h, FALSE);
 
                         h = wx_getdlgitem(hdlg, WX_ID("IDC_CONFIGUREVID"));
                         if (video_card_has_config(video_old_to_new(gfxcard)))
-                        wx_enablewindow(h, TRUE);
+                                wx_enablewindow(h, TRUE);
                         else
-                        wx_enablewindow(h, FALSE);
+                                wx_enablewindow(h, FALSE);
 
                         h = wx_getdlgitem(hdlg, WX_ID("IDC_CONFIGURESND"));
                         if (sound_card_has_config(sound_card_current))
-                        wx_enablewindow(h, TRUE);
+                                wx_enablewindow(h, TRUE);
                         else
-                        wx_enablewindow(h, FALSE);
+                                wx_enablewindow(h, FALSE);
 
                         h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBODRA"));
                         wx_sendmessage(h, WX_CB_ADDSTRING, 0, (LONG_PARAM)"None");
@@ -320,9 +319,9 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
 
                         h = wx_getdlgitem(hdlg, WX_ID("IDC_TEXT_MB"));
                         if (models[model].flags & MODEL_AT)
-                        wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM) "MB");
+                                wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM) "MB");
                         else
-                        wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM) "KB");
+                                wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM) "KB");
 
                         //    h = wx_getdlgitem(hdlg, ID("IDC_COMBOJOY"));
                         //    c = 0;
@@ -357,9 +356,9 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                         cpu_type =
                         models[romstomodel[romset]].cpu[cpu_manufacturer].cpus[cpu].cpu_type;
                         if ((cpu_type >= CPU_286) && (cpu_type <= CPU_386DX))
-                        wx_enablewindow(h, TRUE);
+                                wx_enablewindow(h, TRUE);
                         else
-                        wx_enablewindow(h, FALSE);
+                                wx_enablewindow(h, FALSE);
 
                         h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOMOUSE"));
                         c = d = 0;
@@ -384,11 +383,7 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 }
                                 c++;
                         }
-
-                        if (mouse_valid(temp_mouse_type, temp_model))
-                                wx_sendmessage(h, WX_CB_SETCURSEL, settings_mouse_to_list[temp_mouse_type], 0);
-                        else
-                                wx_sendmessage(h, WX_CB_SETCURSEL, 0, 0);
+                        wx_sendmessage(h, WX_CB_SETCURSEL, settings_mouse_to_list[mouse_type], 0);
 
                         recalc_hdd_list(hdlg, romstomodel[romset], 0);
 
@@ -406,11 +401,11 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 int mem = wx_sendmessage(h, WX_UDM_GETPOS, 0, 0);
                                 mem &= ~(models[temp_model].ram_granularity - 1);
                                 if (mem < models[temp_model].min_ram)
-                                mem = models[temp_model].min_ram;
+                                        mem = models[temp_model].min_ram;
                                 else if (mem > models[temp_model].max_ram)
-                                mem = models[temp_model].max_ram;
+                                        mem = models[temp_model].max_ram;
                                 if (models[temp_model].flags & MODEL_AT)
-                                mem *= 1024;
+                                        mem *= 1024;
 
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOVID"));
                                 wx_sendmessage(h, WX_CB_GETLBTEXT, wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0),
@@ -454,8 +449,7 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 //		h = wx_getdlgitem(hdlg, ID("IDC_COMBOJOY"));
                                 //		temp_joystick_type = wx_sendmessage(h, CB_GETCURSEL, 0, 0);
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOMOUSE"));
-                                temp_mouse_type = settings_list_to_mouse[wx_sendmessage(h,
-                                WX_CB_GETCURSEL, 0, 0)];
+                                temp_mouse_type = settings_list_to_mouse[wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0)];
 
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOHDD"));
                                 c = wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0);
@@ -573,9 +567,9 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 temp_cpu_m = c - 1;
                                 wx_sendmessage(h, WX_CB_SETCURSEL, temp_cpu_m, 0);
                                 if (c == 1)
-                                wx_enablewindow(h, FALSE);
+                                        wx_enablewindow(h, FALSE);
                                 else
-                                wx_enablewindow(h, TRUE);
+                                        wx_enablewindow(h, TRUE);
 
                                 /*Rebuild CPU list*/
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBO3"));
@@ -589,7 +583,7 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                         c++;
                                 }
                                 if (temp_cpu >= c)
-                                temp_cpu = c - 1;
+                                        temp_cpu = c - 1;
                                 wx_sendmessage(h, WX_CB_SETCURSEL, temp_cpu, 0);
 
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_CHECKDYNAREC"));
@@ -598,20 +592,19 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 cpu_flags =
                                 models[temp_model].cpu[temp_cpu_m].cpus[temp_cpu].cpu_flags;
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_CHECKDYNAREC"));
-                                if (!(cpu_flags & CPU_SUPPORTS_DYNAREC)
-                                || (cpu_flags & CPU_REQUIRES_DYNAREC))
-                                wx_enablewindow(h, FALSE);
+                                if (!(cpu_flags & CPU_SUPPORTS_DYNAREC) || (cpu_flags & CPU_REQUIRES_DYNAREC))
+                                        wx_enablewindow(h, FALSE);
                                 else
-                                wx_enablewindow(h, TRUE);
+                                        wx_enablewindow(h, TRUE);
                                 wx_sendmessage(h, WX_BM_SETCHECK,
                                 ((cpu_flags & CPU_SUPPORTS_DYNAREC) && temp_dynarec)
                                 || (cpu_flags & CPU_REQUIRES_DYNAREC), 0);
 
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_TEXT_MB"));
                                 if (models[temp_model].flags & MODEL_AT)
-                                wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM) "MB");
+                                        wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM) "MB");
                                 else
-                                wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM) "KB");
+                                        wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM) "KB");
 
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_MEMSPIN"));
                                 mem = wx_sendmessage(h, WX_UDM_GETPOS, 0, 0);
@@ -620,9 +613,9 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 | models[temp_model].max_ram);
                                 mem &= ~(models[temp_model].ram_granularity - 1);
                                 if (mem < models[temp_model].min_ram)
-                                mem = models[temp_model].min_ram;
+                                        mem = models[temp_model].min_ram;
                                 else if (mem > models[temp_model].max_ram)
-                                mem = models[temp_model].max_ram;
+                                        mem = models[temp_model].max_ram;
                                 wx_sendmessage(h, WX_UDM_SETPOS, 0, mem);
                                 wx_sendmessage(h, WX_UDM_SETINCR, 0, models[temp_model].ram_granularity);
 
@@ -630,19 +623,18 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 cpu_type =
                                 models[temp_model].cpu[temp_cpu_m].cpus[temp_cpu].cpu_type;
                                 if (cpu_type >= CPU_286 && cpu_type <= CPU_386DX)
-                                wx_enablewindow(h, TRUE);
+                                        wx_enablewindow(h, TRUE);
                                 else
-                                wx_enablewindow(h, FALSE);
+                                        wx_enablewindow(h, FALSE);
 
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_CONFIGUREMOD"));
                                 if (model_getdevice(temp_model))
-                                wx_enablewindow(h, TRUE);
+                                        wx_enablewindow(h, TRUE);
                                 else
-                                wx_enablewindow(h, FALSE);
+                                        wx_enablewindow(h, FALSE);
 
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOMOUSE"));
-                                temp_mouse_type = settings_list_to_mouse[wx_sendmessage(h,
-                                WX_CB_GETCURSEL, 0, 0)];
+                                temp_mouse_type = settings_list_to_mouse[wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0)];
                                 wx_sendmessage(h, WX_CB_RESETCONTENT, 0, 0);
                                 c = d = 0;
                                 while (1)
@@ -667,10 +659,9 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                         c++;
                                 }
                                 if (mouse_valid(temp_mouse_type, temp_model))
-                                wx_sendmessage(h, WX_CB_SETCURSEL,
-                                settings_mouse_to_list[temp_mouse_type], 0);
+                                        wx_sendmessage(h, WX_CB_SETCURSEL, settings_mouse_to_list[temp_mouse_type], 0);
                                 else
-                                wx_sendmessage(h, WX_CB_SETCURSEL, 0, 0);
+                                        wx_sendmessage(h, WX_CB_SETCURSEL, 0, 0);
 
                                 recalc_hdd_list(hdlg, temp_model, 1);
 
@@ -704,11 +695,10 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 cpu_flags =
                                 models[temp_model].cpu[temp_cpu_m].cpus[temp_cpu].cpu_flags;
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_CHECKDYNAREC"));
-                                if (!(cpu_flags & CPU_SUPPORTS_DYNAREC)
-                                || (cpu_flags & CPU_REQUIRES_DYNAREC))
-                                wx_enablewindow(h, FALSE);
+                                if (!(cpu_flags & CPU_SUPPORTS_DYNAREC) || (cpu_flags & CPU_REQUIRES_DYNAREC))
+                                        wx_enablewindow(h, FALSE);
                                 else
-                                wx_enablewindow(h, TRUE);
+                                        wx_enablewindow(h, TRUE);
                                 wx_sendmessage(h, WX_BM_SETCHECK,
                                 ((cpu_flags & CPU_SUPPORTS_DYNAREC) && temp_dynarec)
                                 || (cpu_flags & CPU_REQUIRES_DYNAREC), 0);
@@ -717,9 +707,9 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 cpu_type =
                                 models[temp_model].cpu[temp_cpu_m].cpus[temp_cpu].cpu_type;
                                 if (cpu_type >= CPU_286 && cpu_type <= CPU_386DX)
-                                wx_enablewindow(h, TRUE);
+                                        wx_enablewindow(h, TRUE);
                                 else
-                                wx_enablewindow(h, FALSE);
+                                        wx_enablewindow(h, FALSE);
 
                         }
                         else if (wParam == WX_ID("IDC_COMBO3"))
@@ -737,11 +727,10 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 cpu_flags =
                                 models[temp_model].cpu[temp_cpu_m].cpus[temp_cpu].cpu_flags;
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_CHECKDYNAREC"));
-                                if (!(cpu_flags & CPU_SUPPORTS_DYNAREC)
-                                || (cpu_flags & CPU_REQUIRES_DYNAREC))
-                                wx_enablewindow(h, FALSE);
+                                if (!(cpu_flags & CPU_SUPPORTS_DYNAREC) || (cpu_flags & CPU_REQUIRES_DYNAREC))
+                                        wx_enablewindow(h, FALSE);
                                 else
-                                wx_enablewindow(h, TRUE);
+                                        wx_enablewindow(h, TRUE);
                                 wx_sendmessage(h, WX_BM_SETCHECK,
                                 ((cpu_flags & CPU_SUPPORTS_DYNAREC) && temp_dynarec)
                                 || (cpu_flags & CPU_REQUIRES_DYNAREC), 0);
@@ -750,9 +739,9 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 cpu_type =
                                 models[temp_model].cpu[temp_cpu_m].cpus[temp_cpu].cpu_type;
                                 if (cpu_type >= CPU_286 && cpu_type <= CPU_386DX)
-                                wx_enablewindow(h, TRUE);
+                                        wx_enablewindow(h, TRUE);
                                 else
-                                wx_enablewindow(h, FALSE);
+                                        wx_enablewindow(h, FALSE);
                         }
                         else if (wParam == WX_ID("IDC_CONFIGUREMOD"))
                         {
@@ -779,9 +768,9 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
 
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_CONFIGUREVID"));
                                 if (video_card_has_config(gfx))
-                                wx_enablewindow(h, TRUE);
+                                        wx_enablewindow(h, TRUE);
                                 else
-                                wx_enablewindow(h, FALSE);
+                                        wx_enablewindow(h, FALSE);
                         }
                         else if (wParam == WX_ID("IDC_CONFIGURESND"))
                         {
@@ -800,9 +789,9 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
 
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_CONFIGURESND"));
                                 if (sound_card_has_config(temp_sound_card_current))
-                                wx_enablewindow(h, TRUE);
+                                        wx_enablewindow(h, TRUE);
                                 else
-                                wx_enablewindow(h, FALSE);
+                                        wx_enablewindow(h, FALSE);
                         }
                         else if (wParam == WX_ID("IDC_CONFIGUREVOODOO"))
                         {
