@@ -18,6 +18,7 @@ void saveconfig();
 void resetpchard();
 int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam);
 device_t *config_device;
+int confirm();
 }
 #define IDC_CONFIG_BASE 1000
 
@@ -150,8 +151,7 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM l
                                 return TRUE;
                         }
 
-                        if (wx_messagebox(NULL, "This will reset 86Box!\nOkay to continue?",
-                                        "86Box", wxOK | wxCANCEL) != wxOK) {
+                        if (!confirm()) {
                                 wx_enddialog(hdlg, 0);
                                 return TRUE;
                         }
