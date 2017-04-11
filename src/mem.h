@@ -163,6 +163,24 @@ void mem_reset_page_blocks();
 
 extern mem_mapping_t ram_low_mapping;
 
+void mem_remap_top_256k();
 void mem_remap_top_384k();
+
+void mem_flush_write_page(uint32_t addr, uint32_t virt);
+
+void mem_add_bios();
+
+void mem_init();
+void mem_resize();
+
+void flushmmucache();
+void flushmmucache_nopc();
+void flushmmucache_cr3();
+
+void resetreadlookup();
+
+void mmu_invalidate(uint32_t addr);
+
+int loadbios();
 
 #endif

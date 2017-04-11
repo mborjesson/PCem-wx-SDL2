@@ -315,6 +315,7 @@ typedef struct DMA
         int byte_ptr;
         
         int is_ps2;
+        uint8_t arb_level[4];
 } DMA;
 
 DMA dma,dma16;
@@ -403,6 +404,7 @@ enum
         ROM_MR386DX_OPTI495,
 	ROM_IBMPS2_M30_286,
 	ROM_IBMPS2_M50,
+	ROM_IBMPS2_M55SX,
                 	
         ROM_MAX
 };
@@ -537,3 +539,23 @@ void resetpc_cad();
 
 extern int start_in_fullscreen;
 extern int window_w, window_h, window_x, window_y, window_remember;
+
+void get_executable_name(char *s, int size);
+
+void startblit();
+void endblit();
+
+void set_window_title(char *s);
+
+void updatewindowsize(int x, int y);
+
+void initpc(int argc, char *argv[]);
+void runpc();
+void closepc();
+void resetpc();
+void resetpchard();
+void speedchanged();
+
+void saveconfig();
+
+#define UNUSED(x) (void)x

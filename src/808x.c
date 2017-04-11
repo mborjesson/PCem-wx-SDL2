@@ -9,9 +9,12 @@
                                         4 clocks - fetch mod/rm
         2 clocks - fetch opcode 1       2 clocks - execute
         2 clocks - fetch opcode 2  etc*/
+#include <unistd.h>
 #include <stdio.h>
 #include "ibm.h"
 
+#include "x86_ops.h"
+#include "codegen.h"
 #include "cpu.h"
 #include "keyboard.h"
 #include "mem.h"
@@ -19,6 +22,7 @@
 #include "pic.h"
 #include "timer.h"
 #include "x86.h"
+#include "x87.h"
 
 int xt_cpu_multi;
 int nmi = 0;
@@ -93,7 +97,6 @@ void writememl(uint32_t s, uint32_t a, uint32_t v)
 }
 
 
-void dumpregs();
 uint16_t oldcs;
 int oldcpl;
 
@@ -436,12 +439,6 @@ static inline void seteaw(uint16_t val)
         }
 }
 
-#define getr8(r)   ((r & 4) ? cpu_state.regs[r & 3].b.h : cpu_state.regs[r & 3].b.l)
-
-#define setr8(r,v) if (r & 4) cpu_state.regs[r & 3].b.h = v; \
-                   else       cpu_state.regs[r & 3].b.l = v;
-
-
 /*Flags*/
 uint8_t znptable8[256];
 uint16_t znptable16[65536];
@@ -500,7 +497,7 @@ int indump = 0;
 
 void dumpregs()
 {
-        int c,d=0,e=0,ff;
+        int c,d=0,e=0;
 #ifndef RELEASE_BUILD
         FILE *f;
         if (indump) return;
@@ -647,10 +644,10 @@ void resetx86()
         makeznptable();
         resetreadlookup();
         makemod1table();
-        resetmcr();
         FETCHCLEAR();
         x87_reset();
         cpu_set_edx();
+        EAX = 0;
         ESP=0;
         mmu_perm=4;
         memset(inscounts, 0, sizeof(inscounts));
@@ -825,7 +822,7 @@ void rep(int fv)
         uint16_t tempw,tempw2;
         uint16_t ipc = cpu_state.oldpc;//pc-1;
         int changeds=0;
-        uint32_t oldds;
+        uint32_t oldds = ds;
         startrep:
         temp=FETCH();
 
@@ -2781,8 +2778,8 @@ void execx86(int cycs)
                                         c--;
                                         cycles-=4;
                                 }
-                                if (temp) flags|=C_FLAG;
-                                else      flags&=~C_FLAG;
+                                if (templ) flags|=C_FLAG;
+                                else       flags&=~C_FLAG;
                                 seteaw(tempw);
                                 if ((flags&C_FLAG)^(tempw>>15)) flags|=V_FLAG;
                                 else                            flags&=~V_FLAG;
