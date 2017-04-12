@@ -21,5 +21,3 @@ typedef struct drive_info_t {
         char drive_letter;
         int readflash;
 } drive_info_t;
-
-drive_info_t drive_info[25];

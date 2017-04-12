@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include "wx-sdl2-video.h"
 #include "wx-utils.h"
 #include "ibm.h"
 #include "video.h"
@@ -26,6 +27,10 @@ int winsizex = 640, winsizey = 480;
 
 void renderer_start();
 void renderer_stop(int timeout);
+
+extern void device_force_redraw();
+extern void mouse_wheel_update(int);
+extern void toggle_fullscreen();
 
 void display_resize(int width, int height)
 {

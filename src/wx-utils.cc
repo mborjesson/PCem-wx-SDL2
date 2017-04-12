@@ -10,8 +10,17 @@
 
 #include "wx-dialogbox.h"
 #include "wx-app.h"
+#include "wx-common.h"
 
-int wx_messagebox(void*, char* message, char* title = NULL, int style = 5)
+int confirm()
+{
+        if (emulation_state != EMULATION_STOPPED) {
+                return wx_messagebox(NULL, "This will reset PCem!\nOkay to continue?", "PCem", WX_MB_OKCANCEL) == WX_IDOK;
+        }
+        return 1;
+}
+
+int wx_messagebox(void*, const char* message, const char* title = NULL, int style = 5)
 {
         return wxMessageBox(message, title, style | wxCENTRE);
 }

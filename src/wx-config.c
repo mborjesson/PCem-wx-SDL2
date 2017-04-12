@@ -8,6 +8,7 @@
 #include "hdd.h"
 #include "model.h"
 #include "mouse.h"
+#include "mem.h"
 #include "nvr.h"
 #include "sound.h"
 #include "video.h"
@@ -22,6 +23,8 @@ static int settings_sound_to_list[20], settings_list_to_sound[20];
 static int settings_mouse_to_list[20], settings_list_to_mouse[20];
 static int settings_network_to_list[20], settings_list_to_network[20];
 static char *hdd_names[16];
+
+extern void deviceconfig_open(void* hwnd, device_t *device);
 
 static int mouse_valid(int type, int model)
 {
@@ -59,7 +62,7 @@ static void recalc_snd_list(void* hdlg, int model)
 
                         if (!sound_dev || (sound_dev->flags & DEVICE_MCA) == (models[model].flags & MODEL_MCA))
                         {
-                                wx_sendmessage(h, WX_CB_ADDSTRING, 0, s);
+                                wx_sendmessage(h, WX_CB_ADDSTRING, 0, (LONG_PARAM) s);
                                 settings_list_to_sound[d] = c;
                                 d++;
                         }

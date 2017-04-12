@@ -8,9 +8,13 @@
 #include "codegen.h"
 #include "cpu.h"
 #include "model.h"
+#include "fdd.h"
+#include "hdd.h"
 #include "ide.h"
 #include "cdrom-iso.h"
 #include "wx-common.h"
+
+drive_info_t drive_info[10];
 
 int status_is_open = 0;
 

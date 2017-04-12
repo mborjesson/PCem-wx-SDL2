@@ -38,7 +38,6 @@ FILE *romfopen(char *fn, char *mode)
                                         file = fopen(s2, mode);
                                         if (file) pclog("romfopen() found match for %s: %s\n", fn, s2);
                                 }
-
                         }
                         closedir(d);
                 }

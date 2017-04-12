@@ -5,10 +5,10 @@
 #include <sstream>
 
 extern "C" {
-int get_status(char*, char*);
-int fps;
-int updatestatus;
-drive_info_t* get_machine_info(char*, int*);
+        int get_status(char*, char*);
+        int fps;
+        int updatestatus;
+        drive_info_t* get_machine_info(char*, int*);
 }
 
 int show_status = 0;

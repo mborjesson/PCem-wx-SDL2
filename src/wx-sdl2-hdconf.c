@@ -3,6 +3,7 @@
 
 #include "ibm.h"
 #include "ide.h"
+#include "hdd.h"
 
 static struct
 {
@@ -30,6 +31,8 @@ static char hd_new_name[512];
 static int hd_new_spt, hd_new_hpc, hd_new_cyl;
 static int hd_new_type;
 static int new_cdrom_channel;
+
+extern int pause;
 
 static void check_hd_type(off64_t sz)
 {
@@ -185,7 +188,7 @@ static int hdnew_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM l
                         if (!getsfile(hdlg, "Hard disc image (*.img)|*.img|All files (*.*)|*.*", ""))
                         {
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_EDITC"));
-                                wx_sendmessage(h, WX_WM_SETTEXT, 0, openfilestring);
+                                wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM) openfilestring);
                         }
                         return TRUE;
                 } else if (ID_IS("IDC_EDIT1") || ID_IS("IDC_EDIT2") || ID_IS("IDC_EDIT3")) {
@@ -203,7 +206,7 @@ static int hdnew_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM l
                         sscanf(s, "%i", &hd[0].tracks);
 
                         h = wx_getdlgitem(hdlg, WX_ID("IDC_TEXT1"));
-                        sprintf(s, "Size : %imb", (((((uint64_t)hd[0].tracks*(uint64_t)hd[0].hpc)*(uint64_t)hd[0].spt)*512)/1024)/1024);
+                        sprintf(s, "Size : %imb", (int)(((((uint64_t)hd[0].tracks*(uint64_t)hd[0].hpc)*(uint64_t)hd[0].spt)*512)/1024)/1024);
                         wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)s);
 
                         hd_type = 0;
@@ -235,7 +238,7 @@ static int hdnew_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM l
                                 wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)"17");
 
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_TEXT1"));
-                                sprintf(s, "Size : %imb", (((uint64_t)hd_types[hd_type-1].cylinders*hd_types[hd_type-1].heads*17*512)/1024)/1024);
+                                sprintf(s, "Size : %imb", (int)(((uint64_t)hd_types[hd_type-1].cylinders*hd_types[hd_type-1].heads*17*512)/1024)/1024);
                                 wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)s);
                         }
                         return TRUE;
@@ -276,7 +279,7 @@ static int hdsize_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM 
                 wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)s);
 
                 h = wx_getdlgitem(hdlg, WX_ID("IDC_TEXT1"));
-                sprintf(s, "Size : %imb", ((((uint64_t)hd_new_spt*(uint64_t)hd_new_hpc*(uint64_t)hd_new_cyl)*512)/1024)/1024);
+                sprintf(s, "Size : %imb", (int)((((uint64_t)hd_new_spt*(uint64_t)hd_new_hpc*(uint64_t)hd_new_cyl)*512)/1024)/1024);
                 wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)s);
 
                 return TRUE;
@@ -325,7 +328,7 @@ static int hdsize_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM 
                         sscanf(s, "%i", &hd[0].tracks);
 
                         h = wx_getdlgitem(hdlg, WX_ID("IDC_TEXT1"));
-                        sprintf(s, "Size : %imb", (((((uint64_t)hd[0].tracks*(uint64_t)hd[0].hpc)*(uint64_t)hd[0].spt)*512)/1024)/1024);
+                        sprintf(s, "Size : %imb", (int)(((((uint64_t)hd[0].tracks*(uint64_t)hd[0].hpc)*(uint64_t)hd[0].spt)*512)/1024)/1024);
                         wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)s);
                         return TRUE;
                 }
@@ -400,19 +403,19 @@ static int hdconf_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM 
                 wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)ide_fn[3]);
 
                 h = wx_getdlgitem(hdlg, WX_ID("IDC_TEXT_SIZE[0]"));
-                sprintf(s, "Size : %imb", (((((uint64_t)hd[0].tracks*(uint64_t)hd[0].hpc)*(uint64_t)hd[0].spt)*512)/1024)/1024);
+                sprintf(s, "Size : %imb", (int)(((((uint64_t)hd[0].tracks*(uint64_t)hd[0].hpc)*(uint64_t)hd[0].spt)*512)/1024)/1024);
                 wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)s);
 
                 h = wx_getdlgitem(hdlg, WX_ID("IDC_TEXT_SIZE[1]"));
-                sprintf(s, "Size : %imb", (((((uint64_t)hd[1].tracks*(uint64_t)hd[1].hpc)*(uint64_t)hd[1].spt)*512)/1024)/1024);
+                sprintf(s, "Size : %imb", (int)(((((uint64_t)hd[1].tracks*(uint64_t)hd[1].hpc)*(uint64_t)hd[1].spt)*512)/1024)/1024);
                 wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)s);
 
                 h = wx_getdlgitem(hdlg, WX_ID("IDC_TEXT_SIZE[2]"));
-                sprintf(s, "Size : %imb", (((((uint64_t)hd[2].tracks*(uint64_t)hd[2].hpc)*(uint64_t)hd[2].spt)*512)/1024)/1024);
+                sprintf(s, "Size : %imb", (int)(((((uint64_t)hd[2].tracks*(uint64_t)hd[2].hpc)*(uint64_t)hd[2].spt)*512)/1024)/1024);
                 wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)s);
 
                 h = wx_getdlgitem(hdlg, WX_ID("IDC_TEXT_SIZE[3]"));
-                sprintf(s, "Size : %imb", (((((uint64_t)hd[3].tracks*(uint64_t)hd[3].hpc)*(uint64_t)hd[3].spt)*512)/1024)/1024);
+                sprintf(s, "Size : %imb", (int)(((((uint64_t)hd[3].tracks*(uint64_t)hd[3].hpc)*(uint64_t)hd[3].spt)*512)/1024)/1024);
                 wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)s);
 
                 new_cdrom_channel = cdrom_channel;
@@ -568,7 +571,7 @@ static int hdconf_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM 
                                 wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)hd_new_name);
 
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_TEXT_SIZE[0]"));
-                                sprintf(s, "Size : %imb", (((((uint64_t)hd_new_cyl*(uint64_t)hd_new_hpc)*(uint64_t)hd_new_spt)*512)/1024)/1024);
+                                sprintf(s, "Size : %imb", (int)(((((uint64_t)hd_new_cyl*(uint64_t)hd_new_hpc)*(uint64_t)hd_new_spt)*512)/1024)/1024);
                                 wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)s);
 
                                 hd_changed = 1;
@@ -605,7 +608,7 @@ static int hdconf_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM 
                                         wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)openfilestring);
 
                                         h=  wx_getdlgitem(hdlg, WX_ID("IDC_TEXT_SIZE[0]"));
-                                        sprintf(s, "Size : %imb", (((((uint64_t)hd_new_cyl*(uint64_t)hd_new_hpc)*(uint64_t)hd_new_spt)*512)/1024)/1024);
+                                        sprintf(s, "Size : %imb", (int)(((((uint64_t)hd_new_cyl*(uint64_t)hd_new_hpc)*(uint64_t)hd_new_spt)*512)/1024)/1024);
                                         wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)s);
 
                                         hd_changed = 1;
@@ -631,7 +634,7 @@ static int hdconf_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM 
                                 wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)hd_new_name);
 
                                 h=  wx_getdlgitem(hdlg, WX_ID("IDC_TEXT_SIZE[1]"));
-                                sprintf(s, "Size : %imb", (((((uint64_t)hd_new_cyl*(uint64_t)hd_new_hpc)*(uint64_t)hd_new_spt)*512)/1024)/1024);
+                                sprintf(s, "Size : %imb", (int)(((((uint64_t)hd_new_cyl*(uint64_t)hd_new_hpc)*(uint64_t)hd_new_spt)*512)/1024)/1024);
                                 wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)s);
 
                                 hd_changed = 1;
@@ -668,7 +671,7 @@ static int hdconf_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM 
                                         wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)openfilestring);
 
                                         h = wx_getdlgitem(hdlg, WX_ID("IDC_TEXT_SIZE[1]"));
-                                        sprintf(s, "Size : %imb", (((((uint64_t)hd_new_cyl*(uint64_t)hd_new_hpc)*(uint64_t)hd_new_spt)*512)/1024)/1024);
+                                        sprintf(s, "Size : %imb", (int)(((((uint64_t)hd_new_cyl*(uint64_t)hd_new_hpc)*(uint64_t)hd_new_spt)*512)/1024)/1024);
                                         wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)s);
 
                                         hd_changed = 1;
@@ -693,7 +696,7 @@ static int hdconf_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM 
                                 wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)hd_new_name);
 
                                 h=  wx_getdlgitem(hdlg, WX_ID("IDC_TEXT_SIZE[2]"));
-                                sprintf(s, "Size : %imb", (((((uint64_t)hd_new_cyl*(uint64_t)hd_new_hpc)*(uint64_t)hd_new_spt)*512)/1024)/1024);
+                                sprintf(s, "Size : %imb", (int)(((((uint64_t)hd_new_cyl*(uint64_t)hd_new_hpc)*(uint64_t)hd_new_spt)*512)/1024)/1024);
                                 wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)s);
 
                                 hd_changed = 1;
@@ -730,7 +733,7 @@ static int hdconf_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM 
                                         wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)openfilestring);
 
                                         h = wx_getdlgitem(hdlg, WX_ID("IDC_TEXT_SIZE[2]"));
-                                        sprintf(s, "Size : %imb", (((((uint64_t)hd_new_cyl*(uint64_t)hd_new_hpc)*(uint64_t)hd_new_spt)*512)/1024)/1024);
+                                        sprintf(s, "Size : %imb", (int)(((((uint64_t)hd_new_cyl*(uint64_t)hd_new_hpc)*(uint64_t)hd_new_spt)*512)/1024)/1024);
                                         wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)s);
 
                                         hd_changed = 1;
@@ -755,7 +758,7 @@ static int hdconf_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM 
                                 wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)hd_new_name);
 
                                 h=  wx_getdlgitem(hdlg, WX_ID("IDC_TEXT_SIZE[3]"));
-                                sprintf(s, "Size : %imb", (((((uint64_t)hd_new_cyl*(uint64_t)hd_new_hpc)*(uint64_t)hd_new_spt)*512)/1024)/1024);
+                                sprintf(s, "Size : %imb", (int)(((((uint64_t)hd_new_cyl*(uint64_t)hd_new_hpc)*(uint64_t)hd_new_spt)*512)/1024)/1024);
                                 wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)s);
 
                                 hd_changed = 1;
@@ -792,7 +795,7 @@ static int hdconf_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM 
                                         wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)openfilestring);
 
                                         h = wx_getdlgitem(hdlg, WX_ID("IDC_TEXT_SIZE[3]"));
-                                        sprintf(s, "Size : %imb", (((((uint64_t)hd_new_cyl*(uint64_t)hd_new_hpc)*(uint64_t)hd_new_spt)*512)/1024)/1024);
+                                        sprintf(s, "Size : %imb", (int)(((((uint64_t)hd_new_cyl*(uint64_t)hd_new_hpc)*(uint64_t)hd_new_spt)*512)/1024)/1024);
                                         wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)s);
 
                                         hd_changed = 1;

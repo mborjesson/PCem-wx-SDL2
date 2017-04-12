@@ -6,12 +6,12 @@
 
 extern "C"
 {
-int wx_start(void*);
-int wx_stop(void*);
-void wx_show(void*);
-void wx_handle_command(void*, int, int);
-int window_remember;
-void stop_emulation_confirm();
+        int wx_start(void*);
+        int wx_stop(void*);
+        void wx_show(void*);
+        void wx_handle_command(void*, int, int);
+        int window_remember;
+        void stop_emulation_confirm();
 }
 
 int wx_window_x = 0;
@@ -196,7 +196,6 @@ void Frame::Quit(bool stop_emulator)
 
 void Frame::OnExitEvent(wxCommandEvent& event)
 {
-        // start thread
         if (closing)
                 return;
         closing = true;

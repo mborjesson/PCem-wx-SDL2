@@ -12,13 +12,13 @@
 #include "wx/xrc/xmlres.h"
 
 extern "C" {
-int config_get_int(char *head, char *name, int def);
-void config_set_int(char *head, char *name, int val);
-void saveconfig();
-void resetpchard();
-int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam);
-device_t *config_device;
-int confirm();
+        int config_get_int(char *head, char *name, int def);
+        void config_set_int(char *head, char *name, int val);
+        void saveconfig();
+        void resetpchard();
+        int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam);
+        device_t *config_device;
+        int confirm();
 }
 #define IDC_CONFIG_BASE 1000
 

@@ -21,6 +21,7 @@
 #include "thread.h"
 #include "disc.h"
 #include "disc_img.h"
+#include "mem.h"
 
 #include "wx-sdl2-video.h"
 #include "wx-utils.h"
@@ -30,7 +31,6 @@
 #define ID_IS(s) wParam == wx_xrcid(s)
 #define ID_RANGE(a, b) wParam >= wx_xrcid(a) && wParam <= wx_xrcid(b)
 
-static int save_window_pos = 0;
 uint64_t timer_freq;
 
 
@@ -74,6 +74,12 @@ int video_scale = 1;
 
 char menuitem[60];
 
+void hdconf_open(void* hwnd);
+
+void config_open(void* hwnd);
+
+extern void add_config_callback(void(*loadconfig)(), void(*saveconfig)(), void(*onloaded)());
+
 void warning(const char *format, ...)
 {
         char buf[1024];
@@ -89,6 +95,7 @@ void warning(const char *format, ...)
 void updatewindowsize(int x, int y)
 {
         int winsizex = 640, winsizey = 480;
+        /* Video scaling-code is taken from 86Box */
         switch(video_scale)
         {
                 case 0:
@@ -158,7 +165,6 @@ int mainthread(void* param)
         int frames = 0;
         uint32_t old_time, new_time;
 
-//        Sleep(500);
         drawits = 0;
         old_time = SDL_GetTicks();
         running = 1;
@@ -218,7 +224,6 @@ uint64_t timer_read()
 Uint32 timer_onesec(Uint32 interval, void* param)
 {
         onesec();
-
         return interval;
 }
 
@@ -548,15 +553,6 @@ void atapi_close(void)
                 ioctl_close();
                 break;
         }
-}
-
-int confirm()
-{
-        if (emulation_state != EMULATION_STOPPED) {
-                return wx_messagebox(NULL, "This will reset PCem!\nOkay to continue?",
-                                "PCem", WX_MB_OKCANCEL) == WX_IDOK;
-        }
-        return 1;
 }
 
 int wx_handle_command(void* hwnd, int wParam, int checked)
