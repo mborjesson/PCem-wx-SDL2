@@ -211,7 +211,7 @@ void get_executable_name(char *s, int size)
         strcpy(s, path);
 }
 
-void set_window_title(char *s)
+void set_window_title(const char *s)
 {
 //        wx_setwindowtitle(ghwnd, s);
 }
