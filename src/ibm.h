@@ -316,6 +316,7 @@ typedef struct DMA
         
         int is_ps2;
         uint8_t arb_level[4];
+        uint8_t ps2_mode[4];
 } DMA;
 
 DMA dma,dma16;
@@ -405,6 +406,7 @@ enum
 	ROM_IBMPS2_M30_286,
 	ROM_IBMPS2_M50,
 	ROM_IBMPS2_M55SX,
+	ROM_IBMPS2_M80,
                 	
         ROM_MAX
 };
@@ -545,7 +547,7 @@ void get_executable_name(char *s, int size);
 void startblit();
 void endblit();
 
-void set_window_title(char *s);
+void set_window_title(const char *s);
 
 void updatewindowsize(int x, int y);
 

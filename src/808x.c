@@ -117,7 +117,7 @@ int fetchcycles=0,memcycs,fetchclocks;
 uint8_t prefetchqueue[6];
 uint16_t prefetchpc;
 int prefetchw=0;
-inline uint8_t FETCH()
+static inline uint8_t FETCH()
 {
         uint8_t temp;
 /*        temp=prefetchqueue[0];
@@ -171,7 +171,7 @@ inline uint8_t FETCH()
         return temp;
 }
 
-inline void FETCHADD(int c)
+static inline void FETCHADD(int c)
 {
         int d;
 //        if (output) printf("FETCHADD %i\n",c);
@@ -226,7 +226,7 @@ void FETCHCOMPLETE()
                 fetchcycles+=(4-(fetchcycles&3));
 }
 
-inline void FETCHCLEAR()
+static inline void FETCHCLEAR()
 {
 /*        int c;
         fetchcycles=0;
@@ -3025,6 +3025,7 @@ void execx86(int cycs)
                         switch (rmdat&0x38)
                         {
                                 case 0x00: /*TEST b,#8*/
+                                case 0x08:
                                 temp2=FETCH();
                                 temp&=temp2;
                                 setznp8(temp);
@@ -3163,6 +3164,7 @@ void execx86(int cycs)
                         switch (rmdat&0x38)
                         {
                                 case 0x00: /*TEST w*/
+                                case 0x08:
                                 tempw2=getword();
                                 setznp16(tempw&tempw2);
                                 flags&=~(C_FLAG|V_FLAG|A_FLAG);
