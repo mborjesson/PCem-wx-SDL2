@@ -5,50 +5,24 @@
 #include "mem.h"
 #include "rom.h"
 
-#ifdef __linux__
-#include <dirent.h>
-#include <libgen.h>
-#endif
-
 FILE *romfopen(char *fn, char *mode)
 {
         char s[512];
         strcpy(s, pcempath);
         put_backslash(s);
         strcat(s, fn);
-        FILE* file = fopen(s, mode);
-#ifdef __linux__
-        if (!file)
-        {
-                char s2[512];
-                char* filename = basename(s);
-                char* path = dirname(s);
-                DIR* d = opendir(path);
-                struct dirent *dir;
-                if (d)
-                {
-                        while (!file && ((dir = readdir(d)) != NULL))
-                        {
-                                if (!strcasecmp(dir->d_name, filename))
-                                {
-                                        strcpy(s2, path);
-                                        if (path[sizeof(path)-1] != '/')
-                                                strcat(s2, "/");
-                                        strcat(s2, dir->d_name);
-                                        file = fopen(s2, mode);
-                                        if (file) pclog("romfopen() found match for %s: %s\n", fn, s2);
-                                }
-                        }
-                        closedir(d);
-                }
-        }
-#endif
-        return file;
+        return fopen(s, mode);
 }
 
 int rom_present(char *fn)
 {
-        FILE *f = romfopen(fn, "rb");
+        FILE *f;
+        char s[512];
+        
+        strcpy(s, pcempath);
+        put_backslash(s);
+        strcat(s, fn);
+        f = fopen(s, "rb");
         if (f)
         {
                 fclose(f);
