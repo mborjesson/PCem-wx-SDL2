@@ -6,6 +6,17 @@
 #include "wx-display.h"
 #include "plat-keyboard.h"
 
+#ifdef __WINDOWS__
+#define BITMAP WINDOWS_BITMAP
+#include <windows.h>
+#include <windowsx.h>
+#undef BITMAP
+
+HHOOK hKeyboardHook;
+int modkeystate[255];
+
+#endif
+
 SDL_mutex* rendererMutex;
 SDL_cond* rendererCond;
 SDL_Thread* renderthread = NULL;
@@ -27,6 +38,10 @@ int winsizex = 640, winsizey = 480;
 
 void renderer_start();
 void renderer_stop(int timeout);
+
+int trigger_fullscreen = 0;
+int trigger_togglewindow = 0;
+int trigger_inputrelease = 0;
 
 extern void device_force_redraw();
 extern void mouse_wheel_update(int);
@@ -56,6 +71,12 @@ int wx_createkeyevent(int keycode, int modifiers, SDL_Event* event)
         SDL_Scancode scancode = SDL_SCANCODE_UNKNOWN;
         switch (keycode)
         {
+        case WXK_ALT:
+                scancode = SDL_SCANCODE_LALT;
+                break;
+        case WXK_CONTROL:
+                scancode = SDL_SCANCODE_LCTRL;
+                break;
         case WXK_PAGEUP:
                 scancode = SDL_SCANCODE_PAGEUP;
                 break;
@@ -63,15 +84,9 @@ int wx_createkeyevent(int keycode, int modifiers, SDL_Event* event)
                 scancode = SDL_SCANCODE_PAGEDOWN;
                 break;
         }
-        int mod = 0;
-        if (modifiers&wxMOD_ALT)
-                mod |= KMOD_ALT;
-        if (modifiers&wxMOD_CONTROL)
-                mod |= KMOD_CTRL;
         if (scancode != SDL_SCANCODE_UNKNOWN)
         {
                 event->key.keysym.scancode = scancode;
-                event->key.keysym.mod = mod;
                 return 1;
         }
         return 0;
@@ -82,7 +97,10 @@ int wx_keydown(void* window, void* e, int keycode, int modifiers)
         SDL_Event event;
         event.type = SDL_KEYDOWN;
         if (wx_createkeyevent(keycode, modifiers, &event))
+        {
+                SDL_PushEvent(&event);
                 return 1;
+        }
         return 0;
 }
 
@@ -317,6 +335,69 @@ void window_setup()
         }
 }
 
+#ifdef __WINDOWS__
+int sdl_winhook(int code)
+{
+        switch(code)
+        {
+                case VK_LMENU:
+                        return SDL_SCANCODE_LALT;
+                case VK_LCONTROL:
+                        return SDL_SCANCODE_LCTRL;
+                case VK_LWIN:
+                        return SDL_SCANCODE_LGUI;
+                case VK_LSHIFT:
+                        return SDL_SCANCODE_LSHIFT;
+                case VK_RMENU:
+                        return SDL_SCANCODE_RALT;
+                case VK_RCONTROL:
+                        return SDL_SCANCODE_RCTRL;
+                case VK_RWIN:
+                        return SDL_SCANCODE_RGUI;
+                case VK_RSHIFT:
+                        return SDL_SCANCODE_RSHIFT;
+        }
+
+        return -1;
+}
+
+LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
+{
+        KBDLLHOOKSTRUCT* p = (KBDLLHOOKSTRUCT*)lParam;
+
+        int c = p->vkCode;
+
+        int steal = 0;
+        int s = sdl_winhook(c);
+        if (s != -1)
+        {
+                int key_state = !(p->flags & LLKHF_UP);
+                if (abs(modkeystate[c]) != key_state)
+                {
+                        /* if mousecapture is 0, key_state should be negative */
+                        if (!mousecapture)
+                                key_state = -key_state;
+                        /* if key_state is 0 and modkeystate[c] is negative,
+                         an sdl_event should not generated */
+                        if (key_state > 0 || modkeystate[c] > 0)
+                        {
+                                steal = 1;
+                                SDL_Event event;
+                                event.key.keysym.scancode = s;
+
+                                event.type = key_state ? SDL_KEYDOWN : SDL_KEYUP;
+                                SDL_PushEvent(&event);
+                        }
+                        modkeystate[c] = key_state;
+                }
+                if (steal)
+                        return 1;
+        }
+
+        return CallNextHookEx( hKeyboardHook, nCode, wParam, lParam );
+}
+#endif
+
 int window_create()
 {
         window = SDL_CreateWindow("PCem Display",
@@ -331,6 +412,11 @@ int window_create()
                 wx_messagebox(ghwnd, message, "SDL Error", WX_MB_OK);
                 return 0;
         }
+
+#ifdef __WINDOWS__
+        memset(modkeystate, 0, sizeof(modkeystate));
+        hKeyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL,  LowLevelKeyboardProc, GetModuleHandle(NULL), 0);
+#endif
 
         render_time = 0;
         render_fps = 0;
@@ -394,6 +480,13 @@ int render()
                         if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
                                 wx_stop_emulation(ghwnd);
                         }
+                        if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
+                        {
+                                if (is_fullscreen())
+                                        window_dowindowed = 1;
+                                window_doinputrelease = 1;
+                        }
+
                         if (window_remember) {
                                 int flags = SDL_GetWindowFlags(window);
                                 if (!(flags&SDL_WINDOW_FULLSCREEN) && !(flags&SDL_WINDOW_FULLSCREEN_DESKTOP)) {
@@ -411,6 +504,13 @@ int render()
                         break;
                 case SDL_KEYDOWN:
                 {
+#ifdef __WINDOWS__
+                        /* international keyboard workaround */
+                        if (event.key.keysym.scancode == SDL_SCANCODE_RALT &&
+                                        (event.key.keysym.mod&KMOD_LCTRL) &&
+                                        event.key.timestamp == rawinputkey[sdl_scancode(SDL_SCANCODE_LCTRL)])
+                                rawinputkey[sdl_scancode(SDL_SCANCODE_LCTRL)] = 0;
+#endif
                         int key_idx = sdl_scancode(event.key.keysym.scancode);
                         if (key_idx != -1)
                                 rawinputkey[key_idx] = 1;
@@ -421,22 +521,36 @@ int render()
                         int key_idx = sdl_scancode(event.key.keysym.scancode);
                         if (key_idx != -1)
                                 rawinputkey[key_idx] = 0;
-                        if (event.key.keysym.scancode == SDL_SCANCODE_PAGEDOWN && (event.key.keysym.mod&KMOD_CTRL) && (event.key.keysym.mod&KMOD_ALT))
-                        {
-                                toggle_fullscreen();
-                        }
-                        else if (event.key.keysym.scancode == SDL_SCANCODE_PAGEUP && (event.key.keysym.mod&KMOD_CTRL) && (event.key.keysym.mod&KMOD_ALT))
-                        {
-                                wx_togglewindow(ghwnd);
-                        }
-                        else if (event.key.keysym.scancode == SDL_SCANCODE_END && (event.key.keysym.mod&KMOD_CTRL))
-                        {
-                                if (!is_fullscreen())
-                                        window_doinputrelease = 1;
-                        }
                         break;
                 }
                 }
+        }
+        if (rawinputkey[sdl_scancode(SDL_SCANCODE_PAGEDOWN)] &&
+                        (rawinputkey[sdl_scancode(SDL_SCANCODE_LCTRL)] || rawinputkey[sdl_scancode(SDL_SCANCODE_RCTRL)]) &&
+                        (rawinputkey[sdl_scancode(SDL_SCANCODE_LALT)] || rawinputkey[sdl_scancode(SDL_SCANCODE_RALT)]))
+                trigger_fullscreen = 1;
+        else if (trigger_fullscreen)
+        {
+                trigger_fullscreen = 0;
+                toggle_fullscreen();
+        }
+        if (event.key.keysym.scancode == SDL_SCANCODE_PAGEUP &&
+                        (rawinputkey[sdl_scancode(SDL_SCANCODE_LCTRL)] || rawinputkey[sdl_scancode(SDL_SCANCODE_RCTRL)]) &&
+                        (rawinputkey[sdl_scancode(SDL_SCANCODE_LALT)] || rawinputkey[sdl_scancode(SDL_SCANCODE_RALT)]))
+                trigger_togglewindow = 1;
+        else if (trigger_togglewindow)
+        {
+                trigger_togglewindow = 0;
+                wx_togglewindow(ghwnd);
+        }
+        else if (event.key.keysym.scancode == SDL_SCANCODE_END &&
+                        (rawinputkey[sdl_scancode(SDL_SCANCODE_LCTRL)] || rawinputkey[sdl_scancode(SDL_SCANCODE_RCTRL)]))
+                trigger_inputrelease = 1;
+        else if (trigger_inputrelease)
+        {
+                trigger_inputrelease = 0;
+                if (!is_fullscreen())
+                        window_doinputrelease = 1;
         }
         if (window_doremember) {
                 window_doremember = 0;
