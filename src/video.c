@@ -53,6 +53,7 @@ typedef struct
 static VIDEO_CARD video_cards[] =
 {
         {"ATI Graphics Pro Turbo (Mach64 GX)",     "mach64gx",       &mach64gx_device,            GFX_MACH64GX},
+        {"ATI Video Xpression (Mach64 VT2)",       "mach64vt2",      &mach64vt2_device,           GFX_MACH64VT2},
         {"ATI VGA Charger (ATI-28800)",            "ati28800",       &ati28800_device,            GFX_VGACHARGER},
         {"ATI VGA Edge-16 (ATI-18800)",            "ati18800",       &ati18800_device,            GFX_VGAEDGE16},
         {"CGA",                                    "cga",            &cga_device,                 GFX_CGA},
@@ -155,6 +156,9 @@ int video_get_video_from_internal_name(char *s)
 }
 
 int video_fullscreen = 0, video_fullscreen_scale, video_fullscreen_first;
+int video_force_aspect_ration = 0;
+int vid_disc_indicator = 0;
+
 uint32_t *video_15to32, *video_16to32;
 
 int egareads=0,egawrites=0;
