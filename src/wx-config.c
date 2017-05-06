@@ -40,6 +40,47 @@ static int mouse_valid(int type, int model)
         return 1;
 }
 
+static void recalc_vid_list(void* hdlg, int model)
+{
+        void* h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOVID"));
+        int c = 0, d = 0;
+        int found_card = 0;
+
+        wx_sendmessage(h, WX_CB_RESETCONTENT, 0, 0);
+        wx_sendmessage(h, WX_CB_SETCURSEL, 0, 0);
+
+        while (1)
+        {
+                char *s = video_card_getname(c);
+
+                if (!s[0])
+                        break;
+
+                if (video_card_available(c) && gfx_present[video_new_to_old(c)] &&
+                    ((models[model].flags & MODEL_PCI) || !(video_card_getdevice(c)->flags & DEVICE_PCI)))
+                {
+                        wx_sendmessage(h, WX_CB_ADDSTRING, 0, (LONG_PARAM)s);
+                        if (video_new_to_old(c) == gfxcard)
+                        {
+                                wx_sendmessage(h, WX_CB_SETCURSEL, d, 0);
+                                found_card = 1;
+                        }
+
+                        d++;
+                }
+
+                c++;
+        }
+        if (!found_card)
+                wx_sendmessage(h, WX_CB_SETCURSEL, 0, 0);
+        wx_enablewindow(h, models[model].fixed_gfxcard ? FALSE : TRUE);
+
+        h = wx_getdlgitem(hdlg, WX_ID("IDC_CHECKVOODOO"));
+        wx_enablewindow(h, (models[model].flags & MODEL_PCI) ? TRUE : FALSE);
+        h = wx_getdlgitem(hdlg, WX_ID("IDC_CONFIGUREVOODOO"));
+        wx_enablewindow(h, (models[model].flags & MODEL_PCI) ? TRUE : FALSE);
+}
+
 static void recalc_snd_list(void* hdlg, int model)
 {
         void* h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOSND"));
@@ -183,28 +224,7 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                         }
                         wx_sendmessage(h, WX_CB_SETCURSEL, modeltolist[model], 0);
 
-                        h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOVID"));
-                        c = d = 0;
-                        while (1)
-                        {
-                                char *s = video_card_getname(c);
-
-                                if (!s[0])
-                                break;
-
-                                if (video_card_available(c) && gfx_present[video_new_to_old(c)])
-                                {
-                                        wx_sendmessage(h, WX_CB_ADDSTRING, 0, (LONG_PARAM) s);
-                                        if (video_new_to_old(c) == gfxcard)
-                                        wx_sendmessage(h, WX_CB_SETCURSEL, d, 0);
-
-                                        d++;
-                                }
-
-                                c++;
-                        }
-                        if (models[model].fixed_gfxcard)
-                                wx_enablewindow(h, FALSE);
+                        recalc_vid_list(hdlg, romstomodel[romset]);
 
                         h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOCPUM"));
                         c = 0;
@@ -534,27 +554,6 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBO1"));
                                 temp_model = listtomodel[wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0)];
 
-                                /*Enable/disable gfxcard list*/
-                                h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOVID"));
-                                if (!models[temp_model].fixed_gfxcard)
-                                {
-                                        char *s = video_card_getname(video_old_to_new(gfxcard));
-
-                                        wx_enablewindow(h, TRUE);
-
-                                        c = 0;
-                                        while (1)
-                                        {
-                                                wx_sendmessage(h, WX_CB_GETLBTEXT, c, (LONG_PARAM) temp_str);
-                                                if (!strcmp(temp_str, s))
-                                                break;
-                                                c++;
-                                        }
-                                        wx_sendmessage(h, WX_CB_SETCURSEL, c, 0);
-                                }
-                                else
-                                wx_enablewindow(h, FALSE);
-
                                 /*Rebuild manufacturer list*/
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOCPUM"));
                                 temp_cpu_m = wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0);
@@ -665,6 +664,8 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                         wx_sendmessage(h, WX_CB_SETCURSEL, settings_mouse_to_list[temp_mouse_type], 0);
                                 else
                                         wx_sendmessage(h, WX_CB_SETCURSEL, 0, 0);
+
+                                recalc_vid_list(hdlg, temp_model);
 
                                 recalc_hdd_list(hdlg, temp_model, 1);
 
