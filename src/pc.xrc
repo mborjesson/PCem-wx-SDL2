@@ -69,7 +69,7 @@
 			<object class="wxMenu">
 				<label>_CD-ROM</label>
 				<object class="wxMenuItem" name="IDM_CDROM_ISO_LOAD">
-					<label>_Load ISO...</label>
+					<label>_Load image...</label>
 				</object>
 				<object class="separator"/>
 				<object class="wxMenuItem" name="IDM_CDROM_DISABLED">
@@ -81,7 +81,7 @@
 					<radio>1</radio>
 				</object>
 				<object class="wxMenuItem" name="IDM_CDROM_ISO">
-					<label>_ISO...</label>
+					<label>_Image...</label>
 					<radio>1</radio>
 				</object>
 			</object>

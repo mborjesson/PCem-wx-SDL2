@@ -3,7 +3,7 @@ CPP  = g++
 CC   = gcc
 WXRC = wxrc
 CFLAGS = -O3 -fomit-frame-pointer -msse2 -m32 $(shell wx-config --cxxflags) $(shell sdl2-config --cflags)
-OBJ = 386.o 386_dynarec.o 386_dynarec_ops.o 808x.o acer386sx.o ali1429.o amstrad.o cdrom-ioctl-linux.o cdrom-iso.o cdrom-null.o \
+OBJ = 386.o 386_dynarec.o 386_dynarec_ops.o 808x.o acer386sx.o ali1429.o amstrad.o cdrom-ioctl-linux.o cdrom-image.o cdrom-null.o \
 codegen.o codegen_ops.o codegen_timing_486.o codegen_timing_686.o codegen_timing_pentium.o codegen_timing_winchip.o codegen_x86.c compaq.o config.o cpu.o \
 dac.o device.o disc.o disc_fdi.o disc_img.o disc_sector.o dma.o fdc.o fdc37c665.o fdd.o fdi2raw.o gameport.o \
 hdd.o hdd_esdi.o headland.o i430lx.o i430fx.o i430vx.o ide.o intel.o intel_flash.o io.o jim.o joystick_ch_flightstick_pro.o joystick_standard.o joystick_sw_pad.o \
@@ -22,7 +22,7 @@ vid_tkd8001_ramdac.o vid_tvga.o vid_unk_ramdac.o vid_vga.o vid_voodoo.o vid_wy70
 x86seg.o x87.o xtide.o sound_dbopl.o sound_resid.o \
 wx-main.o wx-dialogbox.o wx-utils.o wx-app.o wx-sdl2-joystick.o wx-sdl2-mouse.o wx-sdl2-keyboard.o wx-sdl2-video.o wx-sdl2-midi.o \
 wx-sdl2.o wx-config.o wx-deviceconfig.o wx-sdl2-hdconf.o wx-status.o wx-sdl2-status.o wx-resources.o wx-thread.o wx-common.o wx-sdl2-display.o
-DBOBJ = dbopl.o vid_cga_comp.o
+DBOBJ = cdrom_image.o dbopl.o vid_cga_comp.o
 SIDOBJ = convolve.o convolve-sse.o envelope.o extfilt.o filter.o pot.o sid.o voice.o wave6581__ST.o wave6581_P_T.o wave6581_PS_.o wave6581_PST.o wave8580__ST.o wave8580_P_T.o wave8580_PS_.o wave8580_PST.o wave.o
 
 

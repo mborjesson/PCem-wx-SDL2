@@ -6,8 +6,19 @@
 
 extern char iso_path[1024];
 
-extern int iso_open(char *fn);
-extern void iso_reset();
-extern void iso_close();
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int iso_open(char *fn);
+void iso_reset();
+void iso_close();
+
+void iso_audio_callback(int16_t *output, int len);
+void iso_audio_stop();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ! CDROM_ISO_H */

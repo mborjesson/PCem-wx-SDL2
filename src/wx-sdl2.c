@@ -844,7 +844,7 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
         else if (ID_IS("IDM_CDROM_ISO") || ID_IS("IDM_CDROM_ISO_LOAD"))
         {
                 if (!getfile(hwnd,
-                                "CD-ROM image (*.iso)|*.iso|All files (*.*)|*.*",
+                                "CD-ROM image (*.iso;*.cue)|*.iso;*.cue|All files (*.*)|*.*",
                                 iso_path))
                 {
                         if (!cdrom_enabled)
