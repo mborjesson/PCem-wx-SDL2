@@ -201,6 +201,7 @@ bool CDROM_Interface_Image::LoadIsoFile(char* filename)
 		return false;
 	}
 	track.number = 1;
+	track.track_number = 1;
 	track.attr = DATA_TRACK;//data
 	
 	// try to detect iso type

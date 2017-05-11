@@ -1,21 +1,24 @@
 #include <stdlib.h>
-#include "cdrom-iso.h"
+#include "cdrom-image.h"
 #include "dosbox/cdrom.h"
 
 extern "C"
 {
 #include "ibm.h"
 #include "ide.h"
+
+int cdrom_drive;
+int old_cdrom_drive;
 }
 
-char iso_path[1024];
-static int iso_changed = 0;
+char image_path[1024];
+static int image_changed = 0;
 
-extern ATAPI iso_atapi;
+extern ATAPI image_atapi;
 
 CDROM_Interface_Image* cdrom = NULL;
 
-#define MSFtoLBA(m,s,f)  (((((m*60)+s)*75)+f)-150)
+#define MSFtoLBA(m,s,f)  (((((m*60)+s)*75)+f))
 
 static uint32_t cdrom_capacity = 0;
 
@@ -26,43 +29,43 @@ enum
     CD_PAUSED
 };
 
-static int iso_cd_state = CD_STOPPED;
-static uint32_t iso_cd_pos = 0, iso_cd_end = 0;
+static int image_cd_state = CD_STOPPED;
+static uint32_t image_cd_pos = 0, image_cd_end = 0;
 
 #define BUF_SIZE 32768
 static int16_t cd_buffer[BUF_SIZE];
 static int cd_buflen = 0;
 
-void iso_audio_callback(int16_t *output, int len)
+void image_audio_callback(int16_t *output, int len)
 {
-        if (iso_cd_state != CD_PLAYING)
+        if (image_cd_state != CD_PLAYING)
         {
                 memset(output, 0, len * 2);
                 return;
         }
         while (cd_buflen < len)
         {
-                if (iso_cd_pos < iso_cd_end)
+                if (image_cd_pos < image_cd_end)
                 {
 //                      pclog("Read to %i\n", cd_buflen);
-                        if (!cdrom->ReadSector((unsigned char*)&cd_buffer[cd_buflen], true, iso_cd_pos - 150))
+                        if (!cdrom->ReadSector((unsigned char*)&cd_buffer[cd_buflen], true, image_cd_pos - 150))
                         {
 //                                pclog("DeviceIoControl returned false\n");
                                 memset(&cd_buffer[cd_buflen], 0, (BUF_SIZE - cd_buflen) * 2);
-                                iso_cd_state = CD_STOPPED;
+                                image_cd_state = CD_STOPPED;
                                 cd_buflen = len;
                         }
                         else
                         {
 //                                pclog("DeviceIoControl returned true\n");
-                                iso_cd_pos++;
+                                image_cd_pos++;
                                 cd_buflen += (RAW_SECTOR_SIZE / 2);
                         }
                 }
                 else
                 {
                         memset(&cd_buffer[cd_buflen], 0, (BUF_SIZE - cd_buflen) * 2);
-                        iso_cd_state = CD_STOPPED;
+                        image_cd_state = CD_STOPPED;
                         cd_buflen = len;
                 }
         }
@@ -71,12 +74,12 @@ void iso_audio_callback(int16_t *output, int len)
         cd_buflen -= len;
 }
 
-void iso_audio_stop()
+void image_audio_stop()
 {
-        iso_cd_state = CD_STOPPED;
+        image_cd_state = CD_STOPPED;
 }
 
-static int iso_is_track_audio(uint32_t pos, int ismsf)
+static int image_is_track_audio(uint32_t pos, int ismsf)
 {
         if (!cdrom) return 0;
         if (ismsf)
@@ -95,7 +98,7 @@ static int iso_is_track_audio(uint32_t pos, int ismsf)
         return attr == AUDIO_TRACK;
 }
 
-static void iso_playaudio(uint32_t pos, uint32_t len, int ismsf)
+static void image_playaudio(uint32_t pos, uint32_t len, int ismsf)
 {
         if (!cdrom) return;
         int number;
@@ -105,73 +108,88 @@ static void iso_playaudio(uint32_t pos, uint32_t len, int ismsf)
         if (attr == DATA_TRACK)
         {
                 pclog("Can't play data track\n");
-                iso_cd_pos = 0;
-                iso_cd_state = CD_STOPPED;
+                image_cd_pos = 0;
+                image_cd_state = CD_STOPPED;
                 return;
         }
         pclog("Play audio - %08X %08X %i\n", pos, len, ismsf);
         if (ismsf)
         {
-                pos = (pos & 0xff) + (((pos >> 8) & 0xff) * 75) + (((pos >> 16) & 0xff) * 75 * 60);
-                len = (len & 0xff) + (((len >> 8) & 0xff) * 75) + (((len >> 16) & 0xff) * 75 * 60);
+                int m, s, f;
+                m = (pos >> 16) & 0xff;
+                s = (pos >> 8) & 0xff;
+                f = pos & 0xff;
+                pos = MSFtoLBA(m, s, f);
+
+                m = (len >> 16) & 0xff;
+                s = (len >> 8) & 0xff;
+                f = len & 0xff;
+                len = MSFtoLBA(m, s, f);
+
                 pclog("MSF - pos = %08X len = %08X\n", pos, len);
         }
         else
                 len += pos;
-        iso_cd_pos   = pos;// + 150;
-        iso_cd_end   = len;// + 150;
-        iso_cd_state = CD_PLAYING;
-        if (iso_cd_pos < 150)
-                iso_cd_pos = 150;
-        pclog("Audio start %08X %08X %i %i %i\n", iso_cd_pos, iso_cd_end, iso_cd_state, cd_buflen, len);
+        image_cd_pos   = pos;// + 150;
+        image_cd_end   = len;// + 150;
+        image_cd_state = CD_PLAYING;
+        if (image_cd_pos < 150)
+                image_cd_pos = 150;
+        cd_buflen = 0;
+        pclog("Audio start %08X %08X %i %i %i\n", image_cd_pos, image_cd_end, image_cd_state, cd_buflen, len);
 }
 
-static void iso_pause(void)
+static void image_pause(void)
 {
         if (!cdrom) return;
-        if (iso_cd_state == CD_PLAYING)
-                iso_cd_state = CD_PAUSED;
+        if (image_cd_state == CD_PLAYING)
+                image_cd_state = CD_PAUSED;
 }
 
-static void iso_resume(void)
+static void image_resume(void)
 {
         if (!cdrom) return;
-        if (iso_cd_state == CD_PAUSED)
-                iso_cd_state = CD_PLAYING;
+        if (image_cd_state == CD_PAUSED)
+                image_cd_state = CD_PLAYING;
 }
 
-static void iso_stop(void)
+static void image_stop(void)
 {
         if (!cdrom) return;
-        iso_cd_state = CD_STOPPED;
+        image_cd_state = CD_STOPPED;
 }
 
-static void iso_seek(uint32_t pos)
+static void image_seek(uint32_t pos)
 {
         if (!cdrom) return;
-        iso_cd_pos   = pos;
-        iso_cd_state = CD_STOPPED;
+        image_cd_pos   = pos;
+        image_cd_state = CD_STOPPED;
 }
 
-static int iso_ready(void)
+static int image_ready(void)
 {
         if (!cdrom)
                 return 0;
 
-        if (strlen(iso_path) == 0)
+        if (strlen(image_path) == 0)
                 return 0;
 
         if (old_cdrom_drive != cdrom_drive)
                 return 1;
 
+        if (image_changed)
+        {
+                image_changed = 0;
+                return 1;
+        }
+
         return 1;
 }
 
-static int iso_get_last_block(unsigned char starttrack, int msf, int maxlen, int single)
+static int image_get_last_block(unsigned char starttrack, int msf, int maxlen, int single)
 {
-        long size;
         int c;
-        int lb=0;
+        uint32_t lb=0;
 
         if (!cdrom) return 0;
 
@@ -193,28 +211,43 @@ static int iso_get_last_block(unsigned char starttrack, int msf, int maxlen, int
         return lb;
 }
 
-static int iso_medium_changed(void)
+static int image_medium_changed(void)
 {
-        int changed = iso_changed;
-        iso_changed = 0;
-        return changed;
+        if (!cdrom)
+                return 0;
+
+        if (strlen(image_path) == 0)
+                return 0;
+
+        if (old_cdrom_drive != cdrom_drive)
+        {
+                old_cdrom_drive = cdrom_drive;
+                return 1;
+        }
+
+        if (image_changed)
+        {
+                image_changed = 0;
+                return 1;
+        }
+        return 0;
 }
 
-static uint8_t iso_getcurrentsubchannel(uint8_t *b, int msf)
+static uint8_t image_getcurrentsubchannel(uint8_t *b, int msf)
 {
         if (!cdrom) return 0;
         uint8_t ret;
         int pos=0;
 
-        uint32_t cdpos = iso_cd_pos;
+        uint32_t cdpos = image_cd_pos;
         if (cdpos >= 150) cdpos -= 150;
         TMSF relPos, absPos;
         unsigned char attr, track, index;
         cdrom->GetAudioSub(cdpos, attr, track, index, relPos, absPos);
 
-        if (iso_cd_state == CD_PLAYING)
+        if (image_cd_state == CD_PLAYING)
                 ret = 0x11;
-        else if (iso_cd_state == CD_PAUSED)
+        else if (image_cd_state == CD_PAUSED)
                 ret = 0x12;
         else
                 ret = 0x13;
@@ -255,39 +288,27 @@ static uint8_t iso_getcurrentsubchannel(uint8_t *b, int msf)
         return ret;
 }
 
-static void iso_eject(void)
+static void image_eject(void)
 {
-        /*
-        iso_cd_state = CD_STOPPED;
-        if (cdrom)
-        {
-                delete cdrom;
-                cdrom = NULL;
-        }
-        */
 }
 
-static void iso_load(void)
+static void image_load(void)
 {
-        /*
-        if (!cdrom && iso_path && strlen(iso_path) > 0)
-                iso_open(iso_path);
-        */
 }
 
-static int iso_readsector(uint8_t *b, int sector)
+static int image_readsector(uint8_t *b, int sector)
 {
         if (!cdrom) return -1;
         return !cdrom->ReadSector(b, false, sector);
 }
 
-static void iso_readsector_raw(uint8_t *b, int sector)
+static void image_readsector_raw(uint8_t *b, int sector)
 {
         if (!cdrom) return;
         cdrom->ReadSector(b, true, sector);
 }
 
-static int iso_readtoc(unsigned char *b, unsigned char starttrack, int msf, int maxlen, int single)
+static int image_readtoc(unsigned char *b, unsigned char starttrack, int msf, int maxlen, int single)
 {
         if (!cdrom) return 0;
         int len=4;
@@ -366,7 +387,7 @@ static int iso_readtoc(unsigned char *b, unsigned char starttrack, int msf, int 
         return len;
 }
 
-static int iso_readtoc_session(unsigned char *b, int msf, int maxlen)
+static int image_readtoc_session(unsigned char *b, int msf, int maxlen)
 {
         if (!cdrom) return 0;
         int len = 4;
@@ -403,7 +424,7 @@ static int iso_readtoc_session(unsigned char *b, int msf, int maxlen)
         return len;
 }
 
-static int iso_readtoc_raw(unsigned char *b, int maxlen)
+static int image_readtoc_raw(unsigned char *b, int maxlen)
 {
         if (!cdrom) return 0;
 
@@ -424,7 +445,7 @@ static int iso_readtoc_raw(unsigned char *b, int maxlen)
         {
                 if ((len + 11) > maxlen)
                 {
-                        pclog("iso_readtocraw: This iteration would fill the buffer beyond the bounds, aborting...\n");
+                        pclog("image_readtocraw: This iteration would fill the buffer beyond the bounds, aborting...\n");
                         return len;
                 }
 
@@ -447,17 +468,17 @@ static int iso_readtoc_raw(unsigned char *b, int maxlen)
         return len;
 }
 
-static uint32_t iso_size()
+static uint32_t image_size()
 {
         return cdrom_capacity;
 }
 
-static int iso_status()
+static int image_status()
 {
         if (!cdrom) return CD_STATUS_EMPTY;
         if (cdrom->HasAudioTracks())
         {
-                switch(iso_cd_state)
+                switch(image_cd_state)
                 {
                         case CD_PLAYING:
                         return CD_STATUS_PLAYING;
@@ -470,70 +491,70 @@ static int iso_status()
         }
         return CD_STATUS_DATA_ONLY;
 }
-void iso_reset()
+void image_reset()
 {
 }
 
-void iso_close(void)
+void image_close(void)
 {
-        iso_cd_state = CD_STOPPED;
+        image_cd_state = CD_STOPPED;
         if (cdrom)
         {
                 delete cdrom;
                 cdrom = NULL;
         }
-        memset(iso_path, 0, 1024);
+        memset(image_path, 0, 1024);
 }
 
-int iso_open(char* fn)
+int image_open(char* fn)
 {
-        if (strcmp(fn, iso_path) != 0)
-                iso_changed = 1;
+        if (strcmp(fn, image_path) != 0)
+                image_changed = 1;
 
-        /* Make sure iso_changed stays when changing from ISO to another ISO. */
-        if (cdrom_drive != CDROM_ISO)
-                iso_changed = 1;
+        /* Make sure image_changed stays when changing from an image to another image. */
+        if (cdrom_drive != CDROM_IMAGE)
+                image_changed = 1;
         /* strcpy fails on OSX if both parameters are pointing to the same address */
-        if (iso_path != fn)
-                strcpy(iso_path, fn);
+        if (image_path != fn)
+                strcpy(image_path, fn);
 
         cdrom = new CDROM_Interface_Image();
         if (!cdrom->SetDevice(fn, false))
         {
-                iso_close();
+                image_close();
                 return 1;
         }
-        iso_cd_state = CD_STOPPED;
-        iso_cd_pos = 0;
+        image_cd_state = CD_STOPPED;
+        image_cd_pos = 0;
         cd_buflen = 0;
-        cdrom_capacity = iso_get_last_block(0, 0, 4096, 0);
-        atapi = &iso_atapi;
+        cdrom_capacity = image_get_last_block(0, 0, 4096, 0) + 1;
+        atapi = &image_atapi;
         return 0;
 }
 
-static void iso_exit(void)
+static void image_exit(void)
 {
 }
 
-ATAPI iso_atapi=
+ATAPI image_atapi=
 {
-        iso_ready,
-        iso_medium_changed,
-        iso_readtoc,
-        iso_readtoc_session,
-        iso_readtoc_raw,
-        iso_getcurrentsubchannel,
-        iso_readsector,
-        iso_readsector_raw,
-        iso_playaudio,
-        iso_seek,
-        iso_load,
-        iso_eject,
-        iso_pause,
-        iso_resume,
-        iso_size,
-	iso_status,
-	iso_is_track_audio,
-        iso_stop,
-        iso_exit
+        image_ready,
+        image_medium_changed,
+        image_readtoc,
+        image_readtoc_session,
+        image_readtoc_raw,
+        image_getcurrentsubchannel,
+        image_readsector,
+        image_readsector_raw,
+        image_playaudio,
+        image_seek,
+        image_load,
+        image_eject,
+        image_pause,
+        image_resume,
+        image_size,
+	image_status,
+	image_is_track_audio,
+        image_stop,
+        image_exit
 };

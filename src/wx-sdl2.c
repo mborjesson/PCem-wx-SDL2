@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include "ibm.h"
 #include "cdrom-ioctl.h"
-#include "cdrom-iso.h"
+#include "cdrom-image.h"
 #include "config.h"
 #include "video.h"
 #include "cpu.h"
@@ -59,7 +59,6 @@ void* menu;
 
 emulation_state_t emulation_state = EMULATION_STOPPED;
 int pause = 0;
-int old_cdrom_drive = 0;
 
 int window_doreset = 0;
 int renderer_doreset = 0;
@@ -266,8 +265,8 @@ void wx_setupitems()
                 wx_checkmenuitem(menu, WX_ID("IDM_CDROM_DISABLED"), WX_MB_CHECKED);
         else
         {
-                if (cdrom_drive == CDROM_ISO)
-                        wx_checkmenuitem(menu, WX_ID("IDM_CDROM_ISO"), WX_MB_CHECKED);
+                if (cdrom_drive == CDROM_IMAGE)
+                        wx_checkmenuitem(menu, WX_ID("IDM_CDROM_IMAGE"), WX_MB_CHECKED);
                 else
                 {
                         wx_checkmenuitem(menu, WX_ID("IDM_CDROM_EMPTY"), WX_MB_CHECKED);
@@ -546,8 +545,8 @@ void atapi_close(void)
 {
         switch (cdrom_drive)
         {
-        case CDROM_ISO:
-                iso_close();
+        case CDROM_IMAGE:
+                image_close();
                 break;
         default:
                 ioctl_close();
@@ -560,7 +559,7 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
         SDL_Rect rect;
         void* hmenu;
         void* toolbar;
-        char temp_iso_path[1024];
+        char temp_image_path[1024];
         int new_cdrom_drive;
         hmenu = wx_getmenu(hwnd);
         toolbar = wx_gettoolbar(hwnd);
@@ -841,11 +840,11 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                         pause = 0;
                 }
         }
-        else if (ID_IS("IDM_CDROM_ISO") || ID_IS("IDM_CDROM_ISO_LOAD"))
+        else if (ID_IS("IDM_CDROM_IMAGE") || ID_IS("IDM_CDROM_IMAGE_LOAD"))
         {
                 if (!getfile(hwnd,
                                 "CD-ROM image (*.iso;*.cue)|*.iso;*.cue|All files (*.*)|*.*",
-                                iso_path))
+                                image_path))
                 {
                         if (!cdrom_enabled)
                         {
@@ -853,9 +852,9 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                                         return 0;
                         }
                         old_cdrom_drive = cdrom_drive;
-                        strcpy(temp_iso_path, openfilestring);
-                        if ((strcmp(iso_path, temp_iso_path) == 0)
-                                        && (cdrom_drive == CDROM_ISO)
+                        strcpy(temp_image_path, openfilestring);
+                        if ((strcmp(image_path, temp_image_path) == 0)
+                                        && (cdrom_drive == CDROM_IMAGE)
                                         && cdrom_enabled)
                         {
                                 /* Switching from ISO to the same ISO. Do nothing. */
@@ -863,7 +862,7 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                         }
                         atapi->exit();
                         atapi_close();
-                        iso_open(temp_iso_path);
+                        image_open(temp_image_path);
                         if (cdrom_enabled)
                         {
                                 /* Signal disc change to the emulated machine. */
@@ -872,8 +871,8 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                         //                                wx_checkmenuitem(hmenu, IDM_CDROM_REAL + cdrom_drive, MF_UNCHECKED);
                         //                                wx_checkmenuitem(hmenu, IDM_CDROM_DISABLED,           MF_UNCHECKED);
                         //                                wx_checkmenuitem(hmenu, IDM_CDROM_ISO,                        MF_UNCHECKED);
-                        cdrom_drive = CDROM_ISO;
-                        wx_checkmenuitem(hmenu, WX_ID("IDM_CDROM_ISO"), WX_MB_CHECKED);
+                        cdrom_drive = CDROM_IMAGE;
+                        wx_checkmenuitem(hmenu, WX_ID("IDM_CDROM_IMAGE"), WX_MB_CHECKED);
                         saveconfig();
                         if (!cdrom_enabled)
                         {

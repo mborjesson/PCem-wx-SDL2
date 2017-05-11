@@ -6,7 +6,7 @@
 
 #include "ali1429.h"
 #include "cdrom-ioctl.h"
-#include "cdrom-iso.h"
+#include "cdrom-image.h"
 #include "disc.h"
 #include "disc_img.h"
 #include "mem.h"
@@ -281,13 +281,13 @@ void initpc(int argc, char *argv[])
 	else
 #endif
 	{
-		if (cdrom_drive == CDROM_ISO)
+		if (cdrom_drive == CDROM_IMAGE)
 		{
-			FILE *ff = fopen(iso_path, "rb");
+			FILE *ff = fopen(image_path, "rb");
 			if (ff)
 			{
 				fclose(ff);
-				iso_open(iso_path);
+				image_open(image_path);
 			}
 			else
 			{
@@ -318,9 +318,9 @@ void initpc(int argc, char *argv[])
 	else
 #endif
 	{
-		if (cdrom_drive == CDROM_ISO)
+		if (cdrom_drive == CDROM_IMAGE)
 		{
-			iso_reset();
+			image_reset();
 		}
 		else
 		{
@@ -402,9 +402,9 @@ void resetpchard()
 	else
 #endif
 	{
-		if (cdrom_drive == CDROM_ISO)
+		if (cdrom_drive == CDROM_IMAGE)
 		{
-			iso_reset();
+			image_reset();
 		}
 		else
 		{
@@ -665,8 +665,8 @@ void loadconfig(char *fn)
         cdrom_channel = config_get_int(NULL, "cdrom_channel", 2);
         
         p = (char *)config_get_string(NULL, "cdrom_path", "");
-        if (p) strcpy(iso_path, p);
-        else   strcpy(iso_path, "");
+        if (p) strcpy(image_path, p);
+        else   strcpy(image_path, "");
         
         vid_resize = config_get_int(NULL, "vid_resize", 0);
         video_force_aspect_ration = config_get_int(NULL, "vid_force_aspect_ratio", 0);
@@ -785,7 +785,7 @@ void saveconfig()
         config_set_int(NULL, "cdrom_drive", cdrom_drive);
         config_set_int(NULL, "cdrom_enabled", cdrom_enabled);
         config_set_int(NULL, "cdrom_channel", cdrom_channel);
-        config_set_string(NULL, "cdrom_path", iso_path);
+        config_set_string(NULL, "cdrom_path", image_path);
         config_set_int(NULL, "vid_resize", vid_resize);
         config_set_int(NULL, "vid_force_aspect_ratio", video_force_aspect_ration);
         config_set_int(NULL, "vid_disc_indicator", vid_disc_indicator);

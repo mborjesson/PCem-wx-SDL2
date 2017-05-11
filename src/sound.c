@@ -4,7 +4,7 @@
 #include "device.h"
 
 #include "cdrom-ioctl.h"
-#include "cdrom-iso.h"
+#include "cdrom-image.h"
 #include "ide.h"
 
 #include "filters.h"
@@ -136,7 +136,7 @@ static void sound_cd_thread(void *param)
                 
                 thread_wait_event(sound_cd_event, -1);
                 ioctl_audio_callback(cd_buffer, CD_BUFLEN*2);
-                iso_audio_callback(cd_buffer, CD_BUFLEN*2);
+                image_audio_callback(cd_buffer, CD_BUFLEN*2);
                 if (soundon)
                 {
                         int32_t atapi_vol_l = atapi_get_cd_volume(0);
@@ -261,5 +261,5 @@ void sound_reset()
         
         sound_set_cd_volume(65535, 65535);
         ioctl_audio_stop();
-        iso_audio_stop();
+        image_audio_stop();
 }

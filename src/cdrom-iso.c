@@ -299,7 +299,7 @@ int iso_open(char *fn)
 		iso_changed = 1;
 
 	/* Make sure iso_changed stays when changing from ISO to another ISO. */
-        if (cdrom_drive != CDROM_ISO)
+        if (cdrom_drive != CDROM_IMAGE)
                 iso_changed = 1;
         /* strcpy fails on OSX if both parameters are pointing to the same address */
         if (iso_path != fn)

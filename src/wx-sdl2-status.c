@@ -11,7 +11,7 @@
 #include "fdd.h"
 #include "hdd.h"
 #include "ide.h"
-#include "cdrom-iso.h"
+#include "cdrom-image.h"
 #include "wx-common.h"
 
 drive_info_t drive_info[10];
@@ -63,11 +63,11 @@ drive_info_t* get_machine_info(char* s, int* num_drive_info) {
                 {
                         if (cdrom_drive < 0)
                                 continue;
-                        if (cdrom_drive == CDROM_ISO)
+                        if (cdrom_drive == CDROM_IMAGE)
                         {
-                                if (!strlen(iso_path))
+                                if (!strlen(image_path))
                                         continue;
-                                strcpy(drive_info[pos].fn, iso_path);
+                                strcpy(drive_info[pos].fn, image_path);
                         }
                         else
                                 strcpy(drive_info[pos].fn, "");
