@@ -193,7 +193,7 @@ bool CDROM_Interface_Image::LoadIsoFile(char* filename)
 	tracks.clear();
 	
 	// data track
-	Track track = {0, 0, 0, 0, 0, 0, false, NULL};
+	Track track = {0, 0, 0, 0, 0, 0, 0, false, NULL};
 	bool error;
 	track.file = new BinaryFile(filename, error);
 	if (error) {
@@ -264,7 +264,7 @@ static string dirname(char * file) {
 
 bool CDROM_Interface_Image::LoadCueSheet(char *cuefile)
 {
-	Track track = {0, 0, 0, 0, 0, 0, false, NULL};
+	Track track = {0, 0, 0, 0, 0, 0, 0, false, NULL};
 	tracks.clear();
 	int shift = 0;
 	int currPregap = 0;
