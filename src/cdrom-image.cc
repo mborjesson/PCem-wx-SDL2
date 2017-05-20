@@ -204,7 +204,7 @@ static int image_get_last_block(unsigned char starttrack, int msf, int maxlen, i
         {
                 uint32_t address;
                 cdrom->GetAudioTrackInfo(c+1, number, tmsf, attr);
-                address = MSFtoLBA(tmsf.min, tmsf.sec, tmsf.fr);
+                address = MSFtoLBA(tmsf.min, tmsf.sec, tmsf.fr)-150;
                 if (address > lb)
                         lb = address;
         }
@@ -359,7 +359,7 @@ static int image_readtoc(unsigned char *b, unsigned char starttrack, int msf, in
                 }
                 else
                 {
-                        temp = MSFtoLBA(tmsf.min, tmsf.sec, tmsf.fr);
+                        temp = MSFtoLBA(tmsf.min, tmsf.sec, tmsf.fr)-150;
                         b[len++] = temp >> 24;
                         b[len++] = temp >> 16;
                         b[len++] = temp >> 8;
@@ -414,7 +414,7 @@ static int image_readtoc_session(unsigned char *b, int msf, int maxlen)
         }
         else
         {
-                uint32_t temp = MSFtoLBA(tmsf.min, tmsf.sec, tmsf.fr);
+                uint32_t temp = MSFtoLBA(tmsf.min, tmsf.sec, tmsf.fr)-150;
                 b[len++] = temp >> 24;
                 b[len++] = temp >> 16;
                 b[len++] = temp >> 8;
