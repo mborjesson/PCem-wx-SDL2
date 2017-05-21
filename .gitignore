@@ -8,5 +8,6 @@ src/pclog.txt
 src/pcem.cfg
 src/roms/
 src/nvr
+src/configs
 src/*.dmp
 pclog.txt

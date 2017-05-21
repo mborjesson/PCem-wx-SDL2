@@ -173,7 +173,9 @@ void d3d_resize(int x, int y)
 void d3d_reset()
 {
         HRESULT hr;
-        
+
+        if (!d3ddev)
+                return;
         memset(&d3dpp, 0, sizeof(d3dpp));      
 
         d3dpp.Flags                  = 0;
@@ -309,7 +311,10 @@ void d3d_blit_memtoscreen(int x, int y, int y1, int y2, int w, int h)
                         hr = d3ddev->SetTexture(0, NULL);
 
                 if (hr == D3D_OK && readflash && vid_disc_indicator)
+                {
                         hr = d3ddev->DrawPrimitive(D3DPT_TRIANGLELIST, 6, 2);
+                        readflash = 0;
+                }
 
                 if (hr == D3D_OK)
                         hr = d3ddev->EndScene();
@@ -409,7 +414,10 @@ void d3d_blit_memtoscreen_8(int x, int y, int w, int h)
                         hr = d3ddev->SetTexture(0, NULL);
 
                 if (hr == D3D_OK && readflash && vid_disc_indicator)
+                {
                         hr = d3ddev->DrawPrimitive(D3DPT_TRIANGLELIST, 6, 2);
+                        readflash = 0;
+                }
 
                 if (hr == D3D_OK)
                         hr = d3ddev->EndScene();
