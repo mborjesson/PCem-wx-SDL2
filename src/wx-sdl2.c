@@ -239,7 +239,7 @@ void update_cdrom_menu(void* hmenu)
         {
                 if (cdrom_drive == CDROM_IMAGE)
                         wx_checkmenuitem(menu, WX_ID("IDM_CDROM_IMAGE"), WX_MB_CHECKED);
-                else if (cdrom_drive >= 0)
+                else if (cdrom_drive > 0)
                         wx_checkmenuitem(menu, IDM_CDROM_REAL+cdrom_drive, WX_MB_CHECKED);
                 else
                         wx_checkmenuitem(menu, WX_ID("IDM_CDROM_EMPTY"), WX_MB_CHECKED);
@@ -734,6 +734,7 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                 if (!cdrom_enabled)
                 {
                         /* Switching from disabled to disabled. Do nothing. */
+                        update_cdrom_menu(hmenu);
                         return 0;
                 }
                 atapi->exit();
@@ -764,6 +765,7 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                 }
                 if ((cdrom_drive == 0) && cdrom_enabled)
                 {
+                        update_cdrom_menu(hmenu);
                         /* Switch from empty to empty. Do nothing. */
                         return 0;
                 }
@@ -810,6 +812,7 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                                         && cdrom_enabled)
                         {
                                 /* Switching from ISO to the same ISO. Do nothing. */
+                                update_cdrom_menu(hmenu);
                                 return 0;
                         }
                         atapi->exit();
@@ -845,10 +848,11 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                                 return 0;
                         }
                 }
-                new_cdrom_drive = wParam-IDM_CDROM_REAL;
+                new_cdrom_drive = wParam-IDM_CDROM_REAL+1;
                 if ((cdrom_drive == new_cdrom_drive) && cdrom_enabled)
                 {
                         /* Switching to the same drive. Do nothing. */
+                        update_cdrom_menu(hmenu);
                         return 0;
                 }
                 old_cdrom_drive = cdrom_drive;
