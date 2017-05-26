@@ -3,23 +3,21 @@
 #include <wx/xrc/xmlres.h>
 #include <wx/event.h>
 #include "wx-utils.h"
+#include "wx-common.h"
 
 extern "C"
 {
+        int wx_load_config(void*);
         int wx_start(void*);
         int wx_stop(void*);
         void wx_show(void*);
         void wx_handle_command(void*, int, int);
-        int window_remember;
-        void stop_emulation_confirm();
+
+        int start_emulation(void*);
+        int resume_emulation();
+        int pause_emulation();
+        int stop_emulation();
 }
-
-int wx_window_x = 0;
-int wx_window_y = 0;
-
-int (*wx_keydown_func)(void* window, void* event, int keycode, int modifiers);
-int (*wx_keyup_func)(void* window, void* event, int keycode, int modifiers);
-void (*wx_idle_func)(void* window, void* event);
 
 extern void InitXmlResource();
 
@@ -28,6 +26,7 @@ wxDEFINE_EVENT(WX_EXIT_EVENT, wxCommandEvent);
 wxDEFINE_EVENT(WX_STOP_EMULATION_EVENT, wxCommandEvent);
 wxDEFINE_EVENT(WX_EXIT_COMPLETE_EVENT, wxCommandEvent);
 wxDEFINE_EVENT(WX_SHOW_WINDOW_EVENT, wxCommandEvent);
+wxDEFINE_EVENT(WX_POPUP_MENU_EVENT, PopupMenuEvent);
 
 wxBEGIN_EVENT_TABLE(Frame, wxFrame)
 wxEND_EVENT_TABLE()
@@ -50,8 +49,8 @@ bool App::OnInit()
 //        }
         InitXmlResource();
 
-        frame = new Frame(this, "PCem Machine", wxPoint(50, 50),
-                        wxSize(DEFAULT_WINDOW_WIDTH, 200));
+        frame = new Frame(this, "null frame", wxPoint(500, 500),
+                        wxSize(100, 100));
         frame->Start();
         return true;
 }
@@ -61,68 +60,42 @@ int App::OnRun()
         return wxApp::OnRun();
 }
 
-int App::FilterEvent(wxEvent& event)
-{
-        int type = event.GetEventType();
-        if (type == wxEVT_KEY_DOWN && wx_keydown_func)
-        {
-                wxKeyEvent e = (wxKeyEvent&)event;
-                if (wx_keydown_func(this, &e, e.GetKeyCode(), e.GetModifiers()))
-                        return Event_Processed;
-        }
-        else if (type == wxEVT_KEY_UP && wx_keyup_func)
-        {
-                wxKeyEvent e = (wxKeyEvent&)event;
-                if (wx_keyup_func(this, &e, e.GetKeyCode(), e.GetModifiers()))
-                        return Event_Processed;
-        }
-
-        return Event_Skip;
-}
-
-
+#include <sstream>
 
 Frame::Frame(App* app, const wxString& title, const wxPoint& pos,
                 const wxSize& size) :
-                wxFrame(NULL, wxID_ANY, title, pos, size, wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER))
+                wxFrame(NULL, wxID_ANY, title, pos, size, 0)//wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER))
 {
         this->closing = false;
-        this->statusPane = new StatusPane(this);
-        SetMenuBar(wxXmlResource::Get()->LoadMenuBar(wxT("main_menu")));
-        SetToolBar(wxXmlResource::Get()->LoadToolBar(this, wxT("tool_bar")));
+        this->menu = wxXmlResource::Get()->LoadMenu(wxT("main_menu"));
 
         Bind(wxEVT_CLOSE_WINDOW, &Frame::OnClose, this);
         Bind(wxEVT_MENU, &Frame::OnCommand, this);
         Bind(wxEVT_TOOL, &Frame::OnCommand, this);
-        Bind(wxEVT_MOVE, &Frame::OnMoveWindow, this);
-        Bind(wxEVT_IDLE, &Frame::OnIdle, this);
         Bind(WX_SHOW_WINDOW_EVENT, &Frame::OnShowWindowEvent, this);
+        Bind(WX_POPUP_MENU_EVENT, &Frame::OnPopupMenuEvent, this);
         Bind(WX_EXIT_EVENT, &Frame::OnExitEvent, this);
         Bind(WX_EXIT_COMPLETE_EVENT, &Frame::OnExitCompleteEvent, this);
         Bind(WX_STOP_EMULATION_EVENT, &Frame::OnStopEmulationEvent, this);
         Bind(WX_CALLBACK_EVENT, &Frame::OnCallbackEvent, this);
 
-        wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-        sizer->Add(statusPane, 1, wxEXPAND);
-        SetSizer(sizer);
-
-        statusTimer = new StatusTimer(statusPane);
+        CenterOnScreen();
 }
 
 void Frame::Start()
 {
         if (wx_start(this))
-        {
-                Show();
-                statusTimer->Start();
-                if (window_remember)
-                        SetPosition(wxPoint(wx_window_x, wx_window_y));
-                else
-                        CenterOnScreen();
-        }
+                ShowConfigSelection();
         else
                 Quit(0);
+}
 
+void Frame::ShowConfigSelection()
+{
+        if (wx_load_config(this))
+                start_emulation(this);
+        else
+                Quit(1);
 }
 
 void Frame::OnCallbackEvent(CallbackEvent& event)
@@ -131,15 +104,31 @@ void Frame::OnCallbackEvent(CallbackEvent& event)
         callback();
 }
 
-void Frame::OnIdle(wxIdleEvent& event)
-{
-	if (wx_idle_func)
-		wx_idle_func(this, &event);
-}
-
 void Frame::OnStopEmulationEvent(wxCommandEvent& event)
 {
-        wx_handle_command(this, XRCID("TOOLBAR_STOP"), 0); /* Simulate toolbar stop */
+        if (emulation_state != EMULATION_STOPPED)
+        {
+                pause_emulation();
+                int ret = wxID_OK;
+
+                if (confirm_on_stop_emulation)
+                {
+                        wxDialog dlg;
+                        wxXmlResource::Get()->LoadDialog(&dlg, this, "StopEmulationDlg");
+                        dlg.Fit();
+                        ret = dlg.ShowModal();
+                        if (ret == wxID_OK)
+                                confirm_on_stop_emulation = !((wxCheckBox*)dlg.FindWindow("IDC_STOP_EMULATION_CONFIRM"))->IsChecked();
+                }
+
+                if (ret == wxID_OK)
+                {
+                        stop_emulation();
+                        ShowConfigSelection();
+                }
+                else
+                        resume_emulation();
+        }
 }
 
 void Frame::OnShowWindowEvent(wxCommandEvent& event)
@@ -155,6 +144,19 @@ void Frame::OnShowWindowEvent(wxCommandEvent& event)
                 window->Refresh();
 }
 
+void Frame::OnPopupMenuEvent(PopupMenuEvent& event)
+{
+        wxWindow* window = event.GetWindow();
+        wxMenu* menu = event.GetMenu();
+        int* x = event.GetX();
+        int* y = event.GetY();
+
+        if (x && y)
+                window->PopupMenu(menu, *x, *y);
+        else
+                window->PopupMenu(menu);
+}
+
 void Frame::OnCommand(wxCommandEvent& event)
 {
         wx_handle_command(this, event.GetId(), event.IsChecked());
@@ -165,12 +167,9 @@ void Frame::OnClose(wxCloseEvent& event)
         wx_exit(this, 0);
 }
 
-void Frame::OnMoveWindow(wxMoveEvent& event)
+wxMenu* Frame::GetMenu()
 {
-        if (window_remember) {
-                wx_window_x = event.GetPosition().x;
-                wx_window_y = event.GetPosition().y;
-        }
+        return menu;
 }
 
 /* Exit */
@@ -188,8 +187,6 @@ void Frame::Quit(bool stop_emulator)
                         closing = false;
                         return;
                 }
-                statusTimer->Stop();
-                delete statusTimer;
         }
         Destroy();
 }

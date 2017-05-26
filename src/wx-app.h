@@ -6,16 +6,17 @@
 #include <wx/wx.h>
 #endif
 
-#include "wx-status.h"
 #include "wx-utils.h"
 
 class CallbackEvent;
+class PopupMenuEvent;
 
 wxDECLARE_EVENT(WX_CALLBACK_EVENT, CallbackEvent);
 wxDECLARE_EVENT(WX_EXIT_EVENT, wxCommandEvent);
 wxDECLARE_EVENT(WX_STOP_EMULATION_EVENT, wxCommandEvent);
 wxDECLARE_EVENT(WX_EXIT_COMPLETE_EVENT, wxCommandEvent);
 wxDECLARE_EVENT(WX_SHOW_WINDOW_EVENT, wxCommandEvent);
+wxDECLARE_EVENT(WX_POPUP_MENU_EVENT, PopupMenuEvent);
 
 class CallbackEvent: public wxCommandEvent
 {
@@ -39,6 +40,38 @@ private:
 
 };
 
+class PopupMenuEvent: public wxCommandEvent
+{
+public:
+        PopupMenuEvent(wxWindow* window, wxMenu* menu, int* x, int* y) : wxCommandEvent(WX_POPUP_MENU_EVENT)
+        {
+                this->window = window;
+                this->menu = menu;
+                this->x = x;
+                this->y = y;
+        }
+        PopupMenuEvent(const PopupMenuEvent& event) : wxCommandEvent(event)
+        {
+                this->window = event.GetWindow();
+                this->menu = event.GetMenu();
+                this->x = event.GetX();
+                this->y = event.GetY();
+        }
+
+        wxEvent* Clone() const { return new PopupMenuEvent(*this); }
+
+        wxWindow*  GetWindow() const { return window; }
+        wxMenu* GetMenu() const { return menu; }
+        int* GetX() const { return x; }
+        int* GetY() const { return y; }
+
+private:
+        int* x;
+        int* y;
+        wxMenu* menu;
+        wxWindow* window;
+};
+
 
 class Frame;
 
@@ -54,7 +87,6 @@ public:
         }
 private:
         Frame* frame;
-        int FilterEvent(wxEvent& event);
 };
 
 class CExitThread: public wxThread
@@ -77,18 +109,20 @@ public:
 
         void Start();
 
+        wxMenu* GetMenu();
+
 private:
         void OnCommand(wxCommandEvent& event);
         void OnExitEvent(wxCommandEvent& event);
         void OnExitCompleteEvent(wxCommandEvent& event);
         void OnStopEmulationEvent(wxCommandEvent& event);
         void OnShowWindowEvent(wxCommandEvent& event);
+        void OnPopupMenuEvent(PopupMenuEvent& event);
         void OnCallbackEvent(CallbackEvent& event);
         void OnClose(wxCloseEvent& event);
-        void OnMoveWindow(wxMoveEvent& event);
-        void OnIdle(wxIdleEvent& event);
-        StatusPane* statusPane;
-        StatusTimer* statusTimer;
+
+        void ShowConfigSelection();
+        wxMenu* menu;
 
         bool closing;
 

@@ -24,6 +24,8 @@ static int settings_mouse_to_list[20], settings_list_to_mouse[20];
 static int settings_network_to_list[20], settings_list_to_network[20];
 static char *hdd_names[16];
 
+int has_been_inited = 0;
+
 extern void deviceconfig_open(void* hwnd, device_t *device);
 
 static int mouse_valid(int type, int model)
@@ -486,7 +488,7 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                     temp_fda_type != fdd_get_type(0) || temp_fdb_type != fdd_get_type(1) ||
                                     temp_mouse_type != mouse_type || hdd_changed)
                                 {
-                                        if (confirm())
+                                        if (!has_been_inited || confirm())
                                         {
                                                 savenvr();
                                                 model = temp_model;
@@ -512,9 +514,12 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                                         strcpy(hdd_controller_name, "none");
 
 
-                                                mem_resize();
-                                                loadbios();
-                                                resetpchard();
+                                                if (has_been_inited)
+                                                {
+                                                        mem_resize();
+                                                        loadbios();
+                                                        resetpchard();
+                                                }
                                         }
                                         else
                                         {
@@ -535,7 +540,8 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 cpu_waitstates = wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0);
                                 cpu_update_waitstates();
 
-                                saveconfig();
+                                if (has_been_inited)
+                                        saveconfig(NULL);
 
                                 speedchanged();
 

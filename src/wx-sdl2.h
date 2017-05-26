@@ -4,7 +4,7 @@ extern "C" {
 
 void leave_fullscreen();
 int getfile(void* hwnd, char *f, char *fn);
-int getsfile(void* hwnd, char *f, char *fn);
+int getsfile(void* hwnd, char *f, char *fn, char *dir, char *ext);
 
 #ifdef __cplusplus
 }

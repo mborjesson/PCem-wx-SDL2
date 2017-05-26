@@ -5,8 +5,9 @@
 src/*.o
 src/PCem*
 src/pclog.txt
-src/*.dmp
-src/*.cfg
-pclog.txt
+src/pcem.cfg
 src/roms/
-src/nvr/
+src/nvr
+src/configs
+src/*.dmp
+pclog.txt

@@ -1,5 +1,6 @@
 #include "wx-status.h"
 #include "wx-common.h"
+#include "wx-utils.h"
 #include <wx/artprov.h>
 #include <wx/xrc/xmlres.h>
 #include <sstream>
@@ -11,6 +12,8 @@ extern "C" {
         drive_info_t* get_machine_info(char*, int*);
 }
 
+int show_machine_on_start = 0;
+int confirm_on_stop_emulation = 1;
 int show_status = 0;
 int show_speed_history = 0;
 int show_disc_activity = 1;
@@ -51,6 +54,8 @@ void StatusTimer::Start()
 
 BEGIN_EVENT_TABLE(StatusPane, wxPanel) EVT_PAINT(StatusPane::PaintEvent)
 END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(StatusFrame, wxFrame) END_EVENT_TABLE()
 
 StatusPane::StatusPane(wxFrame* parent) :
                 wxPanel(parent)
@@ -210,5 +215,101 @@ void StatusPane::Render(wxDC& dc)
         height = height < DEFAULT_WINDOW_HEIGHT ? DEFAULT_WINDOW_HEIGHT : height;
         if (cSize.GetWidth() != width || cSize.GetHeight() != height) {
                 GetParent()->SetClientSize(width, height);
+        }
+}
+
+extern "C"
+{
+        int window_remember;
+        void wx_handle_command(void*, int, int);
+
+        void resume_emulation();
+        void pause_emulation();
+        int stop_emulation_confirm();
+
+        void hdconf_open(void* hwnd);
+        void config_open(void* hwnd);
+}
+
+int wx_window_x = 0;
+int wx_window_y = 0;
+
+StatusFrame::StatusFrame(wxWindow* parent) :
+                wxFrame(parent, STATUS_WINDOW_ID, "PCem Machine", wxPoint(0, 0), wxSize(DEFAULT_WINDOW_WIDTH, 200), wxCAPTION | wxCLOSE_BOX)
+{
+        SetMenuBar(wxXmlResource::Get()->LoadMenuBar(wxT("status_menu")));
+        SetToolBar(wxXmlResource::Get()->LoadToolBar(this, wxT("tool_bar")));
+
+        this->statusPane = new StatusPane(this);
+        wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+        sizer->Add(statusPane, 1, wxEXPAND);
+        SetSizer(sizer);
+
+        Bind(wxEVT_MENU, &StatusFrame::OnCommand, this);
+        Bind(wxEVT_MOVE, &StatusFrame::OnMoveWindow, this);
+
+        statusTimer = new StatusTimer(statusPane);
+        statusTimer->Start();
+
+        if (window_remember)
+                SetPosition(wxPoint(wx_window_x, wx_window_y));
+        else
+                CenterOnScreen();
+
+        UpdateToolbar();
+        GetMenuBar()->FindItem(XRCID("IDM_SHOW_STATUS"))->Check(show_status);
+        GetMenuBar()->FindItem(XRCID("IDM_SPEED_HISTORY"))->Check(show_speed_history);
+        GetMenuBar()->FindItem(XRCID("IDM_DISC_ACTIVITY"))->Check(show_disc_activity);
+        GetMenuBar()->FindItem(XRCID("IDM_MACHINE_MOUNT_PATHS"))->Check(show_mount_paths);
+}
+
+StatusFrame::~StatusFrame()
+{
+        statusTimer->Stop();
+        delete statusTimer;
+}
+
+void StatusFrame::UpdateToolbar()
+{
+        GetToolBar()->EnableTool(XRCID("TOOLBAR_RUN"), emulation_state != EMULATION_RUNNING);
+        GetToolBar()->EnableTool(XRCID("TOOLBAR_PAUSE"), emulation_state != EMULATION_PAUSED);
+}
+
+void StatusFrame::OnCommand(wxCommandEvent& event)
+{
+        if (event.GetId() == XRCID("TOOLBAR_RUN"))
+        {
+                resume_emulation();
+                UpdateToolbar();
+        }
+        else if (event.GetId() == XRCID("TOOLBAR_PAUSE"))
+        {
+                pause_emulation();
+                UpdateToolbar();
+        }
+        else if (event.GetId() == XRCID("TOOLBAR_STOP"))
+                wx_stop_emulation(GetParent());
+        else if (event.GetId() == XRCID("IDM_SHOW_STATUS"))
+                show_status = event.IsChecked();
+        else if (event.GetId() == XRCID("IDM_SPEED_HISTORY"))
+                show_speed_history = event.IsChecked();
+        else if (event.GetId() == XRCID("IDM_DISC_ACTIVITY"))
+                show_disc_activity = event.IsChecked();
+        else if (event.GetId() == XRCID("IDM_MACHINE_MOUNT_PATHS"))
+                show_mount_paths = event.IsChecked();
+        else if (event.GetId() == XRCID("IDM_SHOW_MACHINE_ON_START"))
+                show_machine_on_start = event.IsChecked();
+        else if (event.GetId() == XRCID("IDM_HDCONF"))
+                hdconf_open(this);
+        else if (event.GetId() == XRCID("IDM_CONFIG"))
+                config_open(this);
+
+}
+
+void StatusFrame::OnMoveWindow(wxMoveEvent& event)
+{
+        if (window_remember) {
+                wx_window_x = event.GetPosition().x;
+                wx_window_y = event.GetPosition().y;
         }
 }

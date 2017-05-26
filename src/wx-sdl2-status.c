@@ -26,6 +26,8 @@ extern uint64_t render_time;
 static uint64_t status_time;
 
 drive_info_t* get_machine_info(char* s, int* num_drive_info) {
+        int drive, i;
+        int pos = 0;
         sprintf(s,
                         "Model: %s\n"
                         "CPU: %s",
@@ -38,9 +40,7 @@ drive_info_t* get_machine_info(char* s, int* num_drive_info) {
         else
                 strcat(s, "\nEmulation is not running.");
 
-        int pos = 0;
-        int drive;
-        for (int i = 0; i < 2; ++i)
+        for (i = 0; i < 2; ++i)
         {
                 drive = 'A'+i;
                 if (fdd_get_type(i) > 0)
@@ -56,7 +56,7 @@ drive_info_t* get_machine_info(char* s, int* num_drive_info) {
                 }
         }
         int num_hdds = hdd_controller_current_is_mfm() ? 2 : 4;
-        for (int i = 0; i < num_hdds; ++i)
+        for (i = 0; i < num_hdds; ++i)
         {
                 drive = 'C'+i;
                 if (cdrom_enabled && !hdd_controller_current_is_mfm() && i == cdrom_channel)

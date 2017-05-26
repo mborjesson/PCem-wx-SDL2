@@ -16,7 +16,7 @@ PCemDialogBox::PCemDialogBox(wxWindow* parent, int (*callback)(void* window, int
         this->callback = callback;
 }
 
-PCemDialogBox::PCemDialogBox(wxWindow* parent, char* name, int (*callback)(void* window, int message, INT_PARAM param1, LONG_PARAM param2))
+PCemDialogBox::PCemDialogBox(wxWindow* parent, const char* name, int (*callback)(void* window, int message, INT_PARAM param1, LONG_PARAM param2))
 {
         wxXmlResource::Get()->LoadDialog(this, parent, name);
         this->callback = callback;
@@ -24,12 +24,17 @@ PCemDialogBox::PCemDialogBox(wxWindow* parent, char* name, int (*callback)(void*
 
 void PCemDialogBox::OnInit()
 {
-        callback(this, WX_INITDIALOG, 0, 0);
+        if (callback)
+        {
+                callback(this, WX_INITDIALOG, 0, 0);
+                Bind(wxEVT_BUTTON, &PCemDialogBox::OnCommand, this);
+                Bind(wxEVT_TEXT, &PCemDialogBox::OnCommand, this);
+                Bind(wxEVT_COMBOBOX, &PCemDialogBox::OnCommand, this);
+        }
 
-        Bind(wxEVT_BUTTON, &PCemDialogBox::OnCommand, this);
-        Bind(wxEVT_TEXT, &PCemDialogBox::OnCommand, this);
-        Bind(wxEVT_COMBOBOX, &PCemDialogBox::OnCommand, this);
-
+        wxWindow* root = FindWindow(XRCID("ROOT_PANEL"));
+        if (root)
+                root->Fit();
         Fit();
 }
 

@@ -7,10 +7,12 @@
 
 #include <wx/spinctrl.h>
 #include <wx/xrc/xmlres.h>
+#include <wx/stdpaths.h>
 
 #include "wx-dialogbox.h"
 #include "wx-app.h"
 #include "wx-common.h"
+#include "wx-status.h"
 
 int confirm()
 {
@@ -20,9 +22,31 @@ int confirm()
         return 1;
 }
 
-int wx_messagebox(void*, const char* message, const char* title = NULL, int style = 5)
+int wx_messagebox(void* window, const char* message, const char* title = NULL, int style = 5)
 {
-        return wxMessageBox(message, title, style | wxCENTRE);
+        return wxMessageBox(message, title, style | wxCENTRE, (wxWindow*) window);
+}
+
+int wx_textentrydialog(void* window, const char* message, const char* title, const char* value, int min_length, int max_length, LONG_PARAM result)
+{
+        while (1)
+        {
+                wxTextEntryDialog dlg((wxWindow*)window, message, title, value);
+                if (max_length > 0)
+                        dlg.SetMaxLength(max_length);
+                if (dlg.ShowModal() == wxID_OK)
+                {
+                        wxString value = dlg.GetValue();
+                        if (value.Length() >= min_length)
+                        {
+                                strcpy((char*)result, value);
+                                return TRUE;
+                        }
+                }
+                else
+                        return FALSE;
+        }
+        return FALSE;
 }
 
 void wx_setwindowtitle(void* window, char* s)
@@ -36,13 +60,24 @@ int wx_xrcid(const char* s)
 }
 
 int wx_filedialog(void* window, const char* title, const char* path,
-                const char* extensions, int open, char* file)
+                const char* extensions, const char* extension, int open, char* file)
 {
         wxFileDialog dlg((wxWindow*) window, title, "", path, extensions,
                         open ? wxFD_OPEN : wxFD_SAVE);
         if (dlg.ShowModal() == wxID_OK)
         {
-                strcpy(file, dlg.GetPath().mb_str());
+                wxString p = dlg.GetPath();
+                wxFileName f(p);
+                if (!open && !f.HasExt() && extension)
+                {
+                        wxString e = extension;
+                        if (!p.EndsWith("."))
+                                p += ".";
+                        p += extension;
+                        strcpy(file, p);
+                }
+                else
+                        strcpy(file, p);
                 return 0;
         }
         return 1;
@@ -50,20 +85,46 @@ int wx_filedialog(void* window, const char* title, const char* path,
 
 void wx_checkmenuitem(void* menu, int id, int checked)
 {
-        wxMenuItem* item = ((wxMenuBar*) menu)->FindItem(id);
+        wxMenuItem* item = NULL;
+        if (((wxObject*)menu)->GetClassInfo()->IsKindOf(CLASSINFO(wxMenuBar)))
+                item = ((wxMenuBar*) menu)->FindItem(id);
+        else
+                item = ((wxMenu*) menu)->FindItem(id);
+
         if (item)
                 item->Check(checked);
+        else
+                std::cout << "Menu item not found: " << id << std::endl;
 }
 
 void wx_enablemenuitem(void* menu, int id, int enable)
 {
+        wxMenuItem* item = NULL;
+        if (((wxObject*)menu)->GetClassInfo()->IsKindOf(CLASSINFO(wxMenuBar)))
+                item = ((wxMenuBar*) menu)->FindItem(id);
+        else
+                item = ((wxMenu*) menu)->FindItem(id);
 
-        wxMenuItem* item = ((wxMenuBar*) menu)->FindItem(id);
         if (item)
                 item->Enable(enable);
         else
                 std::cout << "Menu item not found: " << id << std::endl;
 }
+
+void* wx_getsubmenu(void* menu, int id)
+{
+        wxMenuItem* m = ((wxMenu*) menu)->FindItem(id);
+        if (m)
+                return m->GetSubMenu();
+
+        return 0;
+}
+
+void wx_appendmenu(void* sub_menu, int id, const char* title, enum wxItemKind type)
+{
+        ((wxMenu*) sub_menu)->Append(id, title, wxEmptyString, type);
+}
+
 
 void wx_enabletoolbaritem(void* toolbar, int id, int enable)
 {
@@ -71,6 +132,11 @@ void wx_enabletoolbaritem(void* toolbar, int id, int enable)
 }
 
 void* wx_getmenu(void* window)
+{
+        return ((Frame*) window)->GetMenu();
+}
+
+void* wx_getmenubar(void* window)
 {
         return ((wxFrame*) window)->GetMenuBar();
 }
@@ -121,6 +187,40 @@ void wx_callback(void* window, WX_CALLBACK callback)
 void wx_enddialog(void* window, int ret_code)
 {
         ((wxDialog*) window)->EndModal(ret_code);
+}
+
+int wx_dlgdirlist(void* window, const char* path, int id, int static_path, int file_type)
+{
+        wxWindow* w = ((wxWindow*) window)->FindWindow(id);
+        if (w->GetClassInfo()->IsKindOf(CLASSINFO(wxListBox)))
+        {
+                wxListBox* list = (wxListBox*)w;
+                list->Clear();
+                wxArrayString items;
+                wxString f = wxFindFirstFile(path);
+                while (!f.empty())
+                {
+                        wxFileName file(f);
+                        items.Add(file.GetName());
+                        f = wxFindNextFile();
+                }
+                items.Sort();
+                list->Set(items);
+                return TRUE;
+        }
+        return FALSE;
+}
+
+int wx_dlgdirselectex(void* window, LONG_PARAM path, int count, int id)
+{
+        wxWindow* w = ((wxWindow*) window)->FindWindow(id);
+        if (w->GetClassInfo()->IsKindOf(CLASSINFO(wxListBox)))
+        {
+                wxListBox* list = (wxListBox*)w;
+                strcpy((char*)path, (list->GetStringSelection() + ".").GetData().AsChar());
+                return TRUE;
+        }
+        return FALSE;
 }
 
 int wx_sendmessage(void* window, int type, INT_PARAM param1, LONG_PARAM param2)
@@ -192,6 +292,29 @@ int wx_sendmessage(void* window, int type, INT_PARAM param1, LONG_PARAM param2)
 #endif
                 break;
         }
+        case WX_LB_GETCOUNT:
+        {
+                return ((wxListBox*) window)->GetCount();
+        }
+        case WX_LB_GETCURSEL:
+        {
+                return ((wxListBox*) window)->GetSelection();
+        }
+        case WX_LB_GETTEXT:
+        {
+                strcpy((char*) param2, ((wxListBox*) window)->GetString(param1));
+                break;
+        }
+        case WX_LB_INSERTSTRING:
+        {
+                ((wxListBox*) window)->Insert((char*) param2, param1);
+                break;
+        }
+        case WX_LB_DELETESTRING:
+        {
+                ((wxListBox*) window)->Delete(param1);
+                break;
+        }
         }
 
         ((wxWindow*)window)->Fit();
@@ -199,10 +322,11 @@ int wx_sendmessage(void* window, int type, INT_PARAM param1, LONG_PARAM param2)
         return 0;
 }
 
-int wx_dialogbox(void* window, char* name, int (*callback)(void* window, int message, INT_PARAM param1, LONG_PARAM param2))
+int wx_dialogbox(void* window, const char* name, int (*callback)(void* window, int message, INT_PARAM param1, LONG_PARAM param2))
 {
         PCemDialogBox dlg((wxWindow*) window, name, callback);
         dlg.OnInit();
+        dlg.Fit();
         int ret = dlg.ShowModal();
         dlg.Destroy();
         return ret;
@@ -268,4 +392,51 @@ void wx_destroytimer(void* timer)
 {
         wx_stoptimer(timer);
         delete (wxTimer*)timer;
+}
+
+void wx_popupmenu(void* window, void* menu, int* x, int* y)
+{
+        PopupMenuEvent* event = new PopupMenuEvent((wxWindow*)window, (wxMenu*)menu, x, y);
+        wxQueueEvent((wxWindow*)window, event);
+}
+
+void* wx_create_status_frame(void* window)
+{
+        StatusFrame* frame = new StatusFrame((wxWindow*)window);
+        return frame;
+}
+
+void wx_destroy_status_frame(void* window)
+{
+        StatusFrame* frame = (StatusFrame*)window;
+        delete frame;
+}
+
+void wx_setwindowposition(void* window, int x, int y)
+{
+        ((wxFrame*) window)->SetPosition(wxPoint(x, y));
+}
+
+void wx_setwindowsize(void* window, int width, int height)
+{
+        ((wxFrame*) window)->SetSize(wxSize(width, height));
+}
+
+void wx_show_status(void* window)
+{
+        wxWindow* status = ((wxWindow*)window)->FindWindowById(STATUS_WINDOW_ID);
+        if (!status)
+        {
+                StatusFrame* statusFrame = new StatusFrame((wxWindow*) window);
+                statusFrame->Show();
+        }
+}
+
+void wx_close_status(void* window)
+{
+        wxWindow* status = ((wxWindow*)window)->FindWindowById(STATUS_WINDOW_ID);
+        if (status)
+        {
+                status->Close();
+        }
 }

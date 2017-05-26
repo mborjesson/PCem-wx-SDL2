@@ -203,7 +203,7 @@ static int hdnew_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM l
                         wx_enddialog(hdlg, 0);
                         return TRUE;
                 } else if (ID_IS("IDC_CFILE")) {
-                        if (!getsfile(hdlg, "Hard disc image (*.img)|*.img|All files (*.*)|*.*", ""))
+                        if (!getsfile(hdlg, "Hard disc image (*.img)|*.img|All files (*.*)|*.*", "", NULL, "img"))
                         {
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_EDITC"));
                                 wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM) openfilestring);
@@ -455,7 +455,7 @@ static int hdconf_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM 
                 {
                         if (hd_changed || cdrom_channel != new_cdrom_channel)
                         {
-                                if (confirm())
+                                if (!has_been_inited || confirm())
                                 {
                                         h = wx_getdlgitem(hdlg, WX_ID("IDC_EDIT_SPT[0]"));
                                         wx_sendmessage(h, WX_WM_GETTEXT, 255, (LONG_PARAM)s);
@@ -512,9 +512,12 @@ static int hdconf_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM 
 
                                         cdrom_channel = new_cdrom_channel;
 
-                                        saveconfig();
+                                        if (has_been_inited)
+                                        {
+                                                saveconfig(NULL);
 
-                                        resetpchard();
+                                                resetpchard();
+                                        }
                                 }
                         }
                 }

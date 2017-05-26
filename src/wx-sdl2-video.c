@@ -295,12 +295,9 @@ int sdl_is_fullscreen(SDL_Window* window) {
         return (flags&SDL_WINDOW_FULLSCREEN) || (flags&SDL_WINDOW_FULLSCREEN_DESKTOP);
 }
 
-void sdl_set_window_title(SDL_Window* window, char* title) {
-        SDL_SetWindowTitle(window, title);
-}
-
 int sdl_video_init()
 {
+        int c;
         blitMutex = SDL_CreateMutex();
         updated = 0;
 
@@ -308,7 +305,7 @@ int sdl_video_init()
         video_blit_memtoscreen_8_func = sdl_blit_memtoscreen_8;
         requested_render_driver = sdl_get_render_driver_by_id(RENDERER_AUTO, RENDERER_AUTO);
 
-        for (int c = 0; c < 256; c++)
+        for (c = 0; c < 256; c++)
                 pal_lookup[c] = makecol(cgapal[c].r << 2, cgapal[c].g << 2,
                                 cgapal[c].b << 2);
 

@@ -11,10 +11,10 @@
 
 #include "wx/xrc/xmlres.h"
 
-extern "C" {
-        int config_get_int(char *head, char *name, int def);
-        void config_set_int(char *head, char *name, int val);
-        void saveconfig();
+extern "C"
+{
+        #include "config.h"
+        void saveconfig(char*);
         void resetpchard();
         int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam);
         device_t *config_device;
@@ -41,7 +41,7 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM l
                         switch (config->type) {
                         case CONFIG_BINARY:
                                 h = wx_getdlgitem(hdlg, id);
-                                val_int = config_get_int(config_device->name, config->name,
+                                val_int = config_get_int(CFG_MACHINE, config_device->name, config->name,
                                                 config->default_int);
 
                                 wx_sendmessage(h, WX_BM_SETCHECK, val_int, 0);
@@ -51,7 +51,7 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM l
 
                         case CONFIG_SELECTION:
                                 h = wx_getdlgitem(hdlg, id+1);
-                                val_int = config_get_int(config_device->name, config->name,
+                                val_int = config_get_int(CFG_MACHINE, config_device->name, config->name,
                                                 config->default_int);
 
                                 c = 0;
@@ -69,7 +69,7 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM l
 
                         case CONFIG_MIDI:
                                 // midi ignored
-//                                        val_int = config_get_int(NULL, config->name, config->default_int);
+//                                        val_int = config_get_int(CFG_MACHINE, NULL, config->name, config->default_int);
 //
 //                                        num  = midi_get_num_devs();
 //                                        for (c = 0; c < num; c++)
@@ -105,7 +105,7 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM l
                                 switch (config->type) {
                                 case CONFIG_BINARY:
                                         h = wx_getdlgitem(hdlg, id);
-                                        val_int = config_get_int(config_device->name, config->name,
+                                        val_int = config_get_int(CFG_MACHINE, config_device->name, config->name,
                                                         config->default_int);
 
                                         if (val_int != wx_sendmessage(h, WX_BM_GETCHECK, 0, 0))
@@ -116,7 +116,7 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM l
 
                                 case CONFIG_SELECTION:
                                         h = wx_getdlgitem(hdlg, id+1);
-                                        val_int = config_get_int(config_device->name, config->name,
+                                        val_int = config_get_int(CFG_MACHINE, config_device->name, config->name,
                                                         config->default_int);
 
                                         c = wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0);
@@ -132,7 +132,7 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM l
 
                                 case CONFIG_MIDI:
                                         // midi ignored
-//                                      val_int = config_get_int(NULL, config->name,
+//                                      val_int = config_get_int(CFG_MACHINE, NULL, config->name,
 //                                                      config->default_int);
 //
 //                                      c = SendMessage(h, CB_GETCURSEL, 0, 0);
@@ -151,7 +151,7 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM l
                                 return TRUE;
                         }
 
-                        if (!confirm()) {
+                        if (has_been_inited && !confirm()) {
                                 wx_enddialog(hdlg, 0);
                                 return TRUE;
                         }
@@ -168,7 +168,7 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM l
                                 switch (config->type) {
                                 case CONFIG_BINARY:
                                         h = wx_getdlgitem(hdlg, id);
-                                        config_set_int(config_device->name, config->name,
+                                        config_set_int(CFG_MACHINE, config_device->name, config->name,
                                                         wx_sendmessage(h, WX_BM_GETCHECK, 0, 0));
 
                                         id++;
@@ -179,7 +179,7 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM l
                                         c = wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0);
                                         for (; c > 0; c--)
                                                 selection++;
-                                        config_set_int(config_device->name, config->name,
+                                        config_set_int(CFG_MACHINE, config_device->name, config->name,
                                                         selection->value);
 
                                         id += 2;
@@ -188,7 +188,7 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM l
                                 case CONFIG_MIDI:
                                         // midi ignored
 //                                      c = SendMessage(h, CB_GETCURSEL, 0, 0);
-//                                      config_set_int(NULL, config->name, c);
+//                                      config_set_int(CFG_MACHINE, NULL, config->name, c);
 //
 //                                      id += 2;
                                         break;
@@ -196,9 +196,11 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM l
                                 config++;
                         }
 
-                        saveconfig();
-
-                        resetpchard();
+                        if (has_been_inited)
+                        {
+                                saveconfig(NULL);
+                                resetpchard();
+                        }
 
                         wx_enddialog(hdlg, 0);
                         return TRUE;
@@ -218,7 +220,7 @@ void deviceconfig_open(void* hwnd, device_t *device) {
 	config_device = device;
 
 	PCemDialogBox dialog((wxWindow*) hwnd, deviceconfig_dlgproc);
-	dialog.SetWindowStyle(wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
+//	dialog.SetWindowStyle(wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
 
 	device_config_t *config = device->config;
 

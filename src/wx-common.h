@@ -1,5 +1,7 @@
 extern int show_machine_info;
 extern int show_status;
+extern int show_machine_on_start;
+extern int confirm_on_stop_emulation;
 extern int show_speed_history;
 extern int show_disc_activity;
 extern int show_mount_paths;

@@ -48,4 +48,23 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
+#define STATUS_WINDOW_ID 1000
+
+class StatusFrame : public wxFrame {
+public:
+        StatusFrame(wxWindow* parent);
+        virtual ~StatusFrame();
+        void OnQuit();
+private:
+        void OnCommand(wxCommandEvent &event);
+        void OnMoveWindow(wxMoveEvent& event);
+        StatusPane* statusPane;
+        StatusTimer* statusTimer;
+
+        void UpdateToolbar();
+
+        DECLARE_EVENT_TABLE()
+
+};
+
 #endif /* SRC_WX_STATUS_H_ */

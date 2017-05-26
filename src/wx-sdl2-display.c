@@ -27,7 +27,11 @@ int rendering = 0;
 
 int mousecapture = 0;
 
+extern int pause;
+extern int video_scale;
+
 void* ghwnd;
+void* menu;
 
 SDL_Rect remembered_rect;
 int remembered_mouse_x = 0;
@@ -49,8 +53,36 @@ extern void toggle_fullscreen();
 
 void display_resize(int width, int height)
 {
-        winsizex = width;
-        winsizey = height;
+        /* Video scaling-code is borrowed from 86Box */
+        switch(video_scale)
+        {
+                case 0:
+                        winsizex = width >> 1;
+                        winsizey = height >> 1;
+                        break;
+                case 2:
+                        winsizex = (width * 3) >> 1;
+                        winsizey = (height * 3) >> 1;
+                        break;
+                case 3:
+                        winsizex = width << 1;
+                        winsizey = height << 1;
+                        break;
+                case 1:
+                default:
+                        winsizex = width;
+                        winsizey = height;
+                        break;
+        }
+
+        SDL_Rect rect;
+        rect.x = rect.y = 0;
+        rect.w = winsizex;
+        rect.h = winsizey;
+        sdl_scale(video_fullscreen_scale, rect, &rect, winsizex, winsizey);
+        winsizex = rect.w;
+        winsizey = rect.h;
+
         win_doresize = 1;
 }
 
@@ -63,60 +95,6 @@ void releasemouse()
                 mousecapture = 0;
         }
 }
-
-
-int wx_createkeyevent(int keycode, int modifiers, SDL_Event* event)
-{
-        // translate the necessary keys
-        SDL_Scancode scancode = SDL_SCANCODE_UNKNOWN;
-        switch (keycode)
-        {
-        case WXK_ALT:
-                scancode = SDL_SCANCODE_LALT;
-                break;
-        case WXK_CONTROL:
-                scancode = SDL_SCANCODE_LCTRL;
-                break;
-        case WXK_PAGEUP:
-                scancode = SDL_SCANCODE_PAGEUP;
-                break;
-        case WXK_PAGEDOWN:
-                scancode = SDL_SCANCODE_PAGEDOWN;
-                break;
-        }
-        if (scancode != SDL_SCANCODE_UNKNOWN)
-        {
-                event->key.keysym.scancode = scancode;
-                return 1;
-        }
-        return 0;
-}
-
-int wx_keydown(void* window, void* e, int keycode, int modifiers)
-{
-        SDL_Event event;
-        event.type = SDL_KEYDOWN;
-        if (wx_createkeyevent(keycode, modifiers, &event))
-        {
-                SDL_PushEvent(&event);
-                return 1;
-        }
-        return 0;
-}
-
-int wx_keyup(void* window, void* e, int keycode, int modifiers)
-{
-        SDL_Event event;
-        event.type = SDL_KEYUP;
-        if (wx_createkeyevent(keycode, modifiers, &event))
-        {
-                SDL_PushEvent(&event);
-                return 1;
-        }
-        return 0;
-}
-
-void wx_idle(void* window, void* event);
 
 int display_init()
 {
@@ -140,9 +118,7 @@ void display_close()
 void display_start(void* hwnd)
 {
         ghwnd = hwnd;
-        wx_keydown_func = wx_keydown;
-        wx_keyup_func = wx_keyup;
-        wx_idle_func = wx_idle;
+        menu = wx_getmenu(hwnd);
         atexit(releasemouse);
         rendererMutex = SDL_CreateMutex();
         rendererCond = SDL_CreateCond();
@@ -155,7 +131,9 @@ void display_stop()
 
         SDL_DestroyMutex(rendererMutex);
         SDL_DestroyCond(rendererCond);
+#if SDL_VERSION_ATLEAST(2, 0, 2)
         SDL_DetachThread(renderthread);
+#endif
         releasemouse();
 }
 
@@ -163,6 +141,11 @@ int is_fullscreen()
 {
         int flags = SDL_GetWindowFlags(window);
         return (flags&SDL_WINDOW_FULLSCREEN) || (flags&SDL_WINDOW_FULLSCREEN_DESKTOP);
+}
+
+void sdl_set_window_title(const char* title) {
+        if (window)
+                SDL_SetWindowTitle(window, title);
 }
 
 int get_border_size(int* top, int* left, int* bottom, int* right)
@@ -311,6 +294,9 @@ uint32_t render_frames = 0;
 void window_setup()
 {
         SDL_SetHint(SDL_HINT_GRAB_KEYBOARD, "1");
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+        SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
+#endif
 
         if (start_in_fullscreen)
         {
@@ -427,6 +413,10 @@ int window_create()
 
 void window_close()
 {
+#ifdef __WINDOWS__
+        UnhookWindowsHookEx( hKeyboardHook );
+#endif
+
         sdl_renderer_close();
 
         if (window) {
@@ -438,6 +428,7 @@ void window_close()
 
                 SDL_DestroyWindow(window);
         }
+        window = NULL;
 }
 
 int render()
@@ -466,10 +457,17 @@ int render()
         {
                 switch (event.type) {
                 case SDL_MOUSEBUTTONUP:
-                        if (!mousecapture && event.button.button == SDL_BUTTON_LEFT) {
-                                window_doinputgrab = 1;
-                                if (video_fullscreen) {
-                                        window_dofullscreen = 1;
+                        if (!mousecapture)
+                        {
+                                if (event.button.button == SDL_BUTTON_LEFT && !pause)
+                                {
+                                        window_doinputgrab = 1;
+                                        if (video_fullscreen) {
+                                                window_dofullscreen = 1;
+                                        }
+                                } else if (event.button.button == SDL_BUTTON_RIGHT)
+                                {
+                                        wx_popupmenu(ghwnd, menu, 0, 0);
                                 }
                         }
                         break;
@@ -501,6 +499,7 @@ int render()
                                         //save_window_pos = 1;
                                 }
                         }
+
                         break;
                 case SDL_KEYDOWN:
                 {
@@ -559,7 +558,7 @@ int render()
                 get_border_size(&border_y, &border_x, 0, 0);
                 window_x -= border_x;
                 window_y -= border_y;
-                saveconfig();
+                saveconfig(NULL);
         }
 
         if (window_dotogglefullscreen)
@@ -583,7 +582,9 @@ int render()
                 window_dofullscreen = 0;
                 video_wait_for_blit();
                 SDL_RaiseWindow(window);
+#if SDL_VERSION_ATLEAST(2, 0, 4)
                 SDL_GetGlobalMouseState(&remembered_mouse_x, &remembered_mouse_y);
+#endif
                 SDL_GetWindowPosition(window, &remembered_rect.x, &remembered_rect.y);
                 get_border_size(&border_y, &border_x, 0, 0);
                 remembered_rect.x -= border_x;
@@ -611,7 +612,9 @@ int render()
                 SDL_SetWindowFullscreen(window, 0);
                 SDL_SetWindowSize(window, remembered_rect.w, remembered_rect.h);
                 SDL_SetWindowPosition(window, remembered_rect.x, remembered_rect.y);
+#if SDL_VERSION_ATLEAST(2, 0, 4)
                 SDL_WarpMouseGlobal(remembered_mouse_x, remembered_mouse_y);
+#endif
         }
 
         if (win_doresize)
@@ -677,10 +680,6 @@ int renderer_thread(void* params)
         SDL_UnlockMutex(rendererMutex);
 
         return SDL_TRUE;
-}
-
-void wx_idle(void* window, void* event)
-{
 }
 
 void* timer = 0;
