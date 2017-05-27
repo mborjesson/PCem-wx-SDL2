@@ -14,6 +14,7 @@ extern "C" {
 
 int show_machine_on_start = 0;
 int confirm_on_stop_emulation = 1;
+int confirm_on_reset_machine = 1;
 int show_status = 0;
 int show_speed_history = 0;
 int show_disc_activity = 1;
@@ -262,10 +263,6 @@ StatusFrame::StatusFrame(wxWindow* parent) :
         GetMenuBar()->FindItem(XRCID("IDM_SPEED_HISTORY"))->Check(show_speed_history);
         GetMenuBar()->FindItem(XRCID("IDM_DISC_ACTIVITY"))->Check(show_disc_activity);
         GetMenuBar()->FindItem(XRCID("IDM_MACHINE_MOUNT_PATHS"))->Check(show_mount_paths);
-
-        // credits:
-        // Toolbar-icons made by Roundicons (https://roundicons.com/) from www.flaticon.com
-        // Status-icons made by Mark James (http://www.famfamfam.com/lab/icons/silk/)
 }
 
 StatusFrame::~StatusFrame()
@@ -294,8 +291,23 @@ void StatusFrame::OnCommand(wxCommandEvent& event)
         }
         else if (event.GetId() == XRCID("TOOLBAR_RESET"))
         {
-                reset_emulation();
-                UpdateToolbar();
+                int ret = wxID_OK;
+                if (confirm_on_reset_machine)
+                {
+                        wxDialog dlg;
+                        wxXmlResource::Get()->LoadDialog(&dlg, this, "ConfirmRememberDlg");
+                        dlg.FindWindow("IDC_CONFIRM_LABEL")->SetLabel("Reset machine?");
+                        dlg.FindWindow("IDC_CONFIRM_REMEMBER")->SetLabel("Do not ask again");
+                        dlg.Fit();
+                        ret = dlg.ShowModal();
+                        if (ret == wxID_OK)
+                                confirm_on_reset_machine = !((wxCheckBox*)dlg.FindWindow("IDC_CONFIRM_REMEMBER"))->IsChecked();
+                }
+                if (ret == wxID_OK)
+                {
+                        reset_emulation();
+                        UpdateToolbar();
+                }
         }
         else if (event.GetId() == XRCID("TOOLBAR_STOP"))
                 wx_stop_emulation(GetParent());
@@ -313,6 +325,13 @@ void StatusFrame::OnCommand(wxCommandEvent& event)
                 hdconf_open(this);
         else if (event.GetId() == XRCID("IDM_CONFIG"))
                 config_open(this);
+        else if (event.GetId() == XRCID("IDM_ABOUT"))
+        {
+                wxDialog dlg;
+                wxXmlResource::Get()->LoadDialog(&dlg, this, "AboutDlg");
+                dlg.Fit();
+                dlg.ShowModal();
+        }
 
 }
 

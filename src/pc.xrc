@@ -61,7 +61,12 @@
 			<object class="wxMenuItem" name="IDM_HDCONF">
 				<label>_Hard discs</label>
 			</object>
-		
+		</object>
+		<object class ="wxMenu">
+			<label>_Help</label>
+			<object class="wxMenuItem" name="IDM_ABOUT">
+				<label>_About</label>
+			</object>
 		</object>
 	</object>
 	<object class="wxMenu" name="main_menu">
@@ -1430,6 +1435,7 @@
 									<border>0</border>
 									<object class="wxButton" name="wxID_OK">
 										<label>Load</label>
+										<default>1</default>
 									</object>
 								</object>
 								
@@ -1503,7 +1509,7 @@
 		</object>
 	</object>
 
-	<object class="wxDialog" name="StopEmulationDlg">
+	<object class="wxDialog" name="ConfirmRememberDlg">
 		<title>PCem</title>
 		<centered>1</centered>
 		<object class="wxPanel" name="ROOT_PANEL">
@@ -1527,8 +1533,8 @@
 							<option>0</option>
 							<flag>wxALIGN_CENTER|wxALL</flag>
 							<border>5</border>
-							<object class="wxStaticText">
-								<label>Stop emulation?</label>
+							<object class="wxStaticText" name="IDC_CONFIRM_LABEL">
+								<label>IDC_CONFIRM_LABEL</label>
 								<wrap>-1</wrap>
 							</object>
 						</object>
@@ -1538,8 +1544,8 @@
 					<option>0</option>
 					<flag>wxALL</flag>
 					<border>5</border>
-					<object class="wxCheckBox" name="IDC_STOP_EMULATION_CONFIRM">
-						<label>Do not ask again</label>
+					<object class="wxCheckBox" name="IDC_CONFIRM_REMEMBER">
+						<label>IDC_CONFIRM_REMEMBER</label>
 						<checked>0</checked>
 					</object>
 				</object>
@@ -1562,6 +1568,43 @@
 								<label>_Cancel</label>
 							</object>
 						</object>
+					</object>
+				</object>
+			</object>
+		</object>
+	</object>
+	
+	<object class="wxDialog" name="AboutDlg">
+		<style>wxDEFAULT_DIALOG_STYLE</style>
+		<title></title>
+		<centered>1</centered>
+		<object class="wxPanel" name="ROOT_PANEL">
+			<object class="wxBoxSizer">
+				<orient>wxVERTICAL</orient>
+				<object class="sizeritem">
+					<option>0</option>
+					<flag>wxALL</flag>
+					<border>5</border>
+					<object class="wxStaticText">
+						<label>PCem v12\nhttps://pcem-emulator.co.uk/\n\nThis program is licensed under the GNU General Public License version 2.\nSee COPYING for more details.\n\nToolbar-icons made by Roundicons (https://roundicons.com/) from www.flaticon.com\nStatus-icons made by Mark James (http://www.famfamfam.com/lab/icons/silk/)</label>
+						<wrap>-1</wrap>
+					</object>
+				</object>
+				<object class="sizeritem">
+					<option>0</option>
+					<flag>wxEXPAND | wxALL</flag>
+					<border>5</border>
+					<object class="wxStaticLine">
+						<style>wxLI_HORIZONTAL</style>
+					</object>
+				</object>
+				<object class="sizeritem">
+					<option>0</option>
+					<flag>wxALL</flag>
+					<border>5</border>
+					<object class="wxButton" name="wxID_OK">
+						<label>_OK</label>
+						<default>1</default>
 					</object>
 				</object>
 			</object>

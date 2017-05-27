@@ -114,11 +114,13 @@ void Frame::OnStopEmulationEvent(wxCommandEvent& event)
                 if (confirm_on_stop_emulation)
                 {
                         wxDialog dlg;
-                        wxXmlResource::Get()->LoadDialog(&dlg, this, "StopEmulationDlg");
+                        wxXmlResource::Get()->LoadDialog(&dlg, this, "ConfirmRememberDlg");
+                        dlg.FindWindow("IDC_CONFIRM_LABEL")->SetLabel("Stop emulation?");
+                        dlg.FindWindow("IDC_CONFIRM_REMEMBER")->SetLabel("Do not ask again");
                         dlg.Fit();
                         ret = dlg.ShowModal();
                         if (ret == wxID_OK)
-                                confirm_on_stop_emulation = !((wxCheckBox*)dlg.FindWindow("IDC_STOP_EMULATION_CONFIRM"))->IsChecked();
+                                confirm_on_stop_emulation = !((wxCheckBox*)dlg.FindWindow("IDC_CONFIRM_REMEMBER"))->IsChecked();
                 }
 
                 if (ret == wxID_OK)
