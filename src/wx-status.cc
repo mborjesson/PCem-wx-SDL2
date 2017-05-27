@@ -263,6 +263,7 @@ StatusFrame::StatusFrame(wxWindow* parent) :
         GetMenuBar()->FindItem(XRCID("IDM_SPEED_HISTORY"))->Check(show_speed_history);
         GetMenuBar()->FindItem(XRCID("IDM_DISC_ACTIVITY"))->Check(show_disc_activity);
         GetMenuBar()->FindItem(XRCID("IDM_MACHINE_MOUNT_PATHS"))->Check(show_mount_paths);
+        GetMenuBar()->FindItem(XRCID("IDM_SHOW_MACHINE_ON_START"))->Check(show_machine_on_start);
 }
 
 StatusFrame::~StatusFrame()
