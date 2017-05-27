@@ -326,6 +326,12 @@ void StatusFrame::OnCommand(wxCommandEvent& event)
                 hdconf_open(this);
         else if (event.GetId() == XRCID("IDM_CONFIG"))
                 config_open(this);
+        else if (event.GetId() == XRCID("IDM_RESET_CONFIRMATION_DIALOGS"))
+        {
+                confirm_on_reset_machine = 1;
+                confirm_on_stop_emulation = 1;
+                wxMessageBox("Confirmation dialogs has been reset.", "PCem");
+        }
         else if (event.GetId() == XRCID("IDM_ABOUT"))
         {
                 wxDialog dlg;

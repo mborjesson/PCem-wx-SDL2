@@ -63,7 +63,11 @@
 			</object>
 		</object>
 		<object class ="wxMenu">
-			<label>_Help</label>
+			<label>_Misc</label>
+			<object class="wxMenuItem" name="IDM_RESET_CONFIRMATION_DIALOGS">
+				<label>_Reset confirmation dialogs</label>
+			</object>
+			<object class="separator"/>
 			<object class="wxMenuItem" name="IDM_ABOUT">
 				<label>_About</label>
 			</object>
