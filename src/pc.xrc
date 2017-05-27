@@ -7,16 +7,20 @@
 	<object class="wxToolBar" name="tool_bar">
 		<style>wxTB_FLAT|wxTB_NODIVIDER</style>
 		<object class="tool" name="TOOLBAR_RUN">
-       		<bitmap>icons/Continue24.png</bitmap>
+       		<bitmap>icons/play24.png</bitmap>
         	<label>Run</label>
        	</object>
 		<object class="tool" name="TOOLBAR_PAUSE">
-       		<bitmap>icons/Pause24.png</bitmap>
+       		<bitmap>icons/pause24.png</bitmap>
         	<label>Pause</label>
        	</object>
 		<object class="tool" name="TOOLBAR_STOP">
-       		<bitmap>icons/Kill24.png</bitmap>
+       		<bitmap>icons/stop24.png</bitmap>
         	<label>Stop</label>
+       	</object>
+		<object class="tool" name="TOOLBAR_RESET">
+       		<bitmap>icons/refresh24.png</bitmap>
+        	<label>Hard reset</label>
        	</object>
     </object>
 	<ids-range name="IDM_VID_FS" start="1000" />

@@ -524,6 +524,14 @@ int stop_emulation()
         return TRUE;
 }
 
+void reset_emulation()
+{
+        pause_emulation();
+        SDL_Delay(100);
+        resetpchard();
+        resume_emulation();
+}
+
 int wx_stop()
 {
         pclog("Shutting down...\n");

@@ -226,6 +226,7 @@ extern "C"
         void resume_emulation();
         void pause_emulation();
         int stop_emulation_confirm();
+        void reset_emulation();
 
         void hdconf_open(void* hwnd);
         void config_open(void* hwnd);
@@ -261,6 +262,10 @@ StatusFrame::StatusFrame(wxWindow* parent) :
         GetMenuBar()->FindItem(XRCID("IDM_SPEED_HISTORY"))->Check(show_speed_history);
         GetMenuBar()->FindItem(XRCID("IDM_DISC_ACTIVITY"))->Check(show_disc_activity);
         GetMenuBar()->FindItem(XRCID("IDM_MACHINE_MOUNT_PATHS"))->Check(show_mount_paths);
+
+        // credits:
+        // Toolbar-icons made by Roundicons (https://roundicons.com/) from www.flaticon.com
+        // Status-icons made by Mark James (http://www.famfamfam.com/lab/icons/silk/)
 }
 
 StatusFrame::~StatusFrame()
@@ -285,6 +290,11 @@ void StatusFrame::OnCommand(wxCommandEvent& event)
         else if (event.GetId() == XRCID("TOOLBAR_PAUSE"))
         {
                 pause_emulation();
+                UpdateToolbar();
+        }
+        else if (event.GetId() == XRCID("TOOLBAR_RESET"))
+        {
+                reset_emulation();
                 UpdateToolbar();
         }
         else if (event.GetId() == XRCID("TOOLBAR_STOP"))
