@@ -533,15 +533,15 @@ int render()
                 trigger_fullscreen = 0;
                 toggle_fullscreen();
         }
-        if (event.key.keysym.scancode == SDL_SCANCODE_PAGEUP &&
-                        (rawinputkey[sdl_scancode(SDL_SCANCODE_LCTRL)] || rawinputkey[sdl_scancode(SDL_SCANCODE_RCTRL)]) &&
-                        (rawinputkey[sdl_scancode(SDL_SCANCODE_LALT)] || rawinputkey[sdl_scancode(SDL_SCANCODE_RALT)]))
-                trigger_togglewindow = 1;
-        else if (trigger_togglewindow)
-        {
-                trigger_togglewindow = 0;
-                wx_togglewindow(ghwnd);
-        }
+//        if (event.key.keysym.scancode == SDL_SCANCODE_PAGEUP &&
+//                        (rawinputkey[sdl_scancode(SDL_SCANCODE_LCTRL)] || rawinputkey[sdl_scancode(SDL_SCANCODE_RCTRL)]) &&
+//                        (rawinputkey[sdl_scancode(SDL_SCANCODE_LALT)] || rawinputkey[sdl_scancode(SDL_SCANCODE_RALT)]))
+//                trigger_togglewindow = 1;
+//        else if (trigger_togglewindow)
+//        {
+//                trigger_togglewindow = 0;
+//                wx_togglewindow(ghwnd);
+//        }
         else if (event.key.keysym.scancode == SDL_SCANCODE_END &&
                         (rawinputkey[sdl_scancode(SDL_SCANCODE_LCTRL)] || rawinputkey[sdl_scancode(SDL_SCANCODE_RCTRL)]))
                 trigger_inputrelease = 1;
