@@ -204,6 +204,7 @@ static const struct {
                 { SDL_SCANCODE_GRAVE, 0x29 },
                 { SDL_SCANCODE_MINUS, 0x0c },
                 { SDL_SCANCODE_EQUALS, 0x0d },
+                { SDL_SCANCODE_NONUSBACKSLASH, 0x56 },
                 { SDL_SCANCODE_BACKSLASH, 0x2b },
                 { SDL_SCANCODE_BACKSPACE, 0x0e },
                 { SDL_SCANCODE_SPACE, 0x39 },
