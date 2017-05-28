@@ -43,40 +43,13 @@ sdl_render_driver requested_render_driver;
 
 char current_render_driver_name[50];
 
-static PALETTE cgapal=
-{
-        {0,0,0},{0,42,0},{42,0,0},{42,21,0},
-        {0,0,0},{0,42,42},{42,0,42},{42,42,42},
-        {0,0,0},{21,63,21},{63,21,21},{63,63,21},
-        {0,0,0},{21,63,63},{63,21,63},{63,63,63},
-
-        {0,0,0},{0,0,42},{0,42,0},{0,42,42},
-        {42,0,0},{42,0,42},{42,21,00},{42,42,42},
-        {21,21,21},{21,21,63},{21,63,21},{21,63,63},
-        {63,21,21},{63,21,63},{63,63,21},{63,63,63},
-
-        {0,0,0},{0,21,0},{0,0,42},{0,42,42},
-        {42,0,21},{21,10,21},{42,0,42},{42,0,63},
-        {21,21,21},{21,63,21},{42,21,42},{21,63,63},
-        {63,0,0},{42,42,0},{63,21,42},{41,41,41},
-
-        {0,0,0},{0,42,42},{42,0,0},{42,42,42},
-        {0,0,0},{0,42,42},{42,0,0},{42,42,42},
-        {0,0,0},{0,63,63},{63,0,0},{63,63,63},
-        {0,0,0},{0,63,63},{63,0,0},{63,63,63},
-};
-
-static uint32_t pal_lookup[256];
-
 void hline(BITMAP *b, int x1, int y, int x2, int col)
 {
-        if (y < 0 || y >= buffer->h)
+        if (y < 0 || y >= buffer32->h)
            return;
 
-        if (b == buffer)
-           memset(&b->line[y][x1], col, x2 - x1);
-        else
-           memset(&((uint32_t *)b->line[y])[x1], col, (x2 - x1) * 4);
+        for (; x1 < x2; x1++)
+                ((uint32_t *)b->line[y])[x1] = col;
 }
 
 void blit(BITMAP *src, BITMAP *dst, int x1, int y1, int x2, int y2, int xs, int ys)
@@ -253,37 +226,12 @@ static void sdl_blit_memtoscreen(int x, int y, int y1, int y2, int w, int h)
         SDL_LockMutex(blitMutex);
         for (yy = y1; yy < y2; yy++)
         {
-                if ((y + yy) >= 0 && (y + yy) < buffer->h)
+                if ((y + yy) >= 0 && (y + yy) < buffer32->h)
                         memcpy(screen->dat + (yy * screen->w * 4),
                                         &(((uint32_t *) buffer32->line[y + yy])[x]), w * 4);
         }
         set_updated_size(0, y1, w, y2 - y1);
 //        set_updated_size(0, 0, w, h);
-        blit_rect.w = w;
-        blit_rect.h = h;
-        SDL_UnlockMutex(blitMutex);
-        video_blit_complete();
-}
-
-static void sdl_blit_memtoscreen_8(int x, int y, int w, int h)
-{
-        if (h == 0)
-        {
-                video_blit_complete();
-                return; /*Nothing to do*/
-        }
-
-        int xx, yy;
-        SDL_LockMutex(blitMutex);
-        for (yy = 0; yy < h; yy++)
-        {
-                if ((y + yy) >= 0 && (y + yy) < buffer->h)
-                {
-                        for (xx = 0; xx < w; xx++)
-                                ((uint32_t *) (screen->dat + (yy * screen->w * 4)))[xx] = pal_lookup[buffer->line[y + yy][x + xx]];
-                }
-        }
-        set_updated_size(0, 0, w, h);
         blit_rect.w = w;
         blit_rect.h = h;
         SDL_UnlockMutex(blitMutex);
@@ -297,17 +245,11 @@ int sdl_is_fullscreen(SDL_Window* window) {
 
 int sdl_video_init()
 {
-        int c;
         blitMutex = SDL_CreateMutex();
         updated = 0;
 
         video_blit_memtoscreen_func = sdl_blit_memtoscreen;
-        video_blit_memtoscreen_8_func = sdl_blit_memtoscreen_8;
         requested_render_driver = sdl_get_render_driver_by_id(RENDERER_AUTO, RENDERER_AUTO);
-
-        for (c = 0; c < 256; c++)
-                pal_lookup[c] = makecol(cgapal[c].r << 2, cgapal[c].g << 2,
-                                cgapal[c].b << 2);
 
         buffer32_vscale = create_bitmap(2048, 2048);
         screen = create_bitmap(2048, 2048);
