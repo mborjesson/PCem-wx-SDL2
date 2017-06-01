@@ -1,5 +1,5 @@
-#ifndef CDROM_IMAGE_H
-#define CDROM_IMAGE_H
+#ifndef CDROM_ISO_H
+#define CDROM_ISO_H
 
 #include <stdint.h>
 
@@ -20,4 +20,4 @@ void image_audio_stop();
 }
 #endif
 
-#endif /* ! CDROM_IMAGE_H */
+#endif /* ! CDROM_ISO_H */

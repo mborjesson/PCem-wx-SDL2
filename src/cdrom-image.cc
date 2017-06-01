@@ -23,7 +23,7 @@ static int image_changed = 0;
 
 extern ATAPI image_atapi;
 
-CDROM_Interface_Image* cdrom = NULL;
+CDROM_Interface_Image *cdrom = NULL;
 
 #define MSFtoLBA(m,s,f)  (((((m*60)+s)*75)+f))
 
@@ -46,16 +46,13 @@ static int cd_buflen = 0;
 void image_audio_callback(int16_t *output, int len)
 {
         if (image_cd_state != CD_PLAYING)
-        {
-                memset(output, 0, len * 2);
                 return;
-        }
         while (cd_buflen < len)
         {
                 if (image_cd_pos < image_cd_end)
                 {
 //                      pclog("Read to %i\n", cd_buflen);
-                        if (!cdrom->ReadSector((unsigned char*)&cd_buffer[cd_buflen], true, image_cd_pos - 150))
+                        if (!cdrom->ReadSector((unsigned char *)&cd_buffer[cd_buflen], true, image_cd_pos - 150))
                         {
 //                                pclog("DeviceIoControl returned false\n");
                                 memset(&cd_buffer[cd_buflen], 0, (BUF_SIZE - cd_buflen) * 2);
@@ -181,14 +178,8 @@ static int image_ready(void)
         if (strlen(image_path) == 0)
                 return 0;
 
-        if (old_cdrom_drive != cdrom_drive)
-                return 1;
-
         if (image_changed)
-        {
                 image_changed = 0;
-                return 1;
-        }
 
         return 1;
 }
@@ -211,7 +202,7 @@ static int image_get_last_block(unsigned char starttrack, int msf, int maxlen, i
         {
                 uint32_t address;
                 cdrom->GetAudioTrackInfo(c+1, number, tmsf, attr);
-                address = MSFtoLBA(tmsf.min, tmsf.sec, tmsf.fr)-150;
+                address = MSFtoLBA(tmsf.min, tmsf.sec, tmsf.fr) - 150;
                 if (address > lb)
                         lb = address;
         }
@@ -366,7 +357,7 @@ static int image_readtoc(unsigned char *b, unsigned char starttrack, int msf, in
                 }
                 else
                 {
-                        temp = MSFtoLBA(tmsf.min, tmsf.sec, tmsf.fr)-150;
+                        temp = MSFtoLBA(tmsf.min, tmsf.sec, tmsf.fr) - 150;
                         b[len++] = temp >> 24;
                         b[len++] = temp >> 16;
                         b[len++] = temp >> 8;
@@ -421,7 +412,7 @@ static int image_readtoc_session(unsigned char *b, int msf, int maxlen)
         }
         else
         {
-                uint32_t temp = MSFtoLBA(tmsf.min, tmsf.sec, tmsf.fr)-150;
+                uint32_t temp = MSFtoLBA(tmsf.min, tmsf.sec, tmsf.fr) - 150;
                 b[len++] = temp >> 24;
                 b[len++] = temp >> 16;
                 b[len++] = temp >> 8;
@@ -510,10 +501,10 @@ void image_close(void)
                 delete cdrom;
                 cdrom = NULL;
         }
-        memset(image_path, 0, 1024);
+//        memset(image_path, 0, 1024);
 }
 
-int image_open(char* fn)
+int image_open(char *fn)
 {
         if (strcmp(fn, image_path) != 0)
                 image_changed = 1;

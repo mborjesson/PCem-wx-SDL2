@@ -632,8 +632,8 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
                         CheckMenuItem(menu, IDM_CDROM_DISABLED, MF_CHECKED);
                 else         
                 {
-                	if (cdrom_drive == CDROM_ISO)
-        			CheckMenuItem(menu, IDM_CDROM_ISO, MF_CHECKED);
+                	if (cdrom_drive == CDROM_IMAGE)
+        			CheckMenuItem(menu, IDM_CDROM_IMAGE, MF_CHECKED);
         		else
         			CheckMenuItem(menu, IDM_CDROM_REAL + cdrom_drive, MF_CHECKED);
         	}  

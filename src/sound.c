@@ -135,6 +135,7 @@ static void sound_cd_thread(void *param)
                 int c;
                 
                 thread_wait_event(sound_cd_event, -1);
+                memset(cd_buffer, 0, CD_BUFLEN*2 * 2);
                 ioctl_audio_callback(cd_buffer, CD_BUFLEN*2);
                 image_audio_callback(cd_buffer, CD_BUFLEN*2);
                 if (soundon)

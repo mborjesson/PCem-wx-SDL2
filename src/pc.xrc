@@ -92,10 +92,10 @@
 				<label>Change drive _B:...</label>
 			</object>
 			<object class="wxMenuItem" name="IDM_EJECT_A">
-				<label>_Eject drive A:...</label>
+				<label>_Eject drive A:</label>
 			</object>
 			<object class="wxMenuItem" name="IDM_EJECT_B">
-				<label>Eject drive B:...</label>
+				<label>Eject drive B:</label>
 			</object>
 			<object class="separator"/>
 			<object class="wxMenuItem" name="IDM_BPB_DISABLE">

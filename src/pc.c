@@ -398,6 +398,7 @@ void resetpchard()
         
 //        output=3;
 
+        image_close();
 #if __unix
 	if (cdrom_drive == -1)
 	        cdrom_null_reset();	
@@ -406,7 +407,22 @@ void resetpchard()
 	{
 		if (cdrom_drive == CDROM_IMAGE)
 		{
-			image_reset();
+			FILE *ff = fopen(image_path, "rb");
+			if (ff)
+			{
+				fclose(ff);
+				image_open(image_path);
+			}
+			else
+			{
+#if __unix
+				cdrom_drive = -1;
+				cdrom_null_open(cdrom_drive);
+#else
+				cdrom_drive = 0;
+				ioctl_set_drive(cdrom_drive);
+#endif
+			}
 		}
 		else
 		{
