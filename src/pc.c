@@ -6,7 +6,7 @@
 
 #include "ali1429.h"
 #include "cdrom-ioctl.h"
-#include "cdrom-iso.h"
+#include "cdrom-image.h"
 #include "disc.h"
 #include "disc_img.h"
 #include "mem.h"
@@ -281,13 +281,13 @@ void initpc(int argc, char *argv[])
 	else
 #endif
 	{
-		if (cdrom_drive == CDROM_ISO)
+		if (cdrom_drive == CDROM_IMAGE)
 		{
-			FILE *ff = fopen(iso_path, "rb");
+			FILE *ff = fopen(image_path, "rb");
 			if (ff)
 			{
 				fclose(ff);
-				iso_open(iso_path);
+				image_open(image_path);
 			}
 			else
 			{
@@ -318,9 +318,9 @@ void initpc(int argc, char *argv[])
 	else
 #endif
 	{
-		if (cdrom_drive == CDROM_ISO)
+		if (cdrom_drive == CDROM_IMAGE)
 		{
-			iso_reset();
+			image_reset();
 		}
 		else
 		{
@@ -398,15 +398,31 @@ void resetpchard()
         
 //        output=3;
 
+        image_close();
 #if __unix
 	if (cdrom_drive == -1)
 	        cdrom_null_reset();	
 	else
 #endif
 	{
-		if (cdrom_drive == CDROM_ISO)
+		if (cdrom_drive == CDROM_IMAGE)
 		{
-			iso_reset();
+			FILE *ff = fopen(image_path, "rb");
+			if (ff)
+			{
+				fclose(ff);
+				image_open(image_path);
+			}
+			else
+			{
+#if __unix
+				cdrom_drive = -1;
+				cdrom_null_open(cdrom_drive);
+#else
+				cdrom_drive = 0;
+				ioctl_set_drive(cdrom_drive);
+#endif
+			}
 		}
 		else
 		{
@@ -570,6 +586,22 @@ void closepc()
 
 END_OF_MAIN();*/
 
+typedef struct config_callback_t
+{
+        void(*loadconfig)();
+        void(*saveconfig)();
+        void(*onloaded)();
+} config_callback_t;
+config_callback_t config_callbacks[10];
+int num_config_callbacks = 0;
+
+void add_config_callback(void(*loadconfig)(), void(*saveconfig)(), void(*onloaded)())
+{
+        config_callbacks[num_config_callbacks].loadconfig = loadconfig;
+        config_callbacks[num_config_callbacks].saveconfig = saveconfig;
+        config_callbacks[num_config_callbacks].onloaded = onloaded;
+        num_config_callbacks++;
+}
 
 void loadconfig(char *fn)
 {
@@ -655,8 +687,8 @@ void loadconfig(char *fn)
         cdrom_channel = config_get_int(CFG_MACHINE, NULL, "cdrom_channel", 2);
         
         p = (char *)config_get_string(CFG_MACHINE, NULL, "cdrom_path", "");
-        if (p) strcpy(iso_path, p);
-        else   strcpy(iso_path, "");
+        if (p) strcpy(image_path, p);
+        else   strcpy(image_path, "");
         
         hdc[0].spt = config_get_int(CFG_MACHINE, NULL, "hdc_sectors", 0);
         hdc[0].hpc = config_get_int(CFG_MACHINE, NULL, "hdc_heads", 0);
@@ -718,6 +750,16 @@ void loadconfig(char *fn)
         }
 
         enable_sync = config_get_int(CFG_MACHINE, NULL, "enable_sync", 1);
+
+
+        for (d = 0; d < num_config_callbacks; ++d)
+                if (config_callbacks[d].loadconfig)
+                        config_callbacks[d].loadconfig();
+
+
+        for (d = 0; d < num_config_callbacks; ++d)
+                if (config_callbacks[d].onloaded)
+                        config_callbacks[d].onloaded();
 }
 
 void saveconfig(char *fn)
@@ -764,7 +806,7 @@ void saveconfig(char *fn)
         config_set_int(CFG_MACHINE, NULL, "cdrom_drive", cdrom_drive);
         config_set_int(CFG_MACHINE, NULL, "cdrom_enabled", cdrom_enabled);
         config_set_int(CFG_MACHINE, NULL, "cdrom_channel", cdrom_channel);
-        config_set_string(CFG_MACHINE, NULL, "cdrom_path", iso_path);
+        config_set_string(CFG_MACHINE, NULL, "cdrom_path", image_path);
         
         config_set_int(CFG_MACHINE, NULL, "hdc_sectors", hdc[0].spt);
         config_set_int(CFG_MACHINE, NULL, "hdc_heads", hdc[0].hpc);
@@ -820,6 +862,10 @@ void saveconfig(char *fn)
         }
         
         config_set_int(CFG_MACHINE, NULL, "enable_sync", enable_sync);
+
+        for (d = 0; d < num_config_callbacks; ++d)
+                if (config_callbacks[d].saveconfig)
+                        config_callbacks[d].saveconfig();
 
         pclog("config_save(%s)\n", config_file_default);
         if (fn)

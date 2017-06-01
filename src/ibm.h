@@ -3,6 +3,12 @@
 #include <string.h>
 #define printf pclog
 
+#define READFLASH_FDC 0
+#define READFLASH_HDC 4
+#define readflash_set(offset, drive) readflash |= 1<<(offset+drive)
+#define readflash_clear(offset, drive) readflash &= ~(1<<(offset+drive))
+#define readflash_get(offset, drive) ((readflash&(1<<(offset+drive))) != 0)
+
 /*Memory*/
 uint8_t *ram;
 
@@ -167,7 +173,7 @@ struct
 
 #define cycles cpu_state._cycles
 
-uint32_t cpu_cur_status;
+extern uint32_t cpu_cur_status;
 
 #define CPU_STATUS_USE32   (1 << 0)
 #define CPU_STATUS_STACK32 (1 << 1)
