@@ -14,6 +14,7 @@
 #include "plat-mouse.h"
 #include "sound.h"
 #include "video.h"
+#include <dirent.h>
  
  #undef printf
  
@@ -60,6 +61,21 @@ uint64_t timer_read()
         return 0;
 }
 
+int dir_exists(char* path) {
+        DIR* dir = opendir(path);
+        if (dir)
+        {
+                closedir(dir);
+                return 1;
+        }
+        return 0;
+}
+
+void get_pcem_path(char* s, int size)
+{
+        get_executable_name(s, size);
+}
+
 int main(int argc, char *argv[])
 {
         int frames = 0;
@@ -71,7 +87,7 @@ int main(int argc, char *argv[])
 	install_int_ex(onesec, BPS_TO_TIMER(1));
 	midi_init();
         
-        getpath();
+        paths_init();
         
         sound_init();
 

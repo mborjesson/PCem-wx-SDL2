@@ -60,7 +60,7 @@ uint8_t romext[32768];
 static void mem_load_atide115_bios()
 {
         FILE *f;
-        f=romfopen("roms/ide_at_1_1_5.bin","rb");
+        f=romfopen("ide_at_1_1_5.bin","rb");
 
 //        is486=0;
         if (f)
@@ -75,9 +75,9 @@ int loadbios()
         FILE *f=NULL,*ff=NULL;
         int c;
        
-        loadfont("roms/mda.rom", 0);
-	loadfont("roms/wy700.rom", 3);
-	loadfont("roms/8x12.bin", 4);
+        loadfont("mda.rom", 0);
+	loadfont("wy700.rom", 3);
+	loadfont("8x12.bin", 4);
         
         biosmask = 0xffff;
         
@@ -91,8 +91,8 @@ int loadbios()
         switch (romset)
         {
                 case ROM_PC1512:
-                f=romfopen("roms/pc1512/40043.v1","rb");
-                ff=romfopen("roms/pc1512/40044.v1","rb");
+                f=romfopen("pc1512/40043.v1","rb");
+                ff=romfopen("pc1512/40044.v1","rb");
                 if (!f || !ff) break;
                 for (c=0xC000;c<0x10000;c+=2)
                 {
@@ -101,11 +101,11 @@ int loadbios()
                 }
                 fclose(ff);
                 fclose(f);
-                loadfont("roms/pc1512/40078.ic127", 2);
+                loadfont("pc1512/40078.ic127", 2);
                 return 1;
                 case ROM_PC1640:
-                f=romfopen("roms/pc1640/40044.v3","rb");
-                ff=romfopen("roms/pc1640/40043.v3","rb");
+                f=romfopen("pc1640/40044.v3","rb");
+                ff=romfopen("pc1640/40043.v3","rb");
                 if (!f || !ff) break;
                 for (c=0xC000;c<0x10000;c+=2)
                 {
@@ -114,13 +114,13 @@ int loadbios()
                 }
                 fclose(ff);
                 fclose(f);
-                f=romfopen("roms/pc1640/40100","rb");
+                f=romfopen("pc1640/40100","rb");
                 if (!f) break;
                 fclose(f);
                 return 1;
                 case ROM_PC200:
-                f=romfopen("roms/pc200/pc20v2.1","rb");
-                ff=romfopen("roms/pc200/pc20v2.0","rb");
+                f=romfopen("pc200/pc20v2.1","rb");
+                ff=romfopen("pc200/pc20v2.0","rb");
                 if (!f || !ff) break;
                 for (c=0xC000;c<0x10000;c+=2)
                 {
@@ -129,24 +129,24 @@ int loadbios()
                 }
                 fclose(ff);
                 fclose(f);
-                loadfont("roms/pc200/40109.bin", 1);
+                loadfont("pc200/40109.bin", 1);
                 return 1;
                 case ROM_TANDY:
-                f=romfopen("roms/tandy/tandy1t1.020","rb");
+                f=romfopen("tandy/tandy1t1.020","rb");
                 if (!f) break;
                 fread(rom,65536,1,f);
                 fclose(f);
                 return 1;
                 case ROM_TANDY1000HX:
-                f = romfopen("roms/tandy1000hx/v020000.u12", "rb");
+                f = romfopen("tandy1000hx/v020000.u12", "rb");
                 if (!f) break;
                 fread(rom, 0x20000, 1, f);
                 fclose(f);
                 biosmask = 0x1ffff;
                 return 1;
                 case ROM_TANDY1000SL2:
-                f  = romfopen("roms/tandy1000sl2/8079047.hu1" ,"rb");
-                ff = romfopen("roms/tandy1000sl2/8079048.hu2","rb");
+                f  = romfopen("tandy1000sl2/8079047.hu1" ,"rb");
+                ff = romfopen("tandy1000sl2/8079048.hu2","rb");
                 if (!f || !ff) break;
                 fseek(f,  0x30000/2, SEEK_SET);
                 fseek(ff, 0x30000/2, SEEK_SET);
@@ -167,11 +167,11 @@ int loadbios()
                 fclose(f);
                 break;*/
                 case ROM_IBMXT:
-                f=romfopen("roms/ibmxt/xt.rom","rb");
+                f=romfopen("ibmxt/xt.rom","rb");
                 if (!f)
                 {
-                        f = romfopen("roms/ibmxt/5000027.u19", "rb");
-                        ff = romfopen("roms/ibmxt/1501512.u18","rb");
+                        f = romfopen("ibmxt/5000027.u19", "rb");
+                        ff = romfopen("ibmxt/1501512.u18","rb");
                         if (!f || !ff) break;
                         fread(rom, 0x8000, 1, f);
                         fread(rom + 0x8000, 0x8000, 1, ff);
@@ -188,27 +188,27 @@ int loadbios()
                 break;
                 
                 case ROM_IBMPCJR:
-                f = romfopen("roms/ibmpcjr/bios.rom","rb");
+                f = romfopen("ibmpcjr/bios.rom","rb");
                 if (!f) break;
                 fread(rom, 0x10000, 1, f);
                 fclose(f);
                 return 1;
                 
                 case ROM_GENXT:
-                f=romfopen("roms/genxt/pcxt.rom","rb");
+                f=romfopen("genxt/pcxt.rom","rb");
                 if (!f) break;
                 fread(rom+0xE000,8192,1,f);
                 fclose(f);
                 return 1;
                 case ROM_DTKXT:
-                f=romfopen("roms/dtk/dtk_erso_2.42_2764.bin","rb");
+                f=romfopen("dtk/dtk_erso_2.42_2764.bin","rb");
                 if (!f) break;
                 fread(rom+0xE000,8192,1,f);
                 fclose(f);
                 return 1;
                 case ROM_OLIM24:
-                f  = romfopen("roms/olivetti_m24/olivetti_m24_version_1.43_low.bin" ,"rb");
-                ff = romfopen("roms/olivetti_m24/olivetti_m24_version_1.43_high.bin","rb");
+                f  = romfopen("olivetti_m24/olivetti_m24_version_1.43_low.bin" ,"rb");
+                ff = romfopen("olivetti_m24/olivetti_m24_version_1.43_high.bin","rb");
                 if (!f || !ff) break;
                 for (c = 0x0000; c < 0x4000; c += 2)
                 {
@@ -220,8 +220,8 @@ int loadbios()
                 return 1;
                         
                 case ROM_PC2086:
-                f  = romfopen("roms/pc2086/40179.ic129" ,"rb");
-                ff = romfopen("roms/pc2086/40180.ic132","rb");
+                f  = romfopen("pc2086/40179.ic129" ,"rb");
+                ff = romfopen("pc2086/40180.ic132","rb");
                 if (!f || !ff) break;
                 pclog("Loading BIOS\n");
                 for (c = 0x0000; c < 0x4000; c += 2)
@@ -232,32 +232,32 @@ int loadbios()
                 pclog("%02X %02X %02X\n", rom[0xfff0], rom[0xfff1], rom[0xfff2]);
                 fclose(ff);
                 fclose(f);
-                f = romfopen("roms/pc2086/40186.ic171", "rb");
+                f = romfopen("pc2086/40186.ic171", "rb");
                 if (!f) break;
                 fclose(f);
                 biosmask = 0x3fff;
                 return 1;
 
                 case ROM_PC3086:
-                f  = romfopen("roms/pc3086/fc00.bin" ,"rb");
+                f  = romfopen("pc3086/fc00.bin" ,"rb");
                 if (!f) break;
                 fread(rom, 0x4000, 1, f);
                 fclose(f);
-                f = romfopen("roms/pc3086/c000.bin", "rb");
+                f = romfopen("pc3086/c000.bin", "rb");
                 if (!f) break;
                 fclose(f);
                 biosmask = 0x3fff;                
                 return 1;
 
                 case ROM_IBMAT:
-/*                f=romfopen("roms/amic206.bin","rb");
+/*                f=romfopen("amic206.bin","rb");
                 if (!f) break;
                 fread(rom,65536,1,f);
                 fclose(f);
                 return 1;*/
                 case ROM_IBMAT386:
-                f = romfopen("roms/ibmat/62x0820.u27", "rb");
-                ff  =romfopen("roms/ibmat/62x0821.u47", "rb");
+                f = romfopen("ibmat/62x0820.u27", "rb");
+                ff  =romfopen("ibmat/62x0821.u47", "rb");
                 if (!f || !ff) break;
                 for (c=0x0000;c<0x10000;c+=2)
                 {
@@ -268,8 +268,8 @@ int loadbios()
                 fclose(f);
                 return 1;
                 case ROM_CMDPC30:
-                f  = romfopen("roms/cmdpc30/commodore pc 30 iii even.bin", "rb");
-                ff = romfopen("roms/cmdpc30/commodore pc 30 iii odd.bin",  "rb");
+                f  = romfopen("cmdpc30/commodore pc 30 iii even.bin", "rb");
+                ff = romfopen("cmdpc30/commodore pc 30 iii odd.bin",  "rb");
                 if (!f || !ff) break;
                 for (c = 0x0000; c < 0x8000; c += 2)
                 {
@@ -281,8 +281,8 @@ int loadbios()
                 biosmask = 0x7fff;
                 return 1;
                 case ROM_DELL200:
-                f=romfopen("roms/dells200/dell0.bin","rb");
-                ff=romfopen("roms/dells200/dell1.bin","rb");
+                f=romfopen("dells200/dell0.bin","rb");
+                ff=romfopen("dells200/dell1.bin","rb");
                 if (!f || !ff) break;
                 for (c=0x0000;c<0x10000;c+=2)
                 {
@@ -293,46 +293,46 @@ int loadbios()
                 fclose(f);
                 return 1;
 /*                case ROM_IBMAT386:
-                f=romfopen("roms/at386/at386.bin","rb");
+                f=romfopen("at386/at386.bin","rb");
                 if (!f) break;
                 fread(rom,65536,1,f);
                 fclose(f);
                 return 1;*/
                 case ROM_AMI386SX:
-//                f=romfopen("roms/at386/at386.bin","rb");
-                f=romfopen("roms/ami386/ami386.bin","rb");
+//                f=romfopen("at386/at386.bin","rb");
+                f=romfopen("ami386/ami386.bin","rb");
                 if (!f) break;
                 fread(rom,65536,1,f);
                 fclose(f);
                 return 1;
 
                 case ROM_AMI386DX_OPTI495: /*This uses the OPTi 82C495 chipset*/
-                f=romfopen("roms/ami386dx/opt495sx.ami","rb");
+                f=romfopen("ami386dx/opt495sx.ami","rb");
                 if (!f) break;
                 fread(rom,65536,1,f);
                 fclose(f);
                 return 1;
                 case ROM_MR386DX_OPTI495: /*This uses the OPTi 82C495 chipset*/
-                f=romfopen("roms/mr386dx/opt495sx.mr","rb");
+                f=romfopen("mr386dx/opt495sx.mr","rb");
                 if (!f) break;
                 fread(rom,65536,1,f);
                 fclose(f);
                 return 1;
 
                 case ROM_ACER386:
-                f=romfopen("roms/acer386/acer386.bin","rb");
+                f=romfopen("acer386/acer386.bin","rb");
                 if (!f) break;
                 fread(rom,65536,1,f);
                 fclose(f);
                 rom[0xB0]=0xB0-0x51;
                 rom[0x40d4]=0x51; /*PUSH CX*/
-                f=romfopen("roms/acer386/oti067.bin","rb");
+                f=romfopen("acer386/oti067.bin","rb");
                 if (!f) break;
                 fclose(f);
                 return 1;
 
                 case ROM_AMI286:
-                f=romfopen("roms/ami286/amic206.bin","rb");
+                f=romfopen("ami286/amic206.bin","rb");
                 if (!f) break;
                 fread(rom,65536,1,f);
                 fclose(f);
@@ -340,7 +340,7 @@ int loadbios()
                 return 1;
 
                 case ROM_AWARD286:
-                f=romfopen("roms/award286/award.bin","rb");
+                f=romfopen("award286/award.bin","rb");
                 if (!f) break;
                 fread(rom,65536,1,f);
                 fclose(f);
@@ -348,7 +348,7 @@ int loadbios()
 
                 case ROM_EUROPC:
 //                return 0;
-                f=romfopen("roms/europc/50145","rb");
+                f=romfopen("europc/50145","rb");
                 if (!f) break;
                 fread(rom+0x8000,32768,1,f);
                 fclose(f);
@@ -356,32 +356,32 @@ int loadbios()
                 return 1;
 
                 case ROM_IBMPC:
-                f=romfopen("roms/ibmpc/pc102782.bin","rb");
+                f=romfopen("ibmpc/pc102782.bin","rb");
                 if (!f) break;
 //                f=fopen("pc081682.bin","rb");
                 fread(rom+0xE000,8192,1,f);
                 fclose(f);
-                f=romfopen("roms/ibmpc/basicc11.f6","rb");
+                f=romfopen("ibmpc/basicc11.f6","rb");
                 if (!f) return 1; /*I don't really care if BASIC is there or not*/
                 fread(rom+0x6000,8192,1,f);
                 fclose(f);
-                f=romfopen("roms/ibmpc/basicc11.f8","rb");
+                f=romfopen("ibmpc/basicc11.f8","rb");
                 if (!f) break; /*But if some of it is there, then all of it must be*/
                 fread(rom+0x8000,8192,1,f);
                 fclose(f);
-                f=romfopen("roms/ibmpc/basicc11.fa","rb");
+                f=romfopen("ibmpc/basicc11.fa","rb");
                 if (!f) break;
                 fread(rom+0xA000,8192,1,f);
                 fclose(f);
-                f=romfopen("roms/ibmpc/basicc11.fc","rb");
+                f=romfopen("ibmpc/basicc11.fc","rb");
                 if (!f) break;
                 fread(rom+0xC000,8192,1,f);
                 fclose(f);
                 return 1;
 
                 case ROM_MEGAPC:
-                f  = romfopen("roms/megapc/41651-bios lo.u18",  "rb");
-                ff = romfopen("roms/megapc/211253-bios hi.u19", "rb");
+                f  = romfopen("megapc/41651-bios lo.u18",  "rb");
+                ff = romfopen("megapc/211253-bios hi.u19", "rb");
                 if (!f || !ff) break;
                 fseek(f,  0x8000, SEEK_SET);
                 fseek(ff, 0x8000, SEEK_SET);                
@@ -395,7 +395,7 @@ int loadbios()
                 return 1;
                         
                 case ROM_AMI486:
-                f=romfopen("roms/ami486/ami486.bin","rb");
+                f=romfopen("ami486/ami486.bin","rb");
                 if (!f) break;
                 fread(rom,65536,1,f);
                 fclose(f);
@@ -403,8 +403,8 @@ int loadbios()
                 return 1;
                 
                 case ROM_WIN486:
-//                f=romfopen("roms/win486/win486.bin","rb");
-                f=romfopen("roms/win486/ali1429g.amw","rb");
+//                f=romfopen("win486/win486.bin","rb");
+                f=romfopen("win486/ali1429g.amw","rb");
                 if (!f) break;
                 fread(rom,65536,1,f);
                 fclose(f);
@@ -412,7 +412,7 @@ int loadbios()
                 return 1;
 
                 case ROM_PCI486:
-                f=romfopen("roms/hot-433/hot-433.ami","rb");               
+                f=romfopen("hot-433/hot-433.ami","rb");               
                 if (!f) break;
                 fread(rom,           0x20000, 1, f);                
                 fclose(f);
@@ -421,7 +421,7 @@ int loadbios()
                 return 1;
 
                 case ROM_SIS496:
-                f = romfopen("roms/sis496/sis496-1.awa", "rb");
+                f = romfopen("sis496/sis496-1.awa", "rb");
                 if (!f) break;
                 fread(rom,           0x20000, 1, f);                
                 fclose(f);
@@ -430,10 +430,10 @@ int loadbios()
                 return 1;
                 
                 case ROM_430VX:
-//                f = romfopen("roms/430vx/ga586atv.bin", "rb");
-//                f = fopen("roms/430vx/vx29.bin", "rb");
-                f = romfopen("roms/430vx/55xwuq0e.bin", "rb");
-//                f=romfopen("roms/430vx/430vx","rb");               
+//                f = romfopen("430vx/ga586atv.bin", "rb");
+//                f = fopen("430vx/vx29.bin", "rb");
+                f = romfopen("430vx/55xwuq0e.bin", "rb");
+//                f=romfopen("430vx/430vx","rb");               
                 if (!f) break;
                 fread(rom,           0x20000, 1, f);                
                 fclose(f);
@@ -442,12 +442,12 @@ int loadbios()
                 return 1;
 
                 case ROM_REVENGE:
-                f = romfopen("roms/revenge/1009af2_.bio", "rb");
+                f = romfopen("revenge/1009af2_.bio", "rb");
                 if (!f) break;
                 fseek(f, 0x80, SEEK_SET);
                 fread(rom + 0x10000, 0x10000, 1, f);                
                 fclose(f);
-                f = romfopen("roms/revenge/1009af2_.bi1", "rb");
+                f = romfopen("revenge/1009af2_.bi1", "rb");
                 if (!f) break;
                 fseek(f, 0x80, SEEK_SET);
                 fread(rom, 0xc000, 1, f);                
@@ -456,12 +456,12 @@ int loadbios()
                 //is486=1;
                 return 1;
                 case ROM_ENDEAVOR:
-                f = romfopen("roms/endeavor/1006cb0_.bio", "rb");
+                f = romfopen("endeavor/1006cb0_.bio", "rb");
                 if (!f) break;
                 fseek(f, 0x80, SEEK_SET);
                 fread(rom + 0x10000, 0x10000, 1, f);                
                 fclose(f);
-                f = romfopen("roms/endeavor/1006cb0_.bi1", "rb");
+                f = romfopen("endeavor/1006cb0_.bi1", "rb");
                 if (!f) break;
                 fseek(f, 0x80, SEEK_SET);
                 fread(rom, 0xd000, 1, f);
@@ -472,8 +472,8 @@ int loadbios()
 
                 case ROM_IBMPS1_2011:
 #if 0
-                f=romfopen("roms/ibmps1es/ibm_1057757_24-05-90.bin","rb");
-                ff=romfopen("roms/ibmps1es/ibm_1057757_29-15-90.bin","rb");
+                f=romfopen("ibmps1es/ibm_1057757_24-05-90.bin","rb");
+                ff=romfopen("ibmps1es/ibm_1057757_29-15-90.bin","rb");
                 fseek(f, 0x10000, SEEK_SET);
                 fseek(ff, 0x10000, SEEK_SET);
                 if (!f || !ff) break;
@@ -486,7 +486,7 @@ int loadbios()
                 fclose(f);
 #endif
 //#if 0
-                f = romfopen("roms/ibmps1es/f80000.bin", "rb");
+                f = romfopen("ibmps1es/f80000.bin", "rb");
                 if (!f) break;
                 fseek(f, 0x60000, SEEK_SET);
                 fread(rom, 0x20000, 1, f);                
@@ -497,7 +497,7 @@ int loadbios()
                 return 1;
 
                 case ROM_IBMPS1_2121:
-                f = romfopen("roms/ibmps1_2121/fc0000.bin", "rb");
+                f = romfopen("ibmps1_2121/fc0000.bin", "rb");
                 if (!f) break;
                 fseek(f, 0x20000, SEEK_SET);
                 fread(rom, 0x20000, 1, f);                
@@ -506,8 +506,8 @@ int loadbios()
                 return 1;
 
                 case ROM_DESKPRO_386:
-                f=romfopen("roms/deskpro386/109592-005.u11.bin","rb");
-                ff=romfopen("roms/deskpro386/109591-005.u13.bin","rb");
+                f=romfopen("deskpro386/109592-005.u11.bin","rb");
+                ff=romfopen("deskpro386/109591-005.u13.bin","rb");
                 if (!f || !ff) break;
                 for (c = 0x0000; c < 0x8000; c += 2)
                 {
@@ -520,29 +520,29 @@ int loadbios()
                 return 1;
 
                 case ROM_AMIXT:
-                f = romfopen("roms/amixt/ami_8088_bios_31jan89.bin", "rb");
+                f = romfopen("amixt/ami_8088_bios_31jan89.bin", "rb");
                 if (!f) break;
                 fread(rom + 0xE000, 8192, 1, f);
                 fclose(f);
                 return 1;
                 
                 case ROM_LTXT:
-                f = romfopen("roms/ltxt/27c64.bin", "rb");
+                f = romfopen("ltxt/27c64.bin", "rb");
                 if (!f) break;
                 fread(rom + 0xE000, 8192, 1, f);
                 fclose(f);
                 return 1;
 
                 case ROM_LXT3:
-                f = romfopen("roms/lxt3/27c64d.bin", "rb");
+                f = romfopen("lxt3/27c64d.bin", "rb");
                 if (!f) break;
                 fread(rom + 0xE000, 8192, 1, f);
                 fclose(f);
                 return 1;
 
                 case ROM_PX386: /*Phoenix 80386 BIOS*/
-                f=romfopen("roms/px386/3iip001l.bin","rb");
-                ff=romfopen("roms/px386/3iip001h.bin","rb");
+                f=romfopen("px386/3iip001l.bin","rb");
+                ff=romfopen("px386/3iip001h.bin","rb");
                 if (!f || !ff) break;
                 for (c = 0x0000; c < 0x10000; c += 2)
                 {
@@ -554,28 +554,28 @@ int loadbios()
                 return 1;
 
                 case ROM_DTK386: /*Uses NEAT chipset*/
-                f = romfopen("roms/dtk386/3cto001.bin", "rb");
+                f = romfopen("dtk386/3cto001.bin", "rb");
                 if (!f) break;
                 fread(rom, 65536, 1, f);
                 fclose(f);
                 return 1;
 
                 case ROM_PXXT:
-                f = romfopen("roms/pxxt/000p001.bin", "rb");
+                f = romfopen("pxxt/000p001.bin", "rb");
                 if (!f) break;
                 fread(rom + 0xE000, 8192, 1, f);
                 fclose(f);
                 return 1;
 
                 case ROM_JUKOPC:
-                f = romfopen("roms/jukopc/000o001.bin", "rb");
+                f = romfopen("jukopc/000o001.bin", "rb");
                 if (!f) break;
                 fread(rom + 0xE000, 8192, 1, f);
                 fclose(f);
                 return 1;
 				
 		case ROM_IBMPS2_M30_286:
-                f = romfopen("roms/ibmps2_m30_286/33f5381a.bin", "rb");
+                f = romfopen("ibmps2_m30_286/33f5381a.bin", "rb");
                 if (!f) break;
                 fread(rom, 0x20000, 1, f);                
                 fclose(f);
@@ -583,8 +583,8 @@ int loadbios()
                 return 1;
 
                 case ROM_IBMPS2_M50:
-                f=romfopen("roms/i8550021/90x7423.zm14","rb");
-                ff=romfopen("roms/i8550021/90x7426.zm16","rb");
+                f=romfopen("i8550021/90x7423.zm14","rb");
+                ff=romfopen("i8550021/90x7426.zm16","rb");
                 if (!f || !ff) break;
                 for (c = 0x0000; c < 0x10000; c += 2)
                 {
@@ -593,8 +593,8 @@ int loadbios()
                 }
                 fclose(ff);
                 fclose(f);
-                f=romfopen("roms/i8550021/90x7420.zm13","rb");
-                ff=romfopen("roms/i8550021/90x7429.zm18","rb");
+                f=romfopen("i8550021/90x7420.zm13","rb");
+                ff=romfopen("i8550021/90x7429.zm18","rb");
                 if (!f || !ff) break;
                 for (c = 0x10000; c < 0x20000; c += 2)
                 {
@@ -607,8 +607,8 @@ int loadbios()
                 return 1;
 
                 case ROM_IBMPS2_M55SX:
-                f=romfopen("roms/i8555081/33f8146.zm41","rb");
-                ff=romfopen("roms/i8555081/33f8145.zm40","rb");
+                f=romfopen("i8555081/33f8146.zm41","rb");
+                ff=romfopen("i8555081/33f8145.zm40","rb");
                 if (!f || !ff) break;
                 for (c = 0x0000; c < 0x20000; c += 2)
                 {
@@ -621,8 +621,8 @@ int loadbios()
                 return 1;
 
                 case ROM_IBMPS2_M80:
-                f=romfopen("roms/i8580111/15f6637.bin","rb");
-                ff=romfopen("roms/i8580111/15f6639.bin","rb");
+                f=romfopen("i8580111/15f6637.bin","rb");
+                ff=romfopen("i8580111/15f6639.bin","rb");
                 if (!f || !ff) break;
                 for (c = 0x0000; c < 0x20000; c += 2)
                 {

@@ -23,6 +23,7 @@
 #include "timer.h"
 #include "x86.h"
 #include "x87.h"
+#include "paths.h"
 
 int xt_cpu_multi;
 int nmi = 0;
@@ -271,13 +272,13 @@ r16(/r)                    AX    CX    DX    BX    SP    BP    SI    DI
 r32(/r)                    EAX   ECX   EDX   EBX   ESP   EBP   ESI   EDI
 /digit (Opcode)            0     1     2     3     4     5     6     7
 REG =                      000   001   010   011   100   101   110   111
-  ÚÄÄÄAddress
+  ï¿½ï¿½ï¿½ï¿½Address
 disp8 denotes an 8-bit displacement following the ModR/M byte, to be
 sign-extended and added to the index. disp16 denotes a 16-bit displacement
 following the ModR/M byte, to be added to the index. Default segment
 register is SS for the effective addresses containing a BP index, DS for
 other effective addresses.
-            ÄÄ¿ ÚMod R/M¿ ÚÄÄÄÄÄÄÄÄModR/M Values in HexadecimalÄÄÄÄÄÄÄÄ¿
+            ï¿½Ä¿ ï¿½Mod R/Mï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ModR/M Values in Hexadecimalï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿
 
 [BX + SI]            000   00    08    10    18    20    28    30    38
 [BX + DI]            001   01    09    11    19    21    29    31    39
@@ -507,7 +508,7 @@ void dumpregs()
 //        return;
 //        savenvr();
 //        return;
-chdir(pcempath);
+        chdir(logs_path);
         nopageerrors=1;
 /*        f=fopen("rram3.dmp","wb");
         for (c=0;c<0x8000000;c++) putc(readmemb(c+0x10000000),f);

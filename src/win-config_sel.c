@@ -9,6 +9,7 @@
 #include "config.h"
 #include "resources.h"
 #include "win.h"
+#include "paths.h"
 
 static void config_list_update(HWND hdlg)
 {
@@ -16,7 +17,7 @@ static void config_list_update(HWND hdlg)
         int num, c;
         HWND h;
 
-        strcpy(s, pcempath);
+        strcpy(s, pcem_path);
         put_backslash(s);
         strcat(s, "configs\\*.cfg");
         pclog("Dir %s\n", s);
@@ -71,12 +72,12 @@ static BOOL CALLBACK config_selection_dlgproc(HWND hdlg, UINT message, WPARAM wP
                                 {
                                         char cfg[512];
                                         
-                                        strcpy(cfg, pcempath);
+                                        strcpy(cfg, pcem_path);
                                         put_backslash(cfg);
                                         strcat(cfg, "configs\\");
                                         strcat(cfg, s);
                                         strcat(cfg, "cfg");
-//                                        sprintf(cfg, "%s\\configs\\%scfg", pcempath, s);
+//                                        sprintf(cfg, "%s\\configs\\%scfg", pcem_path, s);
                                         pclog("Config name %s\n", cfg);
                                         
                                         strcpy(config_file_default, cfg);
@@ -97,7 +98,7 @@ static BOOL CALLBACK config_selection_dlgproc(HWND hdlg, UINT message, WPARAM wP
                         {
                                 char s[512];
                                 
-                                strcpy(s, pcempath);
+                                strcpy(s, pcem_path);
                                 put_backslash(s);
                                 strcat(s, "configs\\");
                                 pclog("Dir %s\n", s);
@@ -125,7 +126,7 @@ static BOOL CALLBACK config_selection_dlgproc(HWND hdlg, UINT message, WPARAM wP
                                 {
                                         char cfg[512];
                                         
-                                        strcpy(cfg, pcempath);
+                                        strcpy(cfg, pcem_path);
                                         put_backslash(cfg);
                                         strcat(cfg, "configs\\");
                                         strcat(cfg, s);
@@ -151,7 +152,7 @@ static BOOL CALLBACK config_selection_dlgproc(HWND hdlg, UINT message, WPARAM wP
                                 {
                                         char cfg[512];
                                         
-                                        strcpy(cfg, pcempath);
+                                        strcpy(cfg, pcem_path);
                                         put_backslash(cfg);
                                         strcat(cfg, "configs\\");
                                         strcat(cfg, s);
