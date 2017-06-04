@@ -82,16 +82,19 @@ void set_roms_paths(char* path)
 void set_nvr_path(char *s)
 {
         strncpy(nvr_path, s, 511);
+        append_slash(nvr_path);
 }
 
 void set_logs_path(char *s)
 {
         strncpy(logs_path, s, 511);
+        append_slash(logs_path);
 }
 
 void set_configs_path(char *s)
 {
         strncpy(configs_path, s, 511);
+        append_slash(configs_path);
 }
 
 void set_default_roms_paths(char *s)
@@ -149,13 +152,13 @@ void paths_onconfigloaded()
                 set_roms_paths(default_roms_paths);
 
         if (strlen(default_nvr_path) > 0)
-                strncpy(nvr_path, default_nvr_path, 511);
+                set_nvr_path(default_nvr_path);
 
         if (strlen(default_configs_path) > 0)
-                strncpy(configs_path, default_configs_path, 511);
+                set_configs_path(default_configs_path);
 
         if (strlen(default_logs_path) > 0)
-                strncpy(logs_path, default_logs_path, 511);
+                set_logs_path(default_logs_path);
 
         pclog("path = %s\n", pcem_path);
 }
