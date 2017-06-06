@@ -45,8 +45,8 @@ int get_roms_path(int pos, char* s, int size)
                         if ((pos--) == 0)
                         {
                                 z = (i-j) + ((i == len-1) ? 1 : 0);
-                                safe_strncpy(s, roms_paths+j, (size < z ? size : z));
-                                s[z] = 0;
+                                safe_strncpy(s, roms_paths+j, size);
+                                s[size-1 < z ? size-1 : z] = 0;
                                 return 1;
                         }
                         j = i+1;
@@ -72,7 +72,7 @@ void set_roms_paths(char* path)
                 {
                         z = (i-j) + ((i == len-1) ? 1 : 0);
                         safe_strncpy(s, path+j, z);
-                        s[z] = 0;
+                        s[511 < z ? 511 : z] = 0;
                         append_slash(s, 512);
                         if (dir_exists(s))
                         {
