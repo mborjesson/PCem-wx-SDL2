@@ -14,3 +14,4 @@ src/*.dmp
 pclog.txt
 pcem.log
 autom4te.cache
+roms/tolower.sh
