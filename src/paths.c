@@ -8,11 +8,16 @@ char default_nvr_path[512];
 char default_configs_path[512];
 char default_logs_path[512];
 
+/* the number of roms paths */
 int num_roms_paths;
 char roms_paths[4096];
+/* this is where pcem.cfg is */
 char pcem_path[512];
+/* this is where nvr-files as stored */
 char nvr_path[512];
+/* this is where configs as stored */
 char configs_path[512];
+/* this is where log-files as stored */
 char logs_path[512];
 
 char get_path_separator()
@@ -97,24 +102,28 @@ void set_configs_path(char *s)
         append_slash(configs_path);
 }
 
+/* set the default roms paths, this makes them permanent */
 void set_default_roms_paths(char *s)
 {
         strncpy(default_roms_paths, s, 1023);
         set_roms_paths(s);
 }
 
+/* set the default nvr path, this makes it permanent */
 void set_default_nvr_path(char *s)
 {
         strncpy(default_nvr_path, s, 511);
         set_nvr_path(s);
 }
 
+/* set the default logs path, this makes it permanent */
 void set_default_logs_path(char *s)
 {
         strncpy(default_logs_path, s, 511);
         set_logs_path(s);
 }
 
+/* set the default configs path, this makes it permanent */
 void set_default_configs_path(char *s)
 {
         strncpy(default_configs_path, s, 511);
@@ -163,13 +172,14 @@ void paths_onconfigloaded()
         pclog("path = %s\n", pcem_path);
 }
 
+/* initialize default paths */
 void paths_init()
 {
         char s[512];
         char *p;
 
-        /* config path may be path to executable */
         get_pcem_path(pcem_path, 511);
+        /* pcem_path may be path to executable */
         p=get_filename(pcem_path);
         *p=0;
 
