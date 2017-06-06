@@ -3,6 +3,8 @@
 #include <string.h>
 #include "ibm.h"
 
+#define safe_strncpy(a,b,n) do { strncpy((a),(b),(n)-1); (a)[(n)-1] = 0; } while (0)
+
 char default_roms_paths[4096];
 char default_nvr_path[512];
 char default_configs_path[512];
@@ -43,7 +45,7 @@ int get_roms_path(int pos, char* s, int size)
                         if ((pos--) == 0)
                         {
                                 z = (i-j) + ((i == len-1) ? 1 : 0);
-                                strncpy(s, roms_paths+j, (size < z ? size : z));
+                                safe_strncpy(s, roms_paths+j, (size < z ? size : z));
                                 s[z] = 0;
                                 return 1;
                         }
@@ -69,9 +71,9 @@ void set_roms_paths(char* path)
                 if (path[i] == path_separator[0] || i == len-1)
                 {
                         z = (i-j) + ((i == len-1) ? 1 : 0);
-                        strncpy(s, path+j, z);
+                        safe_strncpy(s, path+j, z);
                         s[z] = 0;
-                        append_slash(s);
+                        append_slash(s, 512);
                         if (dir_exists(s))
                         {
                                 if (num_roms_paths > 0)
@@ -86,47 +88,47 @@ void set_roms_paths(char* path)
 
 void set_nvr_path(char *s)
 {
-        strncpy(nvr_path, s, 511);
-        append_slash(nvr_path);
+        safe_strncpy(nvr_path, s, 512);
+        append_slash(nvr_path, 512);
 }
 
 void set_logs_path(char *s)
 {
-        strncpy(logs_path, s, 511);
-        append_slash(logs_path);
+        safe_strncpy(logs_path, s, 512);
+        append_slash(logs_path, 512);
 }
 
 void set_configs_path(char *s)
 {
-        strncpy(configs_path, s, 511);
-        append_slash(configs_path);
+        safe_strncpy(configs_path, s, 512);
+        append_slash(configs_path, 512);
 }
 
 /* set the default roms paths, this makes them permanent */
 void set_default_roms_paths(char *s)
 {
-        strncpy(default_roms_paths, s, 1023);
+        safe_strncpy(default_roms_paths, s, 4096);
         set_roms_paths(s);
 }
 
 /* set the default nvr path, this makes it permanent */
 void set_default_nvr_path(char *s)
 {
-        strncpy(default_nvr_path, s, 511);
+        safe_strncpy(default_nvr_path, s, 512);
         set_nvr_path(s);
 }
 
 /* set the default logs path, this makes it permanent */
 void set_default_logs_path(char *s)
 {
-        strncpy(default_logs_path, s, 511);
+        safe_strncpy(default_logs_path, s, 512);
         set_logs_path(s);
 }
 
 /* set the default configs path, this makes it permanent */
 void set_default_configs_path(char *s)
 {
-        strncpy(default_configs_path, s, 511);
+        safe_strncpy(default_configs_path, s, 512);
         set_configs_path(s);
 }
 
@@ -134,16 +136,16 @@ void paths_loadconfig()
 {
         char* cfg_roms_paths = config_get_string(CFG_GLOBAL, "Paths", "roms_paths", 0);
         if (cfg_roms_paths)
-                strncpy(default_roms_paths, cfg_roms_paths, 4095);
+                safe_strncpy(default_roms_paths, cfg_roms_paths, 4096);
         char* cfg_nvr_path = config_get_string(CFG_GLOBAL, "Paths", "nvr_path", 0);
         if (cfg_nvr_path)
-                strncpy(default_nvr_path, cfg_nvr_path, 511);
+                safe_strncpy(default_nvr_path, cfg_nvr_path, 512);
         char* cfg_configs_path = config_get_string(CFG_GLOBAL, "Paths", "configs_path", 0);
         if (cfg_configs_path)
-                strncpy(default_configs_path, cfg_configs_path, 511);
+                safe_strncpy(default_configs_path, cfg_configs_path, 512);
         char* cfg_logs_path = config_get_string(CFG_GLOBAL, "Paths", "logs_path", 0);
         if (cfg_logs_path)
-                strncpy(default_logs_path, cfg_logs_path, 511);
+                safe_strncpy(default_logs_path, cfg_logs_path, 512);
 
 }
 
@@ -178,17 +180,17 @@ void paths_init()
         char s[512];
         char *p;
 
-        get_pcem_path(pcem_path, 511);
+        get_pcem_path(pcem_path, 512);
         /* pcem_path may be path to executable */
         p=get_filename(pcem_path);
         *p=0;
 
         /* set up default paths for this session */
-        append_filename(s, pcem_path, "roms/", 511);
+        append_filename(s, pcem_path, "roms/", 512);
         set_roms_paths(s);
-        append_filename(s, pcem_path, "nvr/", 511);
+        append_filename(s, pcem_path, "nvr/", 512);
         set_nvr_path(s);
-        append_filename(s, pcem_path, "configs/", 511);
+        append_filename(s, pcem_path, "configs/", 512);
         set_configs_path(s);
         set_logs_path(pcem_path);
 
