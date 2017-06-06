@@ -5,9 +5,13 @@
 src/*.o
 src/PCem*
 src/pclog.txt
+src/pcem.log
 src/pcem.cfg
 src/roms/
 src/nvr
 src/configs
 src/*.dmp
 pclog.txt
+pcem.log
+autom4te.cache
+roms/tolower.sh
