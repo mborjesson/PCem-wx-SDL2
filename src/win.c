@@ -41,6 +41,7 @@
 #include "win-ddraw-fs.h"
 #include "win-d3d.h"
 #include "win-d3d-fs.h"
+#include "paths.h"
 //#include "win-opengl.h"
 
 #ifndef MAPVK_VK_TO_VSC
