@@ -88,8 +88,8 @@ void get_pcem_path(char* s, int size)
 {
         struct passwd *pw = getpwuid(getuid());
 
-        strncpy(s, pw->pw_dir, size);
-        append_slash(s);
+        strncpy(s, pw->pw_dir, size-10);
+        append_slash(s, size);
         strcat(s, ".pcem/");
         //get_executable_name(s, size);
 }
