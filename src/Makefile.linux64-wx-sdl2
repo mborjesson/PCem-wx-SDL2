@@ -2,7 +2,7 @@ VPATH = . dosbox resid-fp
 CPP  = g++
 CC   = gcc
 WXRC = wxrc
-CFLAGS = -g -Doff64_t=__off64_t -O3 -fomit-frame-pointer -msse2 -m64 $(shell wx-config --cxxflags) $(shell sdl2-config --cflags)
+CFLAGS = -Doff64_t=__off64_t -O3 -fomit-frame-pointer -msse2 -m64 $(shell wx-config --cxxflags) $(shell sdl2-config --cflags)
 OBJ = 386.o 386_dynarec.o 386_dynarec_ops.o 808x.o acer386sx.o ali1429.o amstrad.o cdrom-ioctl-linux.o cdrom-image.o cdrom-null.o \
 codegen.o codegen_ops.o codegen_timing_486.o codegen_timing_686.o codegen_timing_pentium.o codegen_timing_winchip.o codegen_x86-64.c compaq.o config.o cpu.o \
 dac.o dells200.o device.o disc.o disc_fdi.o disc_img.o disc_sector.o dma.o fdc.o fdc37c665.o fdd.o fdi2raw.o gameport.o \
