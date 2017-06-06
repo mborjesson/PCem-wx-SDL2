@@ -15,7 +15,12 @@
 #include "sound.h"
 #include "video.h"
 #include <dirent.h>
- 
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <pwd.h>
+#include "paths.h"
+
  #undef printf
  
 int has_been_inited = 0;
@@ -61,7 +66,8 @@ uint64_t timer_read()
         return 0;
 }
 
-int dir_exists(char* path) {
+int dir_exists(char* path)
+{
         DIR* dir = opendir(path);
         if (dir)
         {
@@ -71,15 +77,29 @@ int dir_exists(char* path) {
         return 0;
 }
 
+int create_dir(char* path)
+{
+        if (!mkdir(path, 0755))
+                return 1;
+        return 0;
+}
+
 void get_pcem_path(char* s, int size)
 {
-        get_executable_name(s, size);
+        struct passwd *pw = getpwuid(getuid());
+
+        strncpy(s, pw->pw_dir, size);
+        append_slash(s);
+        strcat(s, ".pcem/");
+        //get_executable_name(s, size);
 }
 
 int main(int argc, char *argv[])
 {
+        char s[512];
         int frames = 0;
         int c;
+        FILE* f;
         allegro_init();
         allegro_video_init();
         install_timer();
@@ -89,9 +109,48 @@ int main(int argc, char *argv[])
         
         paths_init();
         
+        /* create directories if they don't exist */
+        if (!dir_exists(pcem_path)) {
+                if (!create_dir(pcem_path))
+                        return 0;
+                append_filename(s, pcem_path, "configs", 511);
+                if (!dir_exists(s) && !create_dir(s))
+                        return 0;
+
+                append_filename(s, pcem_path, "roms", 511);
+                if (!dir_exists(s) && !create_dir(s))
+                        return 0;
+
+                append_filename(s, pcem_path, "nvr", 511);
+                if (!dir_exists(s) && !create_dir(s))
+                        return 0;
+
+                append_filename(s, pcem_path, "logs", 511);
+                if (!dir_exists(s) && !create_dir(s))
+                        return 0;
+        }
+
+        /* set up default paths */
+        sprintf(s, "%s%s%c%s", pcem_path, "roms/", get_path_separator(), "/usr/share/pcem/roms/");
+        set_default_roms_paths(s);
+        append_filename(s, pcem_path, "nvr/", 511);
+        set_default_nvr_path(s);
+        append_filename(s, pcem_path, "configs/", 511);
+        set_default_configs_path(s);
+        append_filename(s, pcem_path, "logs/", 511);
+        set_default_logs_path(s);
+
         sound_init();
 
         initpc(argc, argv);
+
+        /* check if cfg exists, and if not create it */
+        append_filename(s, pcem_path, "pcem.cfg", 511);
+        f = fopen(s, "r");
+        if (f)
+                fclose(f);
+        else
+                saveconfig(NULL);
 
         keyboard_init();
         mouse_init();
