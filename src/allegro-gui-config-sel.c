@@ -84,7 +84,7 @@ static int new_proc(int msg, DIALOG *d, int c)
                 
                 if (c == 1)
                 {
-                        sprintf(config_file_default, "%sconfigs/%s.cfg", pcem_path, config_name);
+                        sprintf(config_file_default, "%s%s.cfg", configs_path, config_name);
                         c = settings_configure();
 			free_configs();
 			populate_configs();
@@ -107,7 +107,7 @@ static int config_proc(int msg, DIALOG *d, int c)
 
                 if (name)
                 { 
-                        sprintf(config_file_default, "%sconfigs/%s.cfg", pcem_path, name);
+                        sprintf(config_file_default, "%s%s.cfg", configs_path, name);
                         loadconfig(NULL);
                         return settings_configure();
                 }
@@ -128,7 +128,7 @@ static int hdd_proc(int msg, DIALOG *d, int c)
 
                 if (name)
                 { 
-                        sprintf(config_file_default, "%sconfigs/%s.cfg", pcem_path, name);
+                        sprintf(config_file_default, "%s%s.cfg", configs_path, name);
                         loadconfig(NULL);
                         return disc_hdconf();
                 }
@@ -166,8 +166,8 @@ static void populate_configs()
         char cfg[512];
         config_t *config = NULL;
 
-        strcpy(cfg, pcem_path);
-        strcat(cfg, "/configs/*.cfg");
+        strcpy(cfg, configs_path);
+        strcat(cfg, "*.cfg");
 		printf("cfg %s\n", cfg);
         if (al_findfirst(cfg, &info, FA_ALL))
                 return;
@@ -248,7 +248,7 @@ int config_sel()
 
                         if (name)
                         {                        
-                                sprintf(config_file_default, "%sconfigs/%s.cfg", pcem_path, name);
+                                sprintf(config_file_default, "%s%s.cfg", configs_path, name);
                                 pclog("config_file_default=%s\n", config_file_default);
                                 free_configs();
                                 return 0;
