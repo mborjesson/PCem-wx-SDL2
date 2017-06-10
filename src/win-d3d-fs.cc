@@ -95,7 +95,8 @@ void d3d_fs_init(HWND h)
         d3dpp.BackBufferWidth        = d3d_fs_w;
         d3dpp.BackBufferHeight       = d3d_fs_h;
 
-        d3d->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, h, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &d3ddev);
+        if (FAILED(d3d->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, h, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &d3ddev)))
+                fatal("CreateDevice failed\n");
         
         d3d_fs_init_objects();
         
@@ -122,14 +123,16 @@ static void d3d_fs_init_objects()
         int y;
         RECT r;
 
-        d3ddev->CreateVertexBuffer(12*sizeof(CUSTOMVERTEX),
+        if (FAILED(d3ddev->CreateVertexBuffer(12*sizeof(CUSTOMVERTEX),
                                    0,
                                    D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1,
                                    D3DPOOL_MANAGED,
                                    &v_buffer,
-                                   NULL);
+                                   NULL)))
+                fatal("CreateVertexBuffer failed\n");
 
-        d3ddev->CreateTexture(2048, 2048, 1, 0, D3DFMT_X8R8G8B8, D3DPOOL_MANAGED, &d3dTexture, NULL);
+        if (FAILED(d3ddev->CreateTexture(2048, 2048, 1, 0, D3DFMT_X8R8G8B8, D3DPOOL_MANAGED, &d3dTexture, NULL)))
+                fatal("CreateTexture failed\n");
      
         r.top    = r.left  = 0;
         r.bottom = r.right = 2047;
