@@ -152,7 +152,7 @@ am__pcem_SOURCES_DIST = 386.c 386_dynarec.c 386_dynarec_ops.c 808x.c \
 	vid_unk_ramdac.c vid_vga.c vid_voodoo.c video.c wd76c10.c \
 	vid_wy700.c x86seg.c x87.c xtide.c sound_dbopl.cc \
 	sound_resid.cc dosbox/cdrom_image.cpp dosbox/dbopl.cpp \
-	dosbox/vid_cga_comp.c resid-fp/convolve.cc \
+	dosbox/nukedopl.cpp dosbox/vid_cga_comp.c resid-fp/convolve.cc \
 	resid-fp/convolve-sse.cc resid-fp/envelope.cc \
 	resid-fp/extfilt.cc resid-fp/filter.cc resid-fp/pot.cc \
 	resid-fp/sid.cc resid-fp/voice.cc resid-fp/wave6581_PS_.cc \
@@ -278,16 +278,17 @@ am_pcem_OBJECTS = pcem-386.$(OBJEXT) pcem-386_dynarec.$(OBJEXT) \
 	pcem-x87.$(OBJEXT) pcem-xtide.$(OBJEXT) \
 	pcem-sound_dbopl.$(OBJEXT) pcem-sound_resid.$(OBJEXT) \
 	pcem-cdrom_image.$(OBJEXT) pcem-dbopl.$(OBJEXT) \
-	pcem-vid_cga_comp.$(OBJEXT) pcem-convolve.$(OBJEXT) \
-	pcem-convolve-sse.$(OBJEXT) pcem-envelope.$(OBJEXT) \
-	pcem-extfilt.$(OBJEXT) pcem-filter.$(OBJEXT) \
-	pcem-pot.$(OBJEXT) pcem-sid.$(OBJEXT) pcem-voice.$(OBJEXT) \
-	pcem-wave6581_PS_.$(OBJEXT) pcem-wave6581_PST.$(OBJEXT) \
-	pcem-wave6581_P_T.$(OBJEXT) pcem-wave6581__ST.$(OBJEXT) \
-	pcem-wave8580_PS_.$(OBJEXT) pcem-wave8580_PST.$(OBJEXT) \
-	pcem-wave8580_P_T.$(OBJEXT) pcem-wave8580__ST.$(OBJEXT) \
-	pcem-wave.$(OBJEXT) $(am__objects_1) $(am__objects_2) \
-	$(am__objects_3) $(am__objects_4)
+	pcem-nukedopl.$(OBJEXT) pcem-vid_cga_comp.$(OBJEXT) \
+	pcem-convolve.$(OBJEXT) pcem-convolve-sse.$(OBJEXT) \
+	pcem-envelope.$(OBJEXT) pcem-extfilt.$(OBJEXT) \
+	pcem-filter.$(OBJEXT) pcem-pot.$(OBJEXT) pcem-sid.$(OBJEXT) \
+	pcem-voice.$(OBJEXT) pcem-wave6581_PS_.$(OBJEXT) \
+	pcem-wave6581_PST.$(OBJEXT) pcem-wave6581_P_T.$(OBJEXT) \
+	pcem-wave6581__ST.$(OBJEXT) pcem-wave8580_PS_.$(OBJEXT) \
+	pcem-wave8580_PST.$(OBJEXT) pcem-wave8580_P_T.$(OBJEXT) \
+	pcem-wave8580__ST.$(OBJEXT) pcem-wave.$(OBJEXT) \
+	$(am__objects_1) $(am__objects_2) $(am__objects_3) \
+	$(am__objects_4)
 pcem_OBJECTS = $(am_pcem_OBJECTS)
 am__DEPENDENCIES_1 =
 @USE_WX_FALSE@pcem_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -523,7 +524,7 @@ pcem_SOURCES = 386.c 386_dynarec.c 386_dynarec_ops.c 808x.c \
 	vid_unk_ramdac.c vid_vga.c vid_voodoo.c video.c wd76c10.c \
 	vid_wy700.c x86seg.c x87.c xtide.c sound_dbopl.cc \
 	sound_resid.cc dosbox/cdrom_image.cpp dosbox/dbopl.cpp \
-	dosbox/vid_cga_comp.c resid-fp/convolve.cc \
+	dosbox/nukedopl.cpp dosbox/vid_cga_comp.c resid-fp/convolve.cc \
 	resid-fp/convolve-sse.cc resid-fp/envelope.cc \
 	resid-fp/extfilt.cc resid-fp/filter.cc resid-fp/pot.cc \
 	resid-fp/sid.cc resid-fp/voice.cc resid-fp/wave6581_PS_.cc \
@@ -711,6 +712,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-mouse_serial.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-neat.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-nmi.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-nukedopl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-nvr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-olivetti_m24.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-opti495.Po@am__quote@
@@ -3497,6 +3499,20 @@ pcem-dbopl.obj: dosbox/dbopl.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='dosbox/dbopl.cpp' object='pcem-dbopl.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-dbopl.obj `if test -f 'dosbox/dbopl.cpp'; then $(CYGPATH_W) 'dosbox/dbopl.cpp'; else $(CYGPATH_W) '$(srcdir)/dosbox/dbopl.cpp'; fi`
+
+pcem-nukedopl.o: dosbox/nukedopl.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-nukedopl.o -MD -MP -MF $(DEPDIR)/pcem-nukedopl.Tpo -c -o pcem-nukedopl.o `test -f 'dosbox/nukedopl.cpp' || echo '$(srcdir)/'`dosbox/nukedopl.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-nukedopl.Tpo $(DEPDIR)/pcem-nukedopl.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='dosbox/nukedopl.cpp' object='pcem-nukedopl.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-nukedopl.o `test -f 'dosbox/nukedopl.cpp' || echo '$(srcdir)/'`dosbox/nukedopl.cpp
+
+pcem-nukedopl.obj: dosbox/nukedopl.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-nukedopl.obj -MD -MP -MF $(DEPDIR)/pcem-nukedopl.Tpo -c -o pcem-nukedopl.obj `if test -f 'dosbox/nukedopl.cpp'; then $(CYGPATH_W) 'dosbox/nukedopl.cpp'; else $(CYGPATH_W) '$(srcdir)/dosbox/nukedopl.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-nukedopl.Tpo $(DEPDIR)/pcem-nukedopl.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='dosbox/nukedopl.cpp' object='pcem-nukedopl.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-nukedopl.obj `if test -f 'dosbox/nukedopl.cpp'; then $(CYGPATH_W) 'dosbox/nukedopl.cpp'; else $(CYGPATH_W) '$(srcdir)/dosbox/nukedopl.cpp'; fi`
 
 pcem-convolve.o: resid-fp/convolve.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-convolve.o -MD -MP -MF $(DEPDIR)/pcem-convolve.Tpo -c -o pcem-convolve.o `test -f 'resid-fp/convolve.cc' || echo '$(srcdir)/'`resid-fp/convolve.cc
