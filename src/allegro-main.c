@@ -20,6 +20,8 @@
 #include <unistd.h>
 #include <pwd.h>
 #include "paths.h"
+#include <time.h>
+#include <math.h>
 
  #undef printf
  
@@ -31,6 +33,27 @@ int winsizex = -1, winsizey = -1;
 
 int romspresent[ROM_MAX];
 int gfx_present[GFX_MAX];
+
+long tick_init;
+
+void delay_ms(unsigned int ms)
+{
+        rest(ms);
+}
+
+long time_in_ms()
+{
+        struct timespec spec;
+
+        clock_gettime(CLOCK_REALTIME, &spec);
+
+        return round(spec.tv_nsec / 1.0e6); // Convert nanoseconds to milliseconds
+}
+
+unsigned int get_ticks()
+{
+        return time_in_ms()-tick_init;
+}
 
 void updatewindowsize(int x, int y)
 {
@@ -100,12 +123,12 @@ int main(int argc, char *argv[])
         int frames = 0;
         int c;
         FILE* f;
+        tick_init = time_in_ms();
         allegro_init();
         allegro_video_init();
         install_timer();
         install_int_ex(timer_rout, BPS_TO_TIMER(100));
 	install_int_ex(onesec, BPS_TO_TIMER(1));
-	midi_init();
         
         paths_init();
         
@@ -271,7 +294,6 @@ int main(int argc, char *argv[])
         joystick_close();
         mouse_close();
         keyboard_close();
- 	midi_close();
  
          return 0;
 }

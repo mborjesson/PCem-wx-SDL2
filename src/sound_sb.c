@@ -7,7 +7,7 @@
 #include "rom.h"
 #include "sound.h"
 #include "sound_emu8k.h"
-#include "sound_mpu401_uart.h"
+#include "sound_mpu401.h"
 #include "sound_opl.h"
 #include "sound_sb.h"
 #include "sound_sb_dsp.h"
@@ -33,7 +33,7 @@ typedef struct sb_t
         opl_t           opl;
         sb_dsp_t        dsp;
         sb_mixer_t      mixer;
-        mpu401_uart_t   mpu;
+        mpu_t           mpu;
         emu8k_t         emu8k;
 
         int pos;
@@ -598,7 +598,7 @@ void *sb_16_init()
         io_sethandler(0x0388, 0x0004, opl3_read,   NULL, NULL, opl3_write,   NULL, NULL, &sb->opl);
         io_sethandler(0x0224, 0x0002, sb_16_mixer_read, NULL, NULL, sb_16_mixer_write, NULL, NULL, sb);
         sound_add_handler(sb_get_buffer_opl3, sb);
-        mpu401_uart_init(&sb->mpu, 0x330);
+        mpu401_init(&sb->mpu, 0x330, 9, M_UART);
 
         sb->mixer.regs[0x30] = 31 << 3;
         sb->mixer.regs[0x31] = 31 << 3;
@@ -638,7 +638,7 @@ void *sb_awe32_init()
         io_sethandler(0x0388, 0x0004, opl3_read,   NULL, NULL, opl3_write,   NULL, NULL, &sb->opl);
         io_sethandler(0x0224, 0x0002, sb_16_mixer_read, NULL, NULL, sb_16_mixer_write, NULL, NULL, sb);
         sound_add_handler(sb_get_buffer_emu8k, sb);
-        mpu401_uart_init(&sb->mpu, 0x330);       
+        mpu401_init(&sb->mpu, 0x330, 9, M_UART);
         emu8k_init(&sb->emu8k, onboard_ram);
 
         sb->mixer.regs[0x30] = 31 << 3;
@@ -1011,12 +1011,6 @@ static device_config_t sb_pro_mcv_config[] =
 static device_config_t sb_16_config[] =
 {
         {
-                .name = "midi",
-                .description = "MIDI out device",
-                .type = CONFIG_MIDI,
-                .default_int = 0
-        },
-        {
                 .name = "opl_emu",
                 .description = "OPL emulator",
                 .type = CONFIG_SELECTION,
@@ -1040,12 +1034,6 @@ static device_config_t sb_16_config[] =
 
 static device_config_t sb_awe32_config[] =
 {
-        {
-                .name = "midi",
-                .description = "MIDI out device",
-                .type = CONFIG_MIDI,
-                .default_int = 0
-        },
         {
                 .name = "onboard_ram",
                 .description = "Onboard RAM",

@@ -24,6 +24,25 @@ FILE *romfopen(char *fn, char *mode)
         return 0;
 }
 
+int rom_getfile(char* fn, char *s, int size)
+{
+        FILE *f;
+        int i;
+        for (i = 0; i < num_roms_paths; ++i)
+        {
+                get_roms_path(i, s, size);
+                put_backslash(s);
+                strcat(s, fn);
+                f = fopen(s, "rb");
+                if (f)
+                {
+                        fclose(f);
+                        return 1;
+                }
+        }
+        return 0;
+}
+
 int rom_present(char *fn)
 {
         FILE *f;

@@ -402,6 +402,30 @@
 						</object>
 						
 									
+						<!-- midi out device -->
+						<object class="sizeritem">
+							<flag>wxALIGN_LEFT|wxALL</flag>
+							<border>0</border>
+							<object class="wxStaticText">
+								<label>MIDI out device:</label>
+							</object>
+						</object>
+						<object class="sizeritem">
+							<flag>wxALL</flag>
+							<border>0</border>
+							<object class="wxComboBox" name="IDC_COMBOMIDI">
+								<style>wxCB_DROPDOWN | wxCB_READONLY</style>
+							</object>
+						</object>
+						<object class="sizeritem">
+							<flag>wxALIGN_CENTRE|wxALL</flag>
+							<border>0</border>
+							<object class="wxButton" name="IDC_CONFIGUREMIDI">
+								<label>Configure</label>
+							</object>
+						</object>
+						
+									
 						<!-- HDD -->
 						<object class="sizeritem">
 							<flag>wxALIGN_LEFT|wxALL</flag>

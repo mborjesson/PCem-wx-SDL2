@@ -12,6 +12,7 @@
 #include "gameport.h"
 #include "hdd.h"
 #include "mem.h"
+#include "midi.h"
 #include "model.h"
 #include "mouse.h"
 #include "nvr.h"
@@ -24,6 +25,7 @@
 extern int is486;
 static int romstolist[ROM_MAX], listtomodel[ROM_MAX], romstomodel[ROM_MAX], modeltolist[ROM_MAX];
 static int settings_sound_to_list[20], settings_list_to_sound[20];
+static int settings_midi_to_list[20], settings_list_to_midi[20];
 static int settings_mouse_to_list[20], settings_list_to_mouse[20];
 static char *hdd_names[16];
 
@@ -114,6 +116,34 @@ static void recalc_snd_list(HWND hdlg, int model)
         SendMessage(h, CB_SETCURSEL, settings_sound_to_list[sound_card_current], 0);
 }
 
+static void recalc_midi_list(HWND hdlg, int model)
+{
+        HWND h = GetDlgItem(hdlg, IDC_COMBOMIDI);
+        int c = 0, d = 0;
+
+        SendMessage(h, CB_RESETCONTENT, 0, 0);
+
+        while (1)
+        {
+                char *s = midi_device_getname(c);
+
+                if (!s[0])
+                        break;
+
+                settings_midi_to_list[c] = d;
+
+                if (midi_device_available(c))
+                {
+						SendMessage(h, CB_ADDSTRING, 0, (LPARAM)(LPCSTR)s);
+						settings_list_to_midi[d] = c;
+						d++;
+                }
+
+                c++;
+        }
+        SendMessage(h, CB_SETCURSEL, settings_midi_to_list[midi_device_current], 0);
+}
+
 static void recalc_hdd_list(HWND hdlg, int model, int use_selected_hdd)
 {
         HWND h;
@@ -189,7 +219,7 @@ static BOOL CALLBACK config_dlgproc(HWND hdlg, UINT message, WPARAM wParam, LPAR
         int c, d;
         int gfx, mem, fpu;
         int temp_cpu, temp_cpu_m, temp_model;
-        int temp_GAMEBLASTER, temp_GUS, temp_SSI2001, temp_voodoo, temp_sound_card_current;
+        int temp_GAMEBLASTER, temp_GUS, temp_SSI2001, temp_voodoo, temp_sound_card_current, temp_midi_device_current;
         int temp_dynarec;
         int cpu_flags;
         int temp_fda_type, temp_fdb_type;
@@ -249,6 +279,7 @@ static BOOL CALLBACK config_dlgproc(HWND hdlg, UINT message, WPARAM wParam, LPAR
                 SendMessage(h, CB_SETCURSEL, cpu, 0);
 
                 recalc_snd_list(hdlg, romstomodel[romset]);
+                recalc_midi_list(hdlg, romstomodel[romset]);
 
                 h=GetDlgItem(hdlg, IDC_CHECK3);
                 SendMessage(h, BM_SETCHECK, GAMEBLASTER, 0);
@@ -311,6 +342,12 @@ static BOOL CALLBACK config_dlgproc(HWND hdlg, UINT message, WPARAM wParam, LPAR
                 else
                         EnableWindow(h, FALSE);
                         
+                h = GetDlgItem(hdlg, IDC_CONFIGUREMIDI);
+                if (midi_device_has_config(midi_device_current))
+                        EnableWindow(h, TRUE);
+                else
+                        EnableWindow(h, FALSE);
+
                 h = GetDlgItem(hdlg, IDC_COMBODRA);
                 SendMessage(h, CB_ADDSTRING, 0, (LPARAM)(LPCSTR)"None");
                 SendMessage(h, CB_ADDSTRING, 0, (LPARAM)(LPCSTR)"5.25\" 360k");
@@ -448,6 +485,9 @@ static BOOL CALLBACK config_dlgproc(HWND hdlg, UINT message, WPARAM wParam, LPAR
                         h = GetDlgItem(hdlg, IDC_COMBOSND);
                         temp_sound_card_current = settings_list_to_sound[SendMessage(h, CB_GETCURSEL, 0, 0)];
 
+                        h = GetDlgItem(hdlg, IDC_COMBOMIDI);
+                        temp_midi_device_current = settings_list_to_midi[SendMessage(h, CB_GETCURSEL, 0, 0)];
+
                         h = GetDlgItem(hdlg, IDC_CHECKDYNAREC);
                         temp_dynarec = SendMessage(h, BM_GETCHECK, 0, 0);
 
@@ -469,6 +509,7 @@ static BOOL CALLBACK config_dlgproc(HWND hdlg, UINT message, WPARAM wParam, LPAR
                         if (temp_model != model || gfx != gfxcard || mem != mem_size ||
                             fpu != hasfpu || temp_GAMEBLASTER != GAMEBLASTER || temp_GUS != GUS ||
                             temp_SSI2001 != SSI2001 || temp_sound_card_current != sound_card_current ||
+							temp_midi_device_current != midi_device_current ||
                             temp_voodoo != voodoo_enabled || temp_dynarec != cpu_use_dynarec ||
 			    temp_fda_type != fdd_get_type(0) || temp_fdb_type != fdd_get_type(1) ||
                             temp_mouse_type != mouse_type || hdd_changed)
@@ -486,6 +527,7 @@ static BOOL CALLBACK config_dlgproc(HWND hdlg, UINT message, WPARAM wParam, LPAR
                                         GUS = temp_GUS;
                                         SSI2001 = temp_SSI2001;
                                         sound_card_current = temp_sound_card_current;
+                                        midi_device_current = temp_midi_device_current;
                                         voodoo_enabled = temp_voodoo;
                                         cpu_use_dynarec = temp_dynarec;
                                         mouse_type = temp_mouse_type;
@@ -651,6 +693,7 @@ static BOOL CALLBACK config_dlgproc(HWND hdlg, UINT message, WPARAM wParam, LPAR
                                 recalc_hdd_list(hdlg, temp_model, 1);
 
                                 recalc_snd_list(hdlg, temp_model);
+                                recalc_midi_list(hdlg, temp_model);
                         }
                         break;
                         case IDC_COMBOCPUM:
@@ -767,6 +810,24 @@ static BOOL CALLBACK config_dlgproc(HWND hdlg, UINT message, WPARAM wParam, LPAR
                         else
                                 EnableWindow(h, FALSE);
                         break;                                
+
+                        case IDC_CONFIGUREMIDI:
+                        h = GetDlgItem(hdlg, IDC_COMBOMIDI);
+                        temp_midi_device_current = settings_list_to_midi[SendMessage(h, CB_GETCURSEL, 0, 0)];
+
+                        deviceconfig_open(hdlg, (void *)midi_device_getdevice(temp_midi_device_current));
+                        break;
+
+                        case IDC_COMBOMIDI:
+                        h = GetDlgItem(hdlg, IDC_COMBOMIDI);
+                        temp_midi_device_current = settings_list_to_midi[SendMessage(h, CB_GETCURSEL, 0, 0)];
+
+                        h = GetDlgItem(hdlg, IDC_CONFIGUREMIDI);
+                        if (midi_device_has_config(temp_midi_device_current))
+                                EnableWindow(h, TRUE);
+                        else
+                                EnableWindow(h, FALSE);
+                        break;
 
                         case IDC_CONFIGUREVOODOO:
                         deviceconfig_open(hdlg, (void *)&voodoo_device);

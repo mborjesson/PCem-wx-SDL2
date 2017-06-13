@@ -111,6 +111,16 @@ void updatewindowsize(int x, int y)
         display_resize(x, y);
 }
 
+unsigned int get_ticks()
+{
+        return SDL_GetTicks();
+}
+
+void delay_ms(unsigned int ms)
+{
+        SDL_Delay(ms);
+}
+
 void startblit()
 {
         SDL_LockMutex(ghMutex);

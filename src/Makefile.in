@@ -130,45 +130,53 @@ am__pcem_SOURCES_DIST = 386.c 386_dynarec.c 386_dynarec_ops.c 808x.c \
 	joystick_sw_pad.c joystick_tm_fcs.c keyboard.c \
 	keyboard_amstrad.c keyboard_at.c keyboard_olim24.c \
 	keyboard_pcjr.c keyboard_xt.c laserxt.c lpt.c mca.c mcr.c \
-	mem.c mfm_at.c mfm_xebec.c model.c mouse.c mouse_ps2.c \
-	mouse_serial.c neat.c nmi.c nvr.c olivetti_m24.c opti495.c \
-	paths.c pc.c pci.c pic.c piix.c pit.c ppi.c ps1.c ps2.c \
-	ps2_mca.c ps2_nvr.c rom.c rtc.c scat.c serial.c sio.c sis496.c \
-	sound.c sound_ad1848.c sound_adlib.c sound_adlibgold.c \
-	sound_cms.c sound_emu8k.c sound_gus.c sound_mpu401_uart.c \
-	sound_opl.c sound_pas16.c sound_ps1.c sound_pssj.c sound_sb.c \
-	sound_sb_dsp.c sound_sn76489.c sound_speaker.c sound_ssi2001.c \
-	sound_wss.c sound_ym7128.c soundopenal.c tandy_eeprom.c \
-	tandy_rom.c timer.c um8669f.c um8881f.c vid_ati_eeprom.c \
-	vid_ati_mach64.c vid_ati18800.c vid_ati28800.c \
-	vid_ati68860_ramdac.c vid_cga.c vid_cl5429.c vid_colorplus.c \
-	vid_ega.c vid_et4000.c vid_et4000w32.c vid_genius.c \
-	vid_hercules.c vid_icd2061.c vid_ics2595.c vid_incolor.c \
-	vid_mda.c vid_olivetti_m24.c vid_oti067.c vid_paradise.c \
-	vid_pc200.c vid_pc1512.c vid_pc1640.c vid_pcjr.c \
-	vid_ps1_svga.c vid_s3.c vid_s3_virge.c vid_sdac_ramdac.c \
-	vid_stg_ramdac.c vid_svga.c vid_svga_render.c vid_tandy.c \
-	vid_tandysl.c vid_tgui9440.c vid_tkd8001_ramdac.c vid_tvga.c \
-	vid_unk_ramdac.c vid_vga.c vid_voodoo.c video.c wd76c10.c \
-	vid_wy700.c x86seg.c x87.c xtide.c sound_dbopl.cc \
-	sound_resid.cc dosbox/cdrom_image.cpp dosbox/dbopl.cpp \
-	dosbox/nukedopl.cpp dosbox/vid_cga_comp.c resid-fp/convolve.cc \
-	resid-fp/convolve-sse.cc resid-fp/envelope.cc \
-	resid-fp/extfilt.cc resid-fp/filter.cc resid-fp/pot.cc \
-	resid-fp/sid.cc resid-fp/voice.cc resid-fp/wave6581_PS_.cc \
-	resid-fp/wave6581_PST.cc resid-fp/wave6581_P_T.cc \
-	resid-fp/wave6581__ST.cc resid-fp/wave8580_PS_.cc \
-	resid-fp/wave8580_PST.cc resid-fp/wave8580_P_T.cc \
-	resid-fp/wave8580__ST.cc resid-fp/wave.cc wx-main.cc \
-	wx-config_sel.c wx-dialogbox.cc wx-utils.cc wx-app.cc \
-	wx-sdl2-joystick.c wx-sdl2-mouse.c wx-sdl2-keyboard.c \
-	wx-sdl2-video.c wx-sdl2-midi.c wx-sdl2.c wx-config.c \
-	wx-deviceconfig.cc wx-sdl2-hdconf.c wx-status.cc \
-	wx-sdl2-status.c wx-resources.cpp wx-thread.c wx-common.c \
-	wx-sdl2-display.c allegro-gui.c allegro-gui-config-sel.c \
-	allegro-gui-configure.c allegro-gui-deviceconfig.c \
-	allegro-gui-hdconf.c allegro-joystick.c allegro-keyboard.c \
-	allegro-main.c allegro-midi.c allegro-mouse.c allegro-video.c \
+	midi.c midi_mt32.c midi_system.c mem.c mfm_at.c mfm_xebec.c \
+	model.c mouse.c mouse_ps2.c mouse_serial.c neat.c nmi.c nvr.c \
+	olivetti_m24.c opti495.c paths.c pc.c pci.c pic.c piix.c pit.c \
+	ppi.c ps1.c ps2.c ps2_mca.c ps2_nvr.c rom.c rtc.c scat.c \
+	serial.c sio.c sis496.c sound.c sound_ad1848.c sound_adlib.c \
+	sound_adlibgold.c sound_cms.c sound_emu8k.c sound_gus.c \
+	sound_mpu401.c sound_opl.c sound_pas16.c sound_ps1.c \
+	sound_pssj.c sound_sb.c sound_sb_dsp.c sound_sn76489.c \
+	sound_speaker.c sound_ssi2001.c sound_wss.c sound_ym7128.c \
+	soundopenal.c tandy_eeprom.c tandy_rom.c timer.c um8669f.c \
+	um8881f.c vid_ati_eeprom.c vid_ati_mach64.c vid_ati18800.c \
+	vid_ati28800.c vid_ati68860_ramdac.c vid_cga.c vid_cl5429.c \
+	vid_colorplus.c vid_ega.c vid_et4000.c vid_et4000w32.c \
+	vid_genius.c vid_hercules.c vid_icd2061.c vid_ics2595.c \
+	vid_incolor.c vid_mda.c vid_olivetti_m24.c vid_oti067.c \
+	vid_paradise.c vid_pc200.c vid_pc1512.c vid_pc1640.c \
+	vid_pcjr.c vid_ps1_svga.c vid_s3.c vid_s3_virge.c \
+	vid_sdac_ramdac.c vid_stg_ramdac.c vid_svga.c \
+	vid_svga_render.c vid_tandy.c vid_tandysl.c vid_tgui9440.c \
+	vid_tkd8001_ramdac.c vid_tvga.c vid_unk_ramdac.c vid_vga.c \
+	vid_voodoo.c video.c wd76c10.c vid_wy700.c x86seg.c x87.c \
+	xtide.c sound_dbopl.cc sound_resid.cc dosbox/cdrom_image.cpp \
+	dosbox/dbopl.cpp dosbox/nukedopl.cpp dosbox/vid_cga_comp.c \
+	resid-fp/convolve.cc resid-fp/convolve-sse.cc \
+	resid-fp/envelope.cc resid-fp/extfilt.cc resid-fp/filter.cc \
+	resid-fp/pot.cc resid-fp/sid.cc resid-fp/voice.cc \
+	resid-fp/wave6581_PS_.cc resid-fp/wave6581_PST.cc \
+	resid-fp/wave6581_P_T.cc resid-fp/wave6581__ST.cc \
+	resid-fp/wave8580_PS_.cc resid-fp/wave8580_PST.cc \
+	resid-fp/wave8580_P_T.cc resid-fp/wave8580__ST.cc \
+	resid-fp/wave.cc munt/Analog.cpp munt/BReverbModel.cpp \
+	munt/File.cpp munt/FileStream.cpp munt/LA32Ramp.cpp \
+	munt/LA32FloatWaveGenerator.cpp munt/LA32WaveGenerator.cpp \
+	munt/MidiStreamParser.cpp munt/Part.cpp munt/Partial.cpp \
+	munt/PartialManager.cpp munt/Poly.cpp munt/ROMInfo.cpp \
+	munt/Synth.cpp munt/Tables.cpp munt/TVA.cpp munt/TVF.cpp \
+	munt/TVP.cpp munt/sha1/sha1.cpp \
+	munt/c_interface/c_interface.cpp wx-main.cc wx-config_sel.c \
+	wx-dialogbox.cc wx-utils.cc wx-app.cc wx-sdl2-joystick.c \
+	wx-sdl2-mouse.c wx-sdl2-keyboard.c wx-sdl2-video.c \
+	wx-sdl2-midi.c wx-sdl2.c wx-config.c wx-deviceconfig.cc \
+	wx-sdl2-hdconf.c wx-status.cc wx-sdl2-status.c \
+	wx-resources.cpp wx-thread.c wx-common.c wx-sdl2-display.c \
+	allegro-gui.c allegro-gui-config-sel.c allegro-gui-configure.c \
+	allegro-gui-deviceconfig.c allegro-gui-hdconf.c \
+	allegro-joystick.c allegro-keyboard.c allegro-main.c \
+	allegro-midi.c allegro-mouse.c allegro-video.c \
 	thread-pthread.c codegen_x86.c codegen_x86-64.c
 @USE_WX_TRUE@am__objects_1 = pcem-wx-main.$(OBJEXT) \
 @USE_WX_TRUE@	pcem-wx-config_sel.$(OBJEXT) \
@@ -229,7 +237,9 @@ am_pcem_OBJECTS = pcem-386.$(OBJEXT) pcem-386_dynarec.$(OBJEXT) \
 	pcem-keyboard_at.$(OBJEXT) pcem-keyboard_olim24.$(OBJEXT) \
 	pcem-keyboard_pcjr.$(OBJEXT) pcem-keyboard_xt.$(OBJEXT) \
 	pcem-laserxt.$(OBJEXT) pcem-lpt.$(OBJEXT) pcem-mca.$(OBJEXT) \
-	pcem-mcr.$(OBJEXT) pcem-mem.$(OBJEXT) pcem-mfm_at.$(OBJEXT) \
+	pcem-mcr.$(OBJEXT) pcem-midi.$(OBJEXT) \
+	pcem-midi_mt32.$(OBJEXT) pcem-midi_system.$(OBJEXT) \
+	pcem-mem.$(OBJEXT) pcem-mfm_at.$(OBJEXT) \
 	pcem-mfm_xebec.$(OBJEXT) pcem-model.$(OBJEXT) \
 	pcem-mouse.$(OBJEXT) pcem-mouse_ps2.$(OBJEXT) \
 	pcem-mouse_serial.$(OBJEXT) pcem-neat.$(OBJEXT) \
@@ -244,7 +254,7 @@ am_pcem_OBJECTS = pcem-386.$(OBJEXT) pcem-386_dynarec.$(OBJEXT) \
 	pcem-sound.$(OBJEXT) pcem-sound_ad1848.$(OBJEXT) \
 	pcem-sound_adlib.$(OBJEXT) pcem-sound_adlibgold.$(OBJEXT) \
 	pcem-sound_cms.$(OBJEXT) pcem-sound_emu8k.$(OBJEXT) \
-	pcem-sound_gus.$(OBJEXT) pcem-sound_mpu401_uart.$(OBJEXT) \
+	pcem-sound_gus.$(OBJEXT) pcem-sound_mpu401.$(OBJEXT) \
 	pcem-sound_opl.$(OBJEXT) pcem-sound_pas16.$(OBJEXT) \
 	pcem-sound_ps1.$(OBJEXT) pcem-sound_pssj.$(OBJEXT) \
 	pcem-sound_sb.$(OBJEXT) pcem-sound_sb_dsp.$(OBJEXT) \
@@ -287,8 +297,17 @@ am_pcem_OBJECTS = pcem-386.$(OBJEXT) pcem-386_dynarec.$(OBJEXT) \
 	pcem-wave6581__ST.$(OBJEXT) pcem-wave8580_PS_.$(OBJEXT) \
 	pcem-wave8580_PST.$(OBJEXT) pcem-wave8580_P_T.$(OBJEXT) \
 	pcem-wave8580__ST.$(OBJEXT) pcem-wave.$(OBJEXT) \
-	$(am__objects_1) $(am__objects_2) $(am__objects_3) \
-	$(am__objects_4)
+	pcem-Analog.$(OBJEXT) pcem-BReverbModel.$(OBJEXT) \
+	pcem-File.$(OBJEXT) pcem-FileStream.$(OBJEXT) \
+	pcem-LA32Ramp.$(OBJEXT) pcem-LA32FloatWaveGenerator.$(OBJEXT) \
+	pcem-LA32WaveGenerator.$(OBJEXT) \
+	pcem-MidiStreamParser.$(OBJEXT) pcem-Part.$(OBJEXT) \
+	pcem-Partial.$(OBJEXT) pcem-PartialManager.$(OBJEXT) \
+	pcem-Poly.$(OBJEXT) pcem-ROMInfo.$(OBJEXT) \
+	pcem-Synth.$(OBJEXT) pcem-Tables.$(OBJEXT) pcem-TVA.$(OBJEXT) \
+	pcem-TVF.$(OBJEXT) pcem-TVP.$(OBJEXT) pcem-sha1.$(OBJEXT) \
+	pcem-c_interface.$(OBJEXT) $(am__objects_1) $(am__objects_2) \
+	$(am__objects_3) $(am__objects_4)
 pcem_OBJECTS = $(am_pcem_OBJECTS)
 am__DEPENDENCIES_1 =
 @USE_WX_FALSE@pcem_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -502,36 +521,44 @@ pcem_SOURCES = 386.c 386_dynarec.c 386_dynarec_ops.c 808x.c \
 	joystick_sw_pad.c joystick_tm_fcs.c keyboard.c \
 	keyboard_amstrad.c keyboard_at.c keyboard_olim24.c \
 	keyboard_pcjr.c keyboard_xt.c laserxt.c lpt.c mca.c mcr.c \
-	mem.c mfm_at.c mfm_xebec.c model.c mouse.c mouse_ps2.c \
-	mouse_serial.c neat.c nmi.c nvr.c olivetti_m24.c opti495.c \
-	paths.c pc.c pci.c pic.c piix.c pit.c ppi.c ps1.c ps2.c \
-	ps2_mca.c ps2_nvr.c rom.c rtc.c scat.c serial.c sio.c sis496.c \
-	sound.c sound_ad1848.c sound_adlib.c sound_adlibgold.c \
-	sound_cms.c sound_emu8k.c sound_gus.c sound_mpu401_uart.c \
-	sound_opl.c sound_pas16.c sound_ps1.c sound_pssj.c sound_sb.c \
-	sound_sb_dsp.c sound_sn76489.c sound_speaker.c sound_ssi2001.c \
-	sound_wss.c sound_ym7128.c soundopenal.c tandy_eeprom.c \
-	tandy_rom.c timer.c um8669f.c um8881f.c vid_ati_eeprom.c \
-	vid_ati_mach64.c vid_ati18800.c vid_ati28800.c \
-	vid_ati68860_ramdac.c vid_cga.c vid_cl5429.c vid_colorplus.c \
-	vid_ega.c vid_et4000.c vid_et4000w32.c vid_genius.c \
-	vid_hercules.c vid_icd2061.c vid_ics2595.c vid_incolor.c \
-	vid_mda.c vid_olivetti_m24.c vid_oti067.c vid_paradise.c \
-	vid_pc200.c vid_pc1512.c vid_pc1640.c vid_pcjr.c \
-	vid_ps1_svga.c vid_s3.c vid_s3_virge.c vid_sdac_ramdac.c \
-	vid_stg_ramdac.c vid_svga.c vid_svga_render.c vid_tandy.c \
-	vid_tandysl.c vid_tgui9440.c vid_tkd8001_ramdac.c vid_tvga.c \
-	vid_unk_ramdac.c vid_vga.c vid_voodoo.c video.c wd76c10.c \
-	vid_wy700.c x86seg.c x87.c xtide.c sound_dbopl.cc \
-	sound_resid.cc dosbox/cdrom_image.cpp dosbox/dbopl.cpp \
-	dosbox/nukedopl.cpp dosbox/vid_cga_comp.c resid-fp/convolve.cc \
-	resid-fp/convolve-sse.cc resid-fp/envelope.cc \
-	resid-fp/extfilt.cc resid-fp/filter.cc resid-fp/pot.cc \
-	resid-fp/sid.cc resid-fp/voice.cc resid-fp/wave6581_PS_.cc \
-	resid-fp/wave6581_PST.cc resid-fp/wave6581_P_T.cc \
-	resid-fp/wave6581__ST.cc resid-fp/wave8580_PS_.cc \
-	resid-fp/wave8580_PST.cc resid-fp/wave8580_P_T.cc \
-	resid-fp/wave8580__ST.cc resid-fp/wave.cc $(am__append_1) \
+	midi.c midi_mt32.c midi_system.c mem.c mfm_at.c mfm_xebec.c \
+	model.c mouse.c mouse_ps2.c mouse_serial.c neat.c nmi.c nvr.c \
+	olivetti_m24.c opti495.c paths.c pc.c pci.c pic.c piix.c pit.c \
+	ppi.c ps1.c ps2.c ps2_mca.c ps2_nvr.c rom.c rtc.c scat.c \
+	serial.c sio.c sis496.c sound.c sound_ad1848.c sound_adlib.c \
+	sound_adlibgold.c sound_cms.c sound_emu8k.c sound_gus.c \
+	sound_mpu401.c sound_opl.c sound_pas16.c sound_ps1.c \
+	sound_pssj.c sound_sb.c sound_sb_dsp.c sound_sn76489.c \
+	sound_speaker.c sound_ssi2001.c sound_wss.c sound_ym7128.c \
+	soundopenal.c tandy_eeprom.c tandy_rom.c timer.c um8669f.c \
+	um8881f.c vid_ati_eeprom.c vid_ati_mach64.c vid_ati18800.c \
+	vid_ati28800.c vid_ati68860_ramdac.c vid_cga.c vid_cl5429.c \
+	vid_colorplus.c vid_ega.c vid_et4000.c vid_et4000w32.c \
+	vid_genius.c vid_hercules.c vid_icd2061.c vid_ics2595.c \
+	vid_incolor.c vid_mda.c vid_olivetti_m24.c vid_oti067.c \
+	vid_paradise.c vid_pc200.c vid_pc1512.c vid_pc1640.c \
+	vid_pcjr.c vid_ps1_svga.c vid_s3.c vid_s3_virge.c \
+	vid_sdac_ramdac.c vid_stg_ramdac.c vid_svga.c \
+	vid_svga_render.c vid_tandy.c vid_tandysl.c vid_tgui9440.c \
+	vid_tkd8001_ramdac.c vid_tvga.c vid_unk_ramdac.c vid_vga.c \
+	vid_voodoo.c video.c wd76c10.c vid_wy700.c x86seg.c x87.c \
+	xtide.c sound_dbopl.cc sound_resid.cc dosbox/cdrom_image.cpp \
+	dosbox/dbopl.cpp dosbox/nukedopl.cpp dosbox/vid_cga_comp.c \
+	resid-fp/convolve.cc resid-fp/convolve-sse.cc \
+	resid-fp/envelope.cc resid-fp/extfilt.cc resid-fp/filter.cc \
+	resid-fp/pot.cc resid-fp/sid.cc resid-fp/voice.cc \
+	resid-fp/wave6581_PS_.cc resid-fp/wave6581_PST.cc \
+	resid-fp/wave6581_P_T.cc resid-fp/wave6581__ST.cc \
+	resid-fp/wave8580_PS_.cc resid-fp/wave8580_PST.cc \
+	resid-fp/wave8580_P_T.cc resid-fp/wave8580__ST.cc \
+	resid-fp/wave.cc munt/Analog.cpp munt/BReverbModel.cpp \
+	munt/File.cpp munt/FileStream.cpp munt/LA32Ramp.cpp \
+	munt/LA32FloatWaveGenerator.cpp munt/LA32WaveGenerator.cpp \
+	munt/MidiStreamParser.cpp munt/Part.cpp munt/Partial.cpp \
+	munt/PartialManager.cpp munt/Poly.cpp munt/ROMInfo.cpp \
+	munt/Synth.cpp munt/Tables.cpp munt/TVA.cpp munt/TVF.cpp \
+	munt/TVP.cpp munt/sha1/sha1.cpp \
+	munt/c_interface/c_interface.cpp $(am__append_1) \
 	$(am__append_2) $(am__append_3) $(am__append_5)
 @USE_WX_FALSE@pcem_CFLAGS = $(allegro_CFLAGS) -DPCEM_ALLEGRO \
 @USE_WX_FALSE@	$(am__append_4)
@@ -630,6 +657,24 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-386_dynarec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-386_dynarec_ops.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-808x.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-Analog.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-BReverbModel.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-File.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-FileStream.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-LA32FloatWaveGenerator.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-LA32Ramp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-LA32WaveGenerator.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-MidiStreamParser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-Part.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-Partial.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-PartialManager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-Poly.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-ROMInfo.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-Synth.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-TVA.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-TVF.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-TVP.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-Tables.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-acer386sx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-ali1429.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-allegro-gui-config-sel.Po@am__quote@
@@ -644,6 +689,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-allegro-mouse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-allegro-video.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-amstrad.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-c_interface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-cdrom-image.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-cdrom-ioctl-linux.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-cdrom-null.Po@am__quote@
@@ -706,6 +752,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-mem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-mfm_at.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-mfm_xebec.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-midi.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-midi_mt32.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-midi_system.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-model.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-mouse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-mouse_ps2.Po@am__quote@
@@ -732,6 +781,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-rtc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-scat.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-serial.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-sha1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-sid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-sio.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-sis496.Po@am__quote@
@@ -743,7 +793,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-sound_dbopl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-sound_emu8k.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-sound_gus.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-sound_mpu401_uart.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-sound_mpu401.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-sound_opl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-sound_pas16.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-sound_ps1.Po@am__quote@
@@ -1638,6 +1688,48 @@ pcem-mcr.obj: mcr.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-mcr.obj `if test -f 'mcr.c'; then $(CYGPATH_W) 'mcr.c'; else $(CYGPATH_W) '$(srcdir)/mcr.c'; fi`
 
+pcem-midi.o: midi.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-midi.o -MD -MP -MF $(DEPDIR)/pcem-midi.Tpo -c -o pcem-midi.o `test -f 'midi.c' || echo '$(srcdir)/'`midi.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-midi.Tpo $(DEPDIR)/pcem-midi.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='midi.c' object='pcem-midi.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-midi.o `test -f 'midi.c' || echo '$(srcdir)/'`midi.c
+
+pcem-midi.obj: midi.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-midi.obj -MD -MP -MF $(DEPDIR)/pcem-midi.Tpo -c -o pcem-midi.obj `if test -f 'midi.c'; then $(CYGPATH_W) 'midi.c'; else $(CYGPATH_W) '$(srcdir)/midi.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-midi.Tpo $(DEPDIR)/pcem-midi.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='midi.c' object='pcem-midi.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-midi.obj `if test -f 'midi.c'; then $(CYGPATH_W) 'midi.c'; else $(CYGPATH_W) '$(srcdir)/midi.c'; fi`
+
+pcem-midi_mt32.o: midi_mt32.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-midi_mt32.o -MD -MP -MF $(DEPDIR)/pcem-midi_mt32.Tpo -c -o pcem-midi_mt32.o `test -f 'midi_mt32.c' || echo '$(srcdir)/'`midi_mt32.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-midi_mt32.Tpo $(DEPDIR)/pcem-midi_mt32.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='midi_mt32.c' object='pcem-midi_mt32.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-midi_mt32.o `test -f 'midi_mt32.c' || echo '$(srcdir)/'`midi_mt32.c
+
+pcem-midi_mt32.obj: midi_mt32.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-midi_mt32.obj -MD -MP -MF $(DEPDIR)/pcem-midi_mt32.Tpo -c -o pcem-midi_mt32.obj `if test -f 'midi_mt32.c'; then $(CYGPATH_W) 'midi_mt32.c'; else $(CYGPATH_W) '$(srcdir)/midi_mt32.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-midi_mt32.Tpo $(DEPDIR)/pcem-midi_mt32.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='midi_mt32.c' object='pcem-midi_mt32.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-midi_mt32.obj `if test -f 'midi_mt32.c'; then $(CYGPATH_W) 'midi_mt32.c'; else $(CYGPATH_W) '$(srcdir)/midi_mt32.c'; fi`
+
+pcem-midi_system.o: midi_system.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-midi_system.o -MD -MP -MF $(DEPDIR)/pcem-midi_system.Tpo -c -o pcem-midi_system.o `test -f 'midi_system.c' || echo '$(srcdir)/'`midi_system.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-midi_system.Tpo $(DEPDIR)/pcem-midi_system.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='midi_system.c' object='pcem-midi_system.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-midi_system.o `test -f 'midi_system.c' || echo '$(srcdir)/'`midi_system.c
+
+pcem-midi_system.obj: midi_system.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-midi_system.obj -MD -MP -MF $(DEPDIR)/pcem-midi_system.Tpo -c -o pcem-midi_system.obj `if test -f 'midi_system.c'; then $(CYGPATH_W) 'midi_system.c'; else $(CYGPATH_W) '$(srcdir)/midi_system.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-midi_system.Tpo $(DEPDIR)/pcem-midi_system.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='midi_system.c' object='pcem-midi_system.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-midi_system.obj `if test -f 'midi_system.c'; then $(CYGPATH_W) 'midi_system.c'; else $(CYGPATH_W) '$(srcdir)/midi_system.c'; fi`
+
 pcem-mem.o: mem.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-mem.o -MD -MP -MF $(DEPDIR)/pcem-mem.Tpo -c -o pcem-mem.o `test -f 'mem.c' || echo '$(srcdir)/'`mem.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-mem.Tpo $(DEPDIR)/pcem-mem.Po
@@ -2142,19 +2234,19 @@ pcem-sound_gus.obj: sound_gus.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-sound_gus.obj `if test -f 'sound_gus.c'; then $(CYGPATH_W) 'sound_gus.c'; else $(CYGPATH_W) '$(srcdir)/sound_gus.c'; fi`
 
-pcem-sound_mpu401_uart.o: sound_mpu401_uart.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-sound_mpu401_uart.o -MD -MP -MF $(DEPDIR)/pcem-sound_mpu401_uart.Tpo -c -o pcem-sound_mpu401_uart.o `test -f 'sound_mpu401_uart.c' || echo '$(srcdir)/'`sound_mpu401_uart.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-sound_mpu401_uart.Tpo $(DEPDIR)/pcem-sound_mpu401_uart.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='sound_mpu401_uart.c' object='pcem-sound_mpu401_uart.o' libtool=no @AMDEPBACKSLASH@
+pcem-sound_mpu401.o: sound_mpu401.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-sound_mpu401.o -MD -MP -MF $(DEPDIR)/pcem-sound_mpu401.Tpo -c -o pcem-sound_mpu401.o `test -f 'sound_mpu401.c' || echo '$(srcdir)/'`sound_mpu401.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-sound_mpu401.Tpo $(DEPDIR)/pcem-sound_mpu401.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='sound_mpu401.c' object='pcem-sound_mpu401.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-sound_mpu401_uart.o `test -f 'sound_mpu401_uart.c' || echo '$(srcdir)/'`sound_mpu401_uart.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-sound_mpu401.o `test -f 'sound_mpu401.c' || echo '$(srcdir)/'`sound_mpu401.c
 
-pcem-sound_mpu401_uart.obj: sound_mpu401_uart.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-sound_mpu401_uart.obj -MD -MP -MF $(DEPDIR)/pcem-sound_mpu401_uart.Tpo -c -o pcem-sound_mpu401_uart.obj `if test -f 'sound_mpu401_uart.c'; then $(CYGPATH_W) 'sound_mpu401_uart.c'; else $(CYGPATH_W) '$(srcdir)/sound_mpu401_uart.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-sound_mpu401_uart.Tpo $(DEPDIR)/pcem-sound_mpu401_uart.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='sound_mpu401_uart.c' object='pcem-sound_mpu401_uart.obj' libtool=no @AMDEPBACKSLASH@
+pcem-sound_mpu401.obj: sound_mpu401.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-sound_mpu401.obj -MD -MP -MF $(DEPDIR)/pcem-sound_mpu401.Tpo -c -o pcem-sound_mpu401.obj `if test -f 'sound_mpu401.c'; then $(CYGPATH_W) 'sound_mpu401.c'; else $(CYGPATH_W) '$(srcdir)/sound_mpu401.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-sound_mpu401.Tpo $(DEPDIR)/pcem-sound_mpu401.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='sound_mpu401.c' object='pcem-sound_mpu401.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-sound_mpu401_uart.obj `if test -f 'sound_mpu401_uart.c'; then $(CYGPATH_W) 'sound_mpu401_uart.c'; else $(CYGPATH_W) '$(srcdir)/sound_mpu401_uart.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-sound_mpu401.obj `if test -f 'sound_mpu401.c'; then $(CYGPATH_W) 'sound_mpu401.c'; else $(CYGPATH_W) '$(srcdir)/sound_mpu401.c'; fi`
 
 pcem-sound_opl.o: sound_opl.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-sound_opl.o -MD -MP -MF $(DEPDIR)/pcem-sound_opl.Tpo -c -o pcem-sound_opl.o `test -f 'sound_opl.c' || echo '$(srcdir)/'`sound_opl.c
@@ -3751,6 +3843,286 @@ pcem-wave.obj: resid-fp/wave.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='resid-fp/wave.cc' object='pcem-wave.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-wave.obj `if test -f 'resid-fp/wave.cc'; then $(CYGPATH_W) 'resid-fp/wave.cc'; else $(CYGPATH_W) '$(srcdir)/resid-fp/wave.cc'; fi`
+
+pcem-Analog.o: munt/Analog.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-Analog.o -MD -MP -MF $(DEPDIR)/pcem-Analog.Tpo -c -o pcem-Analog.o `test -f 'munt/Analog.cpp' || echo '$(srcdir)/'`munt/Analog.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-Analog.Tpo $(DEPDIR)/pcem-Analog.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/Analog.cpp' object='pcem-Analog.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-Analog.o `test -f 'munt/Analog.cpp' || echo '$(srcdir)/'`munt/Analog.cpp
+
+pcem-Analog.obj: munt/Analog.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-Analog.obj -MD -MP -MF $(DEPDIR)/pcem-Analog.Tpo -c -o pcem-Analog.obj `if test -f 'munt/Analog.cpp'; then $(CYGPATH_W) 'munt/Analog.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/Analog.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-Analog.Tpo $(DEPDIR)/pcem-Analog.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/Analog.cpp' object='pcem-Analog.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-Analog.obj `if test -f 'munt/Analog.cpp'; then $(CYGPATH_W) 'munt/Analog.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/Analog.cpp'; fi`
+
+pcem-BReverbModel.o: munt/BReverbModel.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-BReverbModel.o -MD -MP -MF $(DEPDIR)/pcem-BReverbModel.Tpo -c -o pcem-BReverbModel.o `test -f 'munt/BReverbModel.cpp' || echo '$(srcdir)/'`munt/BReverbModel.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-BReverbModel.Tpo $(DEPDIR)/pcem-BReverbModel.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/BReverbModel.cpp' object='pcem-BReverbModel.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-BReverbModel.o `test -f 'munt/BReverbModel.cpp' || echo '$(srcdir)/'`munt/BReverbModel.cpp
+
+pcem-BReverbModel.obj: munt/BReverbModel.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-BReverbModel.obj -MD -MP -MF $(DEPDIR)/pcem-BReverbModel.Tpo -c -o pcem-BReverbModel.obj `if test -f 'munt/BReverbModel.cpp'; then $(CYGPATH_W) 'munt/BReverbModel.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/BReverbModel.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-BReverbModel.Tpo $(DEPDIR)/pcem-BReverbModel.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/BReverbModel.cpp' object='pcem-BReverbModel.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-BReverbModel.obj `if test -f 'munt/BReverbModel.cpp'; then $(CYGPATH_W) 'munt/BReverbModel.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/BReverbModel.cpp'; fi`
+
+pcem-File.o: munt/File.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-File.o -MD -MP -MF $(DEPDIR)/pcem-File.Tpo -c -o pcem-File.o `test -f 'munt/File.cpp' || echo '$(srcdir)/'`munt/File.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-File.Tpo $(DEPDIR)/pcem-File.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/File.cpp' object='pcem-File.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-File.o `test -f 'munt/File.cpp' || echo '$(srcdir)/'`munt/File.cpp
+
+pcem-File.obj: munt/File.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-File.obj -MD -MP -MF $(DEPDIR)/pcem-File.Tpo -c -o pcem-File.obj `if test -f 'munt/File.cpp'; then $(CYGPATH_W) 'munt/File.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/File.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-File.Tpo $(DEPDIR)/pcem-File.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/File.cpp' object='pcem-File.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-File.obj `if test -f 'munt/File.cpp'; then $(CYGPATH_W) 'munt/File.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/File.cpp'; fi`
+
+pcem-FileStream.o: munt/FileStream.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-FileStream.o -MD -MP -MF $(DEPDIR)/pcem-FileStream.Tpo -c -o pcem-FileStream.o `test -f 'munt/FileStream.cpp' || echo '$(srcdir)/'`munt/FileStream.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-FileStream.Tpo $(DEPDIR)/pcem-FileStream.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/FileStream.cpp' object='pcem-FileStream.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-FileStream.o `test -f 'munt/FileStream.cpp' || echo '$(srcdir)/'`munt/FileStream.cpp
+
+pcem-FileStream.obj: munt/FileStream.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-FileStream.obj -MD -MP -MF $(DEPDIR)/pcem-FileStream.Tpo -c -o pcem-FileStream.obj `if test -f 'munt/FileStream.cpp'; then $(CYGPATH_W) 'munt/FileStream.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/FileStream.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-FileStream.Tpo $(DEPDIR)/pcem-FileStream.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/FileStream.cpp' object='pcem-FileStream.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-FileStream.obj `if test -f 'munt/FileStream.cpp'; then $(CYGPATH_W) 'munt/FileStream.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/FileStream.cpp'; fi`
+
+pcem-LA32Ramp.o: munt/LA32Ramp.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-LA32Ramp.o -MD -MP -MF $(DEPDIR)/pcem-LA32Ramp.Tpo -c -o pcem-LA32Ramp.o `test -f 'munt/LA32Ramp.cpp' || echo '$(srcdir)/'`munt/LA32Ramp.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-LA32Ramp.Tpo $(DEPDIR)/pcem-LA32Ramp.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/LA32Ramp.cpp' object='pcem-LA32Ramp.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-LA32Ramp.o `test -f 'munt/LA32Ramp.cpp' || echo '$(srcdir)/'`munt/LA32Ramp.cpp
+
+pcem-LA32Ramp.obj: munt/LA32Ramp.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-LA32Ramp.obj -MD -MP -MF $(DEPDIR)/pcem-LA32Ramp.Tpo -c -o pcem-LA32Ramp.obj `if test -f 'munt/LA32Ramp.cpp'; then $(CYGPATH_W) 'munt/LA32Ramp.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/LA32Ramp.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-LA32Ramp.Tpo $(DEPDIR)/pcem-LA32Ramp.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/LA32Ramp.cpp' object='pcem-LA32Ramp.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-LA32Ramp.obj `if test -f 'munt/LA32Ramp.cpp'; then $(CYGPATH_W) 'munt/LA32Ramp.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/LA32Ramp.cpp'; fi`
+
+pcem-LA32FloatWaveGenerator.o: munt/LA32FloatWaveGenerator.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-LA32FloatWaveGenerator.o -MD -MP -MF $(DEPDIR)/pcem-LA32FloatWaveGenerator.Tpo -c -o pcem-LA32FloatWaveGenerator.o `test -f 'munt/LA32FloatWaveGenerator.cpp' || echo '$(srcdir)/'`munt/LA32FloatWaveGenerator.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-LA32FloatWaveGenerator.Tpo $(DEPDIR)/pcem-LA32FloatWaveGenerator.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/LA32FloatWaveGenerator.cpp' object='pcem-LA32FloatWaveGenerator.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-LA32FloatWaveGenerator.o `test -f 'munt/LA32FloatWaveGenerator.cpp' || echo '$(srcdir)/'`munt/LA32FloatWaveGenerator.cpp
+
+pcem-LA32FloatWaveGenerator.obj: munt/LA32FloatWaveGenerator.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-LA32FloatWaveGenerator.obj -MD -MP -MF $(DEPDIR)/pcem-LA32FloatWaveGenerator.Tpo -c -o pcem-LA32FloatWaveGenerator.obj `if test -f 'munt/LA32FloatWaveGenerator.cpp'; then $(CYGPATH_W) 'munt/LA32FloatWaveGenerator.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/LA32FloatWaveGenerator.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-LA32FloatWaveGenerator.Tpo $(DEPDIR)/pcem-LA32FloatWaveGenerator.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/LA32FloatWaveGenerator.cpp' object='pcem-LA32FloatWaveGenerator.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-LA32FloatWaveGenerator.obj `if test -f 'munt/LA32FloatWaveGenerator.cpp'; then $(CYGPATH_W) 'munt/LA32FloatWaveGenerator.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/LA32FloatWaveGenerator.cpp'; fi`
+
+pcem-LA32WaveGenerator.o: munt/LA32WaveGenerator.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-LA32WaveGenerator.o -MD -MP -MF $(DEPDIR)/pcem-LA32WaveGenerator.Tpo -c -o pcem-LA32WaveGenerator.o `test -f 'munt/LA32WaveGenerator.cpp' || echo '$(srcdir)/'`munt/LA32WaveGenerator.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-LA32WaveGenerator.Tpo $(DEPDIR)/pcem-LA32WaveGenerator.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/LA32WaveGenerator.cpp' object='pcem-LA32WaveGenerator.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-LA32WaveGenerator.o `test -f 'munt/LA32WaveGenerator.cpp' || echo '$(srcdir)/'`munt/LA32WaveGenerator.cpp
+
+pcem-LA32WaveGenerator.obj: munt/LA32WaveGenerator.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-LA32WaveGenerator.obj -MD -MP -MF $(DEPDIR)/pcem-LA32WaveGenerator.Tpo -c -o pcem-LA32WaveGenerator.obj `if test -f 'munt/LA32WaveGenerator.cpp'; then $(CYGPATH_W) 'munt/LA32WaveGenerator.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/LA32WaveGenerator.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-LA32WaveGenerator.Tpo $(DEPDIR)/pcem-LA32WaveGenerator.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/LA32WaveGenerator.cpp' object='pcem-LA32WaveGenerator.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-LA32WaveGenerator.obj `if test -f 'munt/LA32WaveGenerator.cpp'; then $(CYGPATH_W) 'munt/LA32WaveGenerator.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/LA32WaveGenerator.cpp'; fi`
+
+pcem-MidiStreamParser.o: munt/MidiStreamParser.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-MidiStreamParser.o -MD -MP -MF $(DEPDIR)/pcem-MidiStreamParser.Tpo -c -o pcem-MidiStreamParser.o `test -f 'munt/MidiStreamParser.cpp' || echo '$(srcdir)/'`munt/MidiStreamParser.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-MidiStreamParser.Tpo $(DEPDIR)/pcem-MidiStreamParser.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/MidiStreamParser.cpp' object='pcem-MidiStreamParser.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-MidiStreamParser.o `test -f 'munt/MidiStreamParser.cpp' || echo '$(srcdir)/'`munt/MidiStreamParser.cpp
+
+pcem-MidiStreamParser.obj: munt/MidiStreamParser.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-MidiStreamParser.obj -MD -MP -MF $(DEPDIR)/pcem-MidiStreamParser.Tpo -c -o pcem-MidiStreamParser.obj `if test -f 'munt/MidiStreamParser.cpp'; then $(CYGPATH_W) 'munt/MidiStreamParser.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/MidiStreamParser.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-MidiStreamParser.Tpo $(DEPDIR)/pcem-MidiStreamParser.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/MidiStreamParser.cpp' object='pcem-MidiStreamParser.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-MidiStreamParser.obj `if test -f 'munt/MidiStreamParser.cpp'; then $(CYGPATH_W) 'munt/MidiStreamParser.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/MidiStreamParser.cpp'; fi`
+
+pcem-Part.o: munt/Part.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-Part.o -MD -MP -MF $(DEPDIR)/pcem-Part.Tpo -c -o pcem-Part.o `test -f 'munt/Part.cpp' || echo '$(srcdir)/'`munt/Part.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-Part.Tpo $(DEPDIR)/pcem-Part.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/Part.cpp' object='pcem-Part.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-Part.o `test -f 'munt/Part.cpp' || echo '$(srcdir)/'`munt/Part.cpp
+
+pcem-Part.obj: munt/Part.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-Part.obj -MD -MP -MF $(DEPDIR)/pcem-Part.Tpo -c -o pcem-Part.obj `if test -f 'munt/Part.cpp'; then $(CYGPATH_W) 'munt/Part.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/Part.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-Part.Tpo $(DEPDIR)/pcem-Part.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/Part.cpp' object='pcem-Part.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-Part.obj `if test -f 'munt/Part.cpp'; then $(CYGPATH_W) 'munt/Part.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/Part.cpp'; fi`
+
+pcem-Partial.o: munt/Partial.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-Partial.o -MD -MP -MF $(DEPDIR)/pcem-Partial.Tpo -c -o pcem-Partial.o `test -f 'munt/Partial.cpp' || echo '$(srcdir)/'`munt/Partial.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-Partial.Tpo $(DEPDIR)/pcem-Partial.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/Partial.cpp' object='pcem-Partial.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-Partial.o `test -f 'munt/Partial.cpp' || echo '$(srcdir)/'`munt/Partial.cpp
+
+pcem-Partial.obj: munt/Partial.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-Partial.obj -MD -MP -MF $(DEPDIR)/pcem-Partial.Tpo -c -o pcem-Partial.obj `if test -f 'munt/Partial.cpp'; then $(CYGPATH_W) 'munt/Partial.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/Partial.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-Partial.Tpo $(DEPDIR)/pcem-Partial.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/Partial.cpp' object='pcem-Partial.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-Partial.obj `if test -f 'munt/Partial.cpp'; then $(CYGPATH_W) 'munt/Partial.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/Partial.cpp'; fi`
+
+pcem-PartialManager.o: munt/PartialManager.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-PartialManager.o -MD -MP -MF $(DEPDIR)/pcem-PartialManager.Tpo -c -o pcem-PartialManager.o `test -f 'munt/PartialManager.cpp' || echo '$(srcdir)/'`munt/PartialManager.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-PartialManager.Tpo $(DEPDIR)/pcem-PartialManager.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/PartialManager.cpp' object='pcem-PartialManager.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-PartialManager.o `test -f 'munt/PartialManager.cpp' || echo '$(srcdir)/'`munt/PartialManager.cpp
+
+pcem-PartialManager.obj: munt/PartialManager.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-PartialManager.obj -MD -MP -MF $(DEPDIR)/pcem-PartialManager.Tpo -c -o pcem-PartialManager.obj `if test -f 'munt/PartialManager.cpp'; then $(CYGPATH_W) 'munt/PartialManager.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/PartialManager.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-PartialManager.Tpo $(DEPDIR)/pcem-PartialManager.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/PartialManager.cpp' object='pcem-PartialManager.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-PartialManager.obj `if test -f 'munt/PartialManager.cpp'; then $(CYGPATH_W) 'munt/PartialManager.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/PartialManager.cpp'; fi`
+
+pcem-Poly.o: munt/Poly.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-Poly.o -MD -MP -MF $(DEPDIR)/pcem-Poly.Tpo -c -o pcem-Poly.o `test -f 'munt/Poly.cpp' || echo '$(srcdir)/'`munt/Poly.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-Poly.Tpo $(DEPDIR)/pcem-Poly.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/Poly.cpp' object='pcem-Poly.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-Poly.o `test -f 'munt/Poly.cpp' || echo '$(srcdir)/'`munt/Poly.cpp
+
+pcem-Poly.obj: munt/Poly.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-Poly.obj -MD -MP -MF $(DEPDIR)/pcem-Poly.Tpo -c -o pcem-Poly.obj `if test -f 'munt/Poly.cpp'; then $(CYGPATH_W) 'munt/Poly.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/Poly.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-Poly.Tpo $(DEPDIR)/pcem-Poly.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/Poly.cpp' object='pcem-Poly.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-Poly.obj `if test -f 'munt/Poly.cpp'; then $(CYGPATH_W) 'munt/Poly.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/Poly.cpp'; fi`
+
+pcem-ROMInfo.o: munt/ROMInfo.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-ROMInfo.o -MD -MP -MF $(DEPDIR)/pcem-ROMInfo.Tpo -c -o pcem-ROMInfo.o `test -f 'munt/ROMInfo.cpp' || echo '$(srcdir)/'`munt/ROMInfo.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-ROMInfo.Tpo $(DEPDIR)/pcem-ROMInfo.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/ROMInfo.cpp' object='pcem-ROMInfo.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-ROMInfo.o `test -f 'munt/ROMInfo.cpp' || echo '$(srcdir)/'`munt/ROMInfo.cpp
+
+pcem-ROMInfo.obj: munt/ROMInfo.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-ROMInfo.obj -MD -MP -MF $(DEPDIR)/pcem-ROMInfo.Tpo -c -o pcem-ROMInfo.obj `if test -f 'munt/ROMInfo.cpp'; then $(CYGPATH_W) 'munt/ROMInfo.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/ROMInfo.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-ROMInfo.Tpo $(DEPDIR)/pcem-ROMInfo.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/ROMInfo.cpp' object='pcem-ROMInfo.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-ROMInfo.obj `if test -f 'munt/ROMInfo.cpp'; then $(CYGPATH_W) 'munt/ROMInfo.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/ROMInfo.cpp'; fi`
+
+pcem-Synth.o: munt/Synth.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-Synth.o -MD -MP -MF $(DEPDIR)/pcem-Synth.Tpo -c -o pcem-Synth.o `test -f 'munt/Synth.cpp' || echo '$(srcdir)/'`munt/Synth.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-Synth.Tpo $(DEPDIR)/pcem-Synth.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/Synth.cpp' object='pcem-Synth.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-Synth.o `test -f 'munt/Synth.cpp' || echo '$(srcdir)/'`munt/Synth.cpp
+
+pcem-Synth.obj: munt/Synth.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-Synth.obj -MD -MP -MF $(DEPDIR)/pcem-Synth.Tpo -c -o pcem-Synth.obj `if test -f 'munt/Synth.cpp'; then $(CYGPATH_W) 'munt/Synth.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/Synth.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-Synth.Tpo $(DEPDIR)/pcem-Synth.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/Synth.cpp' object='pcem-Synth.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-Synth.obj `if test -f 'munt/Synth.cpp'; then $(CYGPATH_W) 'munt/Synth.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/Synth.cpp'; fi`
+
+pcem-Tables.o: munt/Tables.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-Tables.o -MD -MP -MF $(DEPDIR)/pcem-Tables.Tpo -c -o pcem-Tables.o `test -f 'munt/Tables.cpp' || echo '$(srcdir)/'`munt/Tables.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-Tables.Tpo $(DEPDIR)/pcem-Tables.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/Tables.cpp' object='pcem-Tables.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-Tables.o `test -f 'munt/Tables.cpp' || echo '$(srcdir)/'`munt/Tables.cpp
+
+pcem-Tables.obj: munt/Tables.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-Tables.obj -MD -MP -MF $(DEPDIR)/pcem-Tables.Tpo -c -o pcem-Tables.obj `if test -f 'munt/Tables.cpp'; then $(CYGPATH_W) 'munt/Tables.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/Tables.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-Tables.Tpo $(DEPDIR)/pcem-Tables.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/Tables.cpp' object='pcem-Tables.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-Tables.obj `if test -f 'munt/Tables.cpp'; then $(CYGPATH_W) 'munt/Tables.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/Tables.cpp'; fi`
+
+pcem-TVA.o: munt/TVA.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-TVA.o -MD -MP -MF $(DEPDIR)/pcem-TVA.Tpo -c -o pcem-TVA.o `test -f 'munt/TVA.cpp' || echo '$(srcdir)/'`munt/TVA.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-TVA.Tpo $(DEPDIR)/pcem-TVA.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/TVA.cpp' object='pcem-TVA.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-TVA.o `test -f 'munt/TVA.cpp' || echo '$(srcdir)/'`munt/TVA.cpp
+
+pcem-TVA.obj: munt/TVA.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-TVA.obj -MD -MP -MF $(DEPDIR)/pcem-TVA.Tpo -c -o pcem-TVA.obj `if test -f 'munt/TVA.cpp'; then $(CYGPATH_W) 'munt/TVA.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/TVA.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-TVA.Tpo $(DEPDIR)/pcem-TVA.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/TVA.cpp' object='pcem-TVA.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-TVA.obj `if test -f 'munt/TVA.cpp'; then $(CYGPATH_W) 'munt/TVA.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/TVA.cpp'; fi`
+
+pcem-TVF.o: munt/TVF.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-TVF.o -MD -MP -MF $(DEPDIR)/pcem-TVF.Tpo -c -o pcem-TVF.o `test -f 'munt/TVF.cpp' || echo '$(srcdir)/'`munt/TVF.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-TVF.Tpo $(DEPDIR)/pcem-TVF.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/TVF.cpp' object='pcem-TVF.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-TVF.o `test -f 'munt/TVF.cpp' || echo '$(srcdir)/'`munt/TVF.cpp
+
+pcem-TVF.obj: munt/TVF.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-TVF.obj -MD -MP -MF $(DEPDIR)/pcem-TVF.Tpo -c -o pcem-TVF.obj `if test -f 'munt/TVF.cpp'; then $(CYGPATH_W) 'munt/TVF.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/TVF.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-TVF.Tpo $(DEPDIR)/pcem-TVF.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/TVF.cpp' object='pcem-TVF.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-TVF.obj `if test -f 'munt/TVF.cpp'; then $(CYGPATH_W) 'munt/TVF.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/TVF.cpp'; fi`
+
+pcem-TVP.o: munt/TVP.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-TVP.o -MD -MP -MF $(DEPDIR)/pcem-TVP.Tpo -c -o pcem-TVP.o `test -f 'munt/TVP.cpp' || echo '$(srcdir)/'`munt/TVP.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-TVP.Tpo $(DEPDIR)/pcem-TVP.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/TVP.cpp' object='pcem-TVP.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-TVP.o `test -f 'munt/TVP.cpp' || echo '$(srcdir)/'`munt/TVP.cpp
+
+pcem-TVP.obj: munt/TVP.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-TVP.obj -MD -MP -MF $(DEPDIR)/pcem-TVP.Tpo -c -o pcem-TVP.obj `if test -f 'munt/TVP.cpp'; then $(CYGPATH_W) 'munt/TVP.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/TVP.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-TVP.Tpo $(DEPDIR)/pcem-TVP.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/TVP.cpp' object='pcem-TVP.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-TVP.obj `if test -f 'munt/TVP.cpp'; then $(CYGPATH_W) 'munt/TVP.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/TVP.cpp'; fi`
+
+pcem-sha1.o: munt/sha1/sha1.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-sha1.o -MD -MP -MF $(DEPDIR)/pcem-sha1.Tpo -c -o pcem-sha1.o `test -f 'munt/sha1/sha1.cpp' || echo '$(srcdir)/'`munt/sha1/sha1.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-sha1.Tpo $(DEPDIR)/pcem-sha1.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/sha1/sha1.cpp' object='pcem-sha1.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-sha1.o `test -f 'munt/sha1/sha1.cpp' || echo '$(srcdir)/'`munt/sha1/sha1.cpp
+
+pcem-sha1.obj: munt/sha1/sha1.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-sha1.obj -MD -MP -MF $(DEPDIR)/pcem-sha1.Tpo -c -o pcem-sha1.obj `if test -f 'munt/sha1/sha1.cpp'; then $(CYGPATH_W) 'munt/sha1/sha1.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/sha1/sha1.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-sha1.Tpo $(DEPDIR)/pcem-sha1.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/sha1/sha1.cpp' object='pcem-sha1.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-sha1.obj `if test -f 'munt/sha1/sha1.cpp'; then $(CYGPATH_W) 'munt/sha1/sha1.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/sha1/sha1.cpp'; fi`
+
+pcem-c_interface.o: munt/c_interface/c_interface.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-c_interface.o -MD -MP -MF $(DEPDIR)/pcem-c_interface.Tpo -c -o pcem-c_interface.o `test -f 'munt/c_interface/c_interface.cpp' || echo '$(srcdir)/'`munt/c_interface/c_interface.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-c_interface.Tpo $(DEPDIR)/pcem-c_interface.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/c_interface/c_interface.cpp' object='pcem-c_interface.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-c_interface.o `test -f 'munt/c_interface/c_interface.cpp' || echo '$(srcdir)/'`munt/c_interface/c_interface.cpp
+
+pcem-c_interface.obj: munt/c_interface/c_interface.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-c_interface.obj -MD -MP -MF $(DEPDIR)/pcem-c_interface.Tpo -c -o pcem-c_interface.obj `if test -f 'munt/c_interface/c_interface.cpp'; then $(CYGPATH_W) 'munt/c_interface/c_interface.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/c_interface/c_interface.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-c_interface.Tpo $(DEPDIR)/pcem-c_interface.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/c_interface/c_interface.cpp' object='pcem-c_interface.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-c_interface.obj `if test -f 'munt/c_interface/c_interface.cpp'; then $(CYGPATH_W) 'munt/c_interface/c_interface.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/c_interface/c_interface.cpp'; fi`
 
 pcem-wx-main.o: wx-main.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-wx-main.o -MD -MP -MF $(DEPDIR)/pcem-wx-main.Tpo -c -o pcem-wx-main.o `test -f 'wx-main.cc' || echo '$(srcdir)/'`wx-main.cc

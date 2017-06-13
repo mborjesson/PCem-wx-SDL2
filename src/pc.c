@@ -24,6 +24,7 @@
 #include "ide.h"
 #include "keyboard.h"
 #include "keyboard_at.h"
+#include "midi.h"
 #include "model.h"
 #include "mouse.h"
 #include "nvr.h"
@@ -354,10 +355,11 @@ void resetpchard()
 {
         device_close_all();
         mouse_emu_close();
+        closeal();
+
         device_init();
-        
-        midi_close();
-        midi_init();
+        midi_device_init();
+        inital();
         
         timer_reset();
         sound_reset();
@@ -666,6 +668,12 @@ void loadconfig(char *fn)
         else
                 sound_card_current = 0;
 
+        p = (char *)config_get_string(CFG_MACHINE, NULL, "midi_device", "");
+        if (p)
+                midi_device_current = midi_device_get_from_internal_name(p);
+        else
+                midi_device_current = 0;
+
         p = (char *)config_get_string(CFG_MACHINE, NULL, "disc_a", "");
         if (p) strcpy(discfns[0], p);
         else   strcpy(discfns[0], "");
@@ -801,6 +809,7 @@ void saveconfig(char *fn)
         config_set_string(CFG_MACHINE, NULL, "gfxcard", video_get_internal_name(video_old_to_new(gfxcard)));
         config_set_int(CFG_MACHINE, NULL, "video_speed", video_speed);
         config_set_string(CFG_MACHINE, NULL, "sndcard", sound_card_get_internal_name(sound_card_current));
+        config_set_string(CFG_MACHINE, NULL, "midi_device", midi_device_get_internal_name(midi_device_current));
         config_set_int(CFG_MACHINE, NULL, "cpu_speed", cpuspeed);
         config_set_int(CFG_MACHINE, NULL, "has_fpu", hasfpu);
         config_set_string(CFG_MACHINE, NULL, "disc_a", discfns[0]);
