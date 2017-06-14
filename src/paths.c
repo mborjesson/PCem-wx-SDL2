@@ -24,7 +24,7 @@ char logs_path[512];
 
 char get_path_separator()
 {
-#ifdef __WINDOWS__
+#ifdef _WIN32
         return ';';
 #else
         return ':';
@@ -44,7 +44,7 @@ int get_roms_path(int pos, char* s, int size)
                 {
                         if ((pos--) == 0)
                         {
-                                z = (i-j) + ((i == len-1) ? 1 : 0);
+                                z = (i-j) + ((i == len-1) ? 1 : 0) + 1;
                                 safe_strncpy(s, roms_paths+j, size);
                                 s[size-1 < z ? size-1 : z] = 0;
                                 return 1;
