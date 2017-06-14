@@ -22,9 +22,9 @@ typedef struct
 
 static MIDI_DEVICE devices[] =
 {
-        {"None",                        "none",         NULL},
-        {"System MIDI",                 "system_midi",  &system_midi_device},
-        {"Roland MT-32 Emulation",      "mt32",         &mt32_device},
+        {"None",                        "none",                         NULL},
+        {SYSTEM_MIDI_NAME,              SYSTEM_MIDI_INTERNAL_NAME,      &system_midi_device},
+        {"Roland MT-32 Emulation",      "mt32",                         &mt32_device},
         {"", "", NULL}
 };
 

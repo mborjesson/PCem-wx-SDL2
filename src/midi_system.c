@@ -50,7 +50,7 @@ static device_config_t system_midi_config[] =
 
 device_t system_midi_device =
 {
-        "system_midi",
+        SYSTEM_MIDI_NAME,
         0,
         system_midi_init,
         system_midi_close,

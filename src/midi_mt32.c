@@ -278,7 +278,7 @@ static device_config_t mt32_config[] =
 
 device_t mt32_device =
 {
-        "mt32",
+        "Roland MT-32 Emulation",
         0,
         mt32_init,
         mt32_close,
