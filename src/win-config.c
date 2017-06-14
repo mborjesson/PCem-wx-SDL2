@@ -42,6 +42,15 @@ static int mouse_valid(int type, int model)
         return 1;
 }
 
+static int mpu401_available(int sound_card)
+{
+        char* name = sound_card_get_internal_name(sound_card);
+        if (name && (!strcmp(name, "sb16") || !strcmp(name, "sbawe32")))
+                return TRUE;
+
+        return FALSE;
+}
+
 static void recalc_vid_list(HWND hdlg, int model)
 {
         HWND h = GetDlgItem(hdlg, IDC_COMBOVID);
@@ -280,6 +289,10 @@ static BOOL CALLBACK config_dlgproc(HWND hdlg, UINT message, WPARAM wParam, LPAR
 
                 recalc_snd_list(hdlg, romstomodel[romset]);
                 recalc_midi_list(hdlg, romstomodel[romset]);
+
+                c = mpu401_available(sound_card_current);
+                EnableWindow(GetDlgItem(hdlg, IDC_COMBOMIDI), c);
+                EnableWindow(GetDlgItem(hdlg, IDC_CONFIGUREMIDI), c);
 
                 h=GetDlgItem(hdlg, IDC_CHECK3);
                 SendMessage(h, BM_SETCHECK, GAMEBLASTER, 0);
@@ -809,6 +822,11 @@ static BOOL CALLBACK config_dlgproc(HWND hdlg, UINT message, WPARAM wParam, LPAR
                                 EnableWindow(h, TRUE);
                         else
                                 EnableWindow(h, FALSE);
+
+                        c = mpu401_available(temp_sound_card_current);
+                        EnableWindow(GetDlgItem(hdlg, IDC_COMBOMIDI), c);
+                        EnableWindow(GetDlgItem(hdlg, IDC_CONFIGUREMIDI), c);
+
                         break;                                
 
                         case IDC_CONFIGUREMIDI:
