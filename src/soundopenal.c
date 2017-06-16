@@ -18,6 +18,9 @@ ALuint buffers_midi[4]; // front and back buffers
 static ALuint source[3];     // audio source
 #endif
 #define FREQ 48000
+
+int SOUNDBUFLEN = 48000/20;
+
 #define BUFLEN SOUNDBUFLEN
 
 static int midi_freq = 44100;
