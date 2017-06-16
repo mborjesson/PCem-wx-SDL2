@@ -598,7 +598,7 @@ void *sb_16_init()
         io_sethandler(0x0388, 0x0004, opl3_read,   NULL, NULL, opl3_write,   NULL, NULL, &sb->opl);
         io_sethandler(0x0224, 0x0002, sb_16_mixer_read, NULL, NULL, sb_16_mixer_write, NULL, NULL, sb);
         sound_add_handler(sb_get_buffer_opl3, sb);
-        mpu401_init(&sb->mpu, 0x330, 9, M_UART);
+        mpu401_init(&sb->mpu, device_get_config_int("base401"), device_get_config_int("irq401"), device_get_config_int("mode401"));
 
         sb->mixer.regs[0x30] = 31 << 3;
         sb->mixer.regs[0x31] = 31 << 3;
@@ -638,7 +638,7 @@ void *sb_awe32_init()
         io_sethandler(0x0388, 0x0004, opl3_read,   NULL, NULL, opl3_write,   NULL, NULL, &sb->opl);
         io_sethandler(0x0224, 0x0002, sb_16_mixer_read, NULL, NULL, sb_16_mixer_write, NULL, NULL, sb);
         sound_add_handler(sb_get_buffer_emu8k, sb);
-        mpu401_init(&sb->mpu, 0x330, 9, M_UART);
+        mpu401_init(&sb->mpu, device_get_config_int("base401"), device_get_config_int("irq401"), device_get_config_int("mode401"));
         emu8k_init(&sb->emu8k, onboard_ram);
 
         sb->mixer.regs[0x30] = 31 << 3;
@@ -1011,6 +1011,79 @@ static device_config_t sb_pro_mcv_config[] =
 static device_config_t sb_16_config[] =
 {
         {
+               .name = "base401",
+               .description = "MPU-401 Address",
+               .type = CONFIG_BINARY,
+               .type = CONFIG_SELECTION,
+               .selection =
+               {
+                       {
+                               .description = "0x300",
+                               .value = 0x300
+                       },
+                       {
+                               .description = "0x330",
+                               .value = 0x330
+                       },
+               },
+               .default_int = 0x330
+        },
+        {
+               .name = "irq401",
+               .description = "MPU-401 IRQ",
+               .type = CONFIG_BINARY,
+               .type = CONFIG_SELECTION,
+               .selection =
+               {
+                       {
+                               .description = "IRQ 3",
+                               .value = 3
+                       },
+                       {
+                               .description = "IRQ 4",
+                               .value = 4
+                       },
+                       {
+                               .description = "IRQ 5",
+                               .value = 5
+                       },
+                       {
+                               .description = "IRQ 6",
+                               .value = 6
+                       },
+                       {
+                               .description = "IRQ 7",
+                               .value = 7
+                       },
+                       {
+                               .description = "IRQ 9",
+                               .value = 9
+                       },
+                       {
+                               .description = "IRQ 10",
+                               .value = 10
+                       },
+               },
+               .default_int = 9
+        },
+        {
+                .name = "mode401",
+                .description = "MPU-401 mode",
+                .type = CONFIG_SELECTION,
+                .selection =
+                {
+                        {
+                                .description = "UART",
+                                .value = M_UART
+                        },
+                        {
+                                .description = "Intelligent",
+                                .value = M_INTELLIGENT
+                        },
+                },
+                .default_int = M_INTELLIGENT
+        },
+        {
                 .name = "opl_emu",
                 .description = "OPL emulator",
                 .type = CONFIG_SELECTION,
@@ -1065,6 +1138,79 @@ static device_config_t sb_awe32_config[] =
                         }
                 },
                 .default_int = 512
+        },
+        {
+               .name = "base401",
+               .description = "MPU-401 Address",
+               .type = CONFIG_BINARY,
+               .type = CONFIG_SELECTION,
+               .selection =
+               {
+                       {
+                               .description = "0x300",
+                               .value = 0x300
+                       },
+                       {
+                               .description = "0x330",
+                               .value = 0x330
+                       },
+               },
+               .default_int = 0x330
+        },
+        {
+               .name = "irq401",
+               .description = "MPU-401 IRQ",
+               .type = CONFIG_BINARY,
+               .type = CONFIG_SELECTION,
+               .selection =
+               {
+                       {
+                               .description = "IRQ 3",
+                               .value = 3
+                       },
+                       {
+                               .description = "IRQ 4",
+                               .value = 4
+                       },
+                       {
+                               .description = "IRQ 5",
+                               .value = 5
+                       },
+                       {
+                               .description = "IRQ 6",
+                               .value = 6
+                       },
+                       {
+                               .description = "IRQ 7",
+                               .value = 7
+                       },
+                       {
+                               .description = "IRQ 9",
+                               .value = 9
+                       },
+                       {
+                               .description = "IRQ 10",
+                               .value = 10
+                       },
+               },
+               .default_int = 9
+        },
+        {
+                .name = "mode401",
+                .description = "MPU-401 mode",
+                .type = CONFIG_SELECTION,
+                .selection =
+                {
+                        {
+                                .description = "UART",
+                                .value = M_UART
+                        },
+                        {
+                                .description = "Intelligent",
+                                .value = M_INTELLIGENT
+                        },
+                },
+                .default_int = M_INTELLIGENT
         },
         {
                 .name = "opl_emu",
