@@ -6,6 +6,7 @@
 #include "ibm.h"
 #include "config.h"
 #include "device.h"
+#include "midi.h"
 #include "plat-midi.h"
 #include "resources.h"
 #include "win.h"

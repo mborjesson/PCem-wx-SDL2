@@ -32,7 +32,6 @@
 #include "video.h"
 
 #include "plat-joystick.h"
-#include "plat-midi.h"
 #include "plat-mouse.h"
 #include "plat-keyboard.h"
 

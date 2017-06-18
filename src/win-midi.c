@@ -2,6 +2,7 @@
 #include <mmsystem.h>
 #include "ibm.h"
 #include "config.h"
+#include "midi.h"
 #include "plat-midi.h"
 
 typedef struct plat_midi_t
