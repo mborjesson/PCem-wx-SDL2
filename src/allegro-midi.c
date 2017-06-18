@@ -2,16 +2,17 @@
 #include "ibm.h"
 #include "plat-midi.h"
 
-#define USE_ALLEGRO_MIDI
+//#define USE_ALLEGRO_MIDI
 
-void plat_midi_init()
+void* plat_midi_init()
 {
 #ifdef USE_ALLEGRO_MIDI
 	install_sound(DIGI_NONE, MIDI_AUTODETECT, NULL);
 #endif
+	return 0;
 }
 
-void plat_midi_close()
+void plat_midi_close(void* p)
 {
 #ifdef USE_ALLEGRO_MIDI
 	remove_sound();
@@ -67,4 +68,8 @@ int plat_midi_write(uint8_t val)
 #endif
         }
         return 1;
+}
+
+void plat_midi_add_status_info(char *s, int max_len, struct midi_device_t* device)
+{
 }

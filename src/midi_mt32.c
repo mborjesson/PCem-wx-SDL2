@@ -8,11 +8,39 @@
 #include "midi_mt32.h"
 #include "midi.h"
 
+#define RENDER_RATE 30
+#define MESSAGE_HIDE 10000
+
 extern void givealbuffer_midi(void *buf, uint32_t size);
 extern int rom_present(char*);
 extern int rom_getfile(char* fn, char *s, int size);
 extern void pclog(const char *format, ...);
 extern void al_set_midi(int freq, int buf_size);
+extern int soundon;
+
+typedef struct mt32_t
+{
+        mt32emu_context context;
+        char message[MT32EMU_SYSEX_BUFFER_SIZE];
+        unsigned int message_shown;
+        thread_t* thread_h;
+        event_t* event;
+
+        uint32_t samplerate;
+        int buf_size;
+        int16_t* buffer;
+        int midi_pos;
+
+        int status_show_instruments;
+} mt32_t;
+
+void showLCDMessage(void *instance_data, const char *message)
+{
+        mt32_t* data = (mt32_t*)instance_data;
+        strncpy(data->message, message, 999);
+        data->message[999] = 0;
+        data->message_shown = get_ticks();
+}
 
 static const mt32emu_report_handler_i_v0 handler_v0 = {
         /** Returns the actual interface version ID */
@@ -24,7 +52,7 @@ static const mt32emu_report_handler_i_v0 handler_v0 = {
         NULL, //void (*onErrorControlROM)(void *instance_data);
         NULL, //void (*onErrorPCMROM)(void *instance_data);
         /** Callback for reporting about displaying a new custom message on LCD */
-        NULL, //void (*showLCDMessage)(void *instance_data, const char *message);
+        showLCDMessage, //void (*showLCDMessage)(void *instance_data, const char *message);
         /** Callback for reporting actual processing of a MIDI message */
         NULL, //void (*onMIDIMessagePlayed)(void *instance_data);
         /**
@@ -52,7 +80,6 @@ static const mt32emu_report_handler_i_v0 handler_v0 = {
 
 static const mt32emu_report_handler_i handler = { &handler_v0 };
 
-static mt32emu_context context = NULL;
 static int roms_present = -1;
 
 mt32emu_return_code mt32_check(const char* func, mt32emu_return_code ret, mt32emu_return_code expected)
@@ -72,71 +99,73 @@ int mt32_available()
         return roms_present;
 }
 
-static thread_t *thread_h = NULL;
-static event_t *event = NULL;
-
-#define RENDER_RATE 30
-
-static uint32_t samplerate = 44100;
-static int buf_size = 0;
-static int16_t* buffer = NULL;
-static int midi_pos = 0;
-
-void mt32_stream(int16_t* stream, int len)
+void mt32_stream(mt32emu_context context, int16_t* stream, int len)
 {
         if (context) mt32emu_render_bit16s(context, stream, len);
 }
 
-void mt32_poll()
+void mt32_poll(midi_device_t* device)
 {
-        midi_pos++;
-        if (midi_pos == 48000/RENDER_RATE)
+        mt32_t* data = (mt32_t*)device->data;
+        data->midi_pos++;
+        if (data->midi_pos == 48000/RENDER_RATE)
         {
-                midi_pos = 0;
-                thread_set_event(event);
+                data->midi_pos = 0;
+                thread_set_event(data->event);
         }
+        if (get_ticks() > data->message_shown+MESSAGE_HIDE)
+                data->message[0] = 0;
 }
-
-extern int soundon;
 
 static void mt32_thread(void *param)
 {
+        mt32_t* data = (mt32_t*)param;
         while (1)
         {
-                thread_wait_event(event, -1);
-                memset(buffer, 0, buf_size);
-                mt32_stream(buffer, (samplerate/RENDER_RATE));
+                thread_wait_event(data->event, -1);
+                memset(data->buffer, 0, data->buf_size);
+                mt32_stream(data->context, data->buffer, data->buf_size/4);
                 if (soundon)
-                        givealbuffer_midi(buffer, buf_size);
+                        givealbuffer_midi(data->buffer, data->buf_size);
         }
 }
 
-void mt32_msg(uint8_t* val)
+void mt32_msg(midi_device_t* device, uint8_t* val)
 {
+        mt32emu_context context = ((mt32_t*)device->data)->context;
         if (context) mt32_check("mt32emu_play_msg", mt32emu_play_msg(context, *(uint32_t*)val), MT32EMU_RC_OK);
 }
 
-void mt32_sysex(uint8_t* data, unsigned int len)
+void mt32_sysex(midi_device_t* device, uint8_t* data, unsigned int len)
 {
+        mt32emu_context context = ((mt32_t*)device->data)->context;
         if (context) mt32_check("mt32emu_play_sysex", mt32emu_play_sysex(context, data, len), MT32EMU_RC_OK);
 }
 
 void* mt32_init()
 {
         char s[512];
-        context = mt32emu_create_context(handler, NULL);
-        if (!rom_getfile("mt32/mt32_control.rom", s, 512)) return 0;
-        if (!mt32_check("mt32emu_add_rom_file", mt32emu_add_rom_file(context, s), MT32EMU_RC_ADDED_CONTROL_ROM)) return 0;
-        if (!rom_getfile("mt32/mt32_pcm.rom", s, 512)) return 0;
-        if (!mt32_check("mt32emu_add_rom_file", mt32emu_add_rom_file(context, s), MT32EMU_RC_ADDED_PCM_ROM)) return 0;
 
-        if (!mt32_check("mt32emu_open_synth", mt32emu_open_synth(context), MT32EMU_RC_OK)) return 0;
+        mt32_t* data = malloc(sizeof(mt32_t));
+        memset(data, 0, sizeof(mt32_t));
+        mt32emu_context context = mt32emu_create_context(handler, data);
+        if (
+                !rom_getfile("mt32/mt32_control.rom", s, 512) ||
+                !mt32_check("mt32emu_add_rom_file", mt32emu_add_rom_file(context, s), MT32EMU_RC_ADDED_CONTROL_ROM) ||
+                !rom_getfile("mt32/mt32_pcm.rom", s, 512) ||
+                !mt32_check("mt32emu_add_rom_file", mt32emu_add_rom_file(context, s), MT32EMU_RC_ADDED_PCM_ROM) ||
+                !mt32_check("mt32emu_open_synth", mt32emu_open_synth(context), MT32EMU_RC_OK))
+        {
+                free(data);
+                return 0;
+        }
 
-        event = thread_create_event();
-        thread_h = thread_create(mt32_thread, 0);
-        samplerate = mt32emu_get_actual_stereo_output_samplerate(context);
-        buf_size = samplerate/RENDER_RATE*4;
-        buffer = malloc(buf_size);
+        data->samplerate = mt32emu_get_actual_stereo_output_samplerate(context);
+        data->buf_size = data->samplerate/RENDER_RATE*4;
+        data->buffer = malloc(data->buf_size);
+        data->event = thread_create_event();
+        data->thread_h = thread_create(mt32_thread, data);
+        data->status_show_instruments = device_get_config_int("status_show_instruments");
 
         mt32emu_set_output_gain(context, device_get_config_int("output_gain")/100.0f);
         mt32emu_set_reverb_enabled(context, device_get_config_int("reverb"));
@@ -148,9 +177,12 @@ void* mt32_init()
         pclog("mt32 reverb: %d\n", mt32emu_is_reverb_enabled(context));
         pclog("mt32 reversed stereo: %d\n", mt32emu_is_reversed_stereo_enabled(context));
 
-        al_set_midi(samplerate, buf_size);
+        al_set_midi(data->samplerate, data->buf_size);
 
-        pclog("mt32 (Munt %s) initialized, samplerate %d, buf_size %d\n", mt32emu_get_library_version_string(), samplerate, buf_size);
+        pclog("mt32 (Munt %s) initialized, samplerate %d, buf_size %d\n", mt32emu_get_library_version_string(), data->samplerate, data->buf_size);
+
+        data->context = context;
+        data->message[0] = 0;
 
         midi_device_t* dev = malloc(sizeof(midi_device_t));
         memset(dev, 0, sizeof(midi_device_t));
@@ -158,6 +190,7 @@ void* mt32_init()
         dev->play_msg = mt32_msg;
         dev->play_sysex = mt32_sysex;
         dev->poll = mt32_poll;
+        dev->data = data;
 
         midi_init(dev);
 
@@ -168,29 +201,65 @@ void mt32_close(void* p)
 {
         if (!p) return;
 
-        if (thread_h)
-                thread_kill(thread_h);
-        if (event)
-                thread_destroy_event(event);
-        event = NULL;
-        thread_h = NULL;
+        midi_device_t* device = (midi_device_t*)p;
 
-        if (context)
+        mt32_t* data = (mt32_t*)device->data;
+
+        if (data->thread_h)
+                thread_kill(data->thread_h);
+        if (data->event)
+                thread_destroy_event(data->event);
+
+        if (data->context)
         {
-                mt32emu_close_synth(context);
-                mt32emu_free_context(context);
+                mt32emu_close_synth(data->context);
+                mt32emu_free_context(data->context);
         }
-        context = NULL;
 
-        if (buffer)
-                free(buffer);
-        buffer = NULL;
+        if (data->buffer)
+                free(data->buffer);
 
         midi_close();
 
+        free(data);
         free((midi_device_t*)p);
 
         pclog("mt32 closed\n");
+}
+
+void mt32_add_status_info(char *s, int max_len, void *p)
+{
+        int i;
+        char temps[MT32EMU_SYSEX_BUFFER_SIZE];
+//        mt32emu_bit8u keys, velocities;
+        midi_device_t* dev = (midi_device_t*)p;
+        mt32_t* data = (mt32_t*)dev->data;
+        mt32emu_context context = data->context;
+//        mt32emu_bit32u part_count = mt32emu_get_partial_count(context);
+//        snprintf(s, max_len, "MT-32 Partial count: %d\n", part_count);
+        if (strlen(data->message))
+        {
+                sprintf(temps, "MT-32 message: %s\n", data->message);
+                strncat(s, temps, max_len);
+        }
+        if (mt32emu_is_active(context))
+        {
+                sprintf(temps, "MT-32 playback frequency: %iHz\n", data->samplerate);
+                strncat(s, temps, max_len);
+                if (data->status_show_instruments)
+                {
+                        for (i = 0; i < 8; ++i)
+                        {
+                                const char* patch_name = mt32emu_get_patch_name(context, i);
+        //                        mt32emu_get_playing_notes(context, i, &keys, &velocities);
+                                sprintf(temps, "MT-32 inst. %d: %s\n", i+1, patch_name);
+                                strncat(s, temps, max_len);
+                        }
+                }
+                strncat(s, "\n", max_len);
+        }
+        else
+                strncat(s, "MT-32 playback stopped\n\n", max_len);
 }
 
 static device_config_t mt32_config[] =
@@ -272,6 +341,12 @@ static device_config_t mt32_config[] =
                 .default_int = 0
         },
         {
+                .name = "status_show_instruments",
+                .description = "(Status) Show instruments",
+                .type = CONFIG_BINARY,
+                .default_int = 0
+        },
+        {
                 .type = -1
         }
 };
@@ -285,6 +360,6 @@ device_t mt32_device =
         mt32_available,
         NULL,
         NULL,
-        NULL,
+        mt32_add_status_info,
         mt32_config
 };
