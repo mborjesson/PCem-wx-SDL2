@@ -300,6 +300,9 @@ void wx_setupmenu()
         sprintf(menuitem, "IDM_SND_BUF[%d]", (int)(log(sound_buf_len/MIN_SND_BUF)/log(2)));
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
 
+        sprintf(menuitem, "IDM_SND_BUF[%d]", (int)(log(sound_buf_len/MIN_SND_BUF)/log(2)));
+        wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
+
         sprintf(menuitem, "IDM_VID_SCALE_MODE[%d]", video_scale_mode);
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
         sprintf(menuitem, "IDM_VID_SCALE[%d]", video_scale);
