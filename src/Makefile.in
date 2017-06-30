@@ -95,7 +95,8 @@ bin_PROGRAMS = pcem$(EXEEXT)
 @USE_WX_TRUE@am__append_1 = wx-main.cc wx-config_sel.c wx-dialogbox.cc wx-utils.cc wx-app.cc \
 @USE_WX_TRUE@ wx-sdl2-joystick.c wx-sdl2-mouse.c wx-sdl2-keyboard.c wx-sdl2-video.c wx-sdl2-midi.c \
 @USE_WX_TRUE@ wx-sdl2.c wx-config.c wx-deviceconfig.cc wx-sdl2-hdconf.c wx-status.cc wx-sdl2-status.c \
-@USE_WX_TRUE@ wx-resources.cpp wx-thread.c wx-common.c wx-sdl2-display.c
+@USE_WX_TRUE@ wx-resources.cpp wx-thread.c wx-common.c wx-sdl2-display.c wx-sdl2-video-renderer.c wx-sdl2-video-gl3.c \
+@USE_WX_TRUE@ wx-glslp-parser.c wx-shader_man.c wx-shaderconfig.cc
 
 @USE_WX_FALSE@am__append_2 = allegro-gui.c allegro-gui-config-sel.c allegro-gui-configure.c \
 @USE_WX_FALSE@ allegro-gui-deviceconfig.c allegro-gui-hdconf.c allegro-joystick.c \
@@ -165,10 +166,12 @@ am__pcem_SOURCES_DIST = 386.c 386_dynarec.c 386_dynarec_ops.c 808x.c \
 	wx-sdl2-video.c wx-sdl2-midi.c wx-sdl2.c wx-config.c \
 	wx-deviceconfig.cc wx-sdl2-hdconf.c wx-status.cc \
 	wx-sdl2-status.c wx-resources.cpp wx-thread.c wx-common.c \
-	wx-sdl2-display.c allegro-gui.c allegro-gui-config-sel.c \
-	allegro-gui-configure.c allegro-gui-deviceconfig.c \
-	allegro-gui-hdconf.c allegro-joystick.c allegro-keyboard.c \
-	allegro-main.c allegro-midi.c allegro-mouse.c allegro-video.c \
+	wx-sdl2-display.c wx-sdl2-video-renderer.c wx-sdl2-video-gl3.c \
+	wx-glslp-parser.c wx-shader_man.c wx-shaderconfig.cc \
+	allegro-gui.c allegro-gui-config-sel.c allegro-gui-configure.c \
+	allegro-gui-deviceconfig.c allegro-gui-hdconf.c \
+	allegro-joystick.c allegro-keyboard.c allegro-main.c \
+	allegro-midi.c allegro-mouse.c allegro-video.c \
 	thread-pthread.c codegen_x86.c codegen_x86-64.c
 @USE_WX_TRUE@am__objects_1 = pcem-wx-main.$(OBJEXT) \
 @USE_WX_TRUE@	pcem-wx-config_sel.$(OBJEXT) \
@@ -186,7 +189,12 @@ am__pcem_SOURCES_DIST = 386.c 386_dynarec.c 386_dynarec_ops.c 808x.c \
 @USE_WX_TRUE@	pcem-wx-sdl2-status.$(OBJEXT) \
 @USE_WX_TRUE@	pcem-wx-resources.$(OBJEXT) \
 @USE_WX_TRUE@	pcem-wx-thread.$(OBJEXT) pcem-wx-common.$(OBJEXT) \
-@USE_WX_TRUE@	pcem-wx-sdl2-display.$(OBJEXT)
+@USE_WX_TRUE@	pcem-wx-sdl2-display.$(OBJEXT) \
+@USE_WX_TRUE@	pcem-wx-sdl2-video-renderer.$(OBJEXT) \
+@USE_WX_TRUE@	pcem-wx-sdl2-video-gl3.$(OBJEXT) \
+@USE_WX_TRUE@	pcem-wx-glslp-parser.$(OBJEXT) \
+@USE_WX_TRUE@	pcem-wx-shader_man.$(OBJEXT) \
+@USE_WX_TRUE@	pcem-wx-shaderconfig.$(OBJEXT)
 @USE_WX_FALSE@am__objects_2 = pcem-allegro-gui.$(OBJEXT) \
 @USE_WX_FALSE@	pcem-allegro-gui-config-sel.$(OBJEXT) \
 @USE_WX_FALSE@	pcem-allegro-gui-configure.$(OBJEXT) \
@@ -822,6 +830,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-config_sel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-deviceconfig.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-dialogbox.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-glslp-parser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-resources.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-sdl2-display.Po@am__quote@
@@ -831,8 +840,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-sdl2-midi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-sdl2-mouse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-sdl2-status.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-sdl2-video-gl3.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-sdl2-video-renderer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-sdl2-video.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-sdl2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-shader_man.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-shaderconfig.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-status.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-thread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-utils.Po@am__quote@
@@ -3220,6 +3233,62 @@ pcem-wx-sdl2-display.obj: wx-sdl2-display.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-wx-sdl2-display.obj `if test -f 'wx-sdl2-display.c'; then $(CYGPATH_W) 'wx-sdl2-display.c'; else $(CYGPATH_W) '$(srcdir)/wx-sdl2-display.c'; fi`
 
+pcem-wx-sdl2-video-renderer.o: wx-sdl2-video-renderer.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-wx-sdl2-video-renderer.o -MD -MP -MF $(DEPDIR)/pcem-wx-sdl2-video-renderer.Tpo -c -o pcem-wx-sdl2-video-renderer.o `test -f 'wx-sdl2-video-renderer.c' || echo '$(srcdir)/'`wx-sdl2-video-renderer.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-wx-sdl2-video-renderer.Tpo $(DEPDIR)/pcem-wx-sdl2-video-renderer.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='wx-sdl2-video-renderer.c' object='pcem-wx-sdl2-video-renderer.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-wx-sdl2-video-renderer.o `test -f 'wx-sdl2-video-renderer.c' || echo '$(srcdir)/'`wx-sdl2-video-renderer.c
+
+pcem-wx-sdl2-video-renderer.obj: wx-sdl2-video-renderer.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-wx-sdl2-video-renderer.obj -MD -MP -MF $(DEPDIR)/pcem-wx-sdl2-video-renderer.Tpo -c -o pcem-wx-sdl2-video-renderer.obj `if test -f 'wx-sdl2-video-renderer.c'; then $(CYGPATH_W) 'wx-sdl2-video-renderer.c'; else $(CYGPATH_W) '$(srcdir)/wx-sdl2-video-renderer.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-wx-sdl2-video-renderer.Tpo $(DEPDIR)/pcem-wx-sdl2-video-renderer.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='wx-sdl2-video-renderer.c' object='pcem-wx-sdl2-video-renderer.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-wx-sdl2-video-renderer.obj `if test -f 'wx-sdl2-video-renderer.c'; then $(CYGPATH_W) 'wx-sdl2-video-renderer.c'; else $(CYGPATH_W) '$(srcdir)/wx-sdl2-video-renderer.c'; fi`
+
+pcem-wx-sdl2-video-gl3.o: wx-sdl2-video-gl3.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-wx-sdl2-video-gl3.o -MD -MP -MF $(DEPDIR)/pcem-wx-sdl2-video-gl3.Tpo -c -o pcem-wx-sdl2-video-gl3.o `test -f 'wx-sdl2-video-gl3.c' || echo '$(srcdir)/'`wx-sdl2-video-gl3.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-wx-sdl2-video-gl3.Tpo $(DEPDIR)/pcem-wx-sdl2-video-gl3.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='wx-sdl2-video-gl3.c' object='pcem-wx-sdl2-video-gl3.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-wx-sdl2-video-gl3.o `test -f 'wx-sdl2-video-gl3.c' || echo '$(srcdir)/'`wx-sdl2-video-gl3.c
+
+pcem-wx-sdl2-video-gl3.obj: wx-sdl2-video-gl3.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-wx-sdl2-video-gl3.obj -MD -MP -MF $(DEPDIR)/pcem-wx-sdl2-video-gl3.Tpo -c -o pcem-wx-sdl2-video-gl3.obj `if test -f 'wx-sdl2-video-gl3.c'; then $(CYGPATH_W) 'wx-sdl2-video-gl3.c'; else $(CYGPATH_W) '$(srcdir)/wx-sdl2-video-gl3.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-wx-sdl2-video-gl3.Tpo $(DEPDIR)/pcem-wx-sdl2-video-gl3.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='wx-sdl2-video-gl3.c' object='pcem-wx-sdl2-video-gl3.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-wx-sdl2-video-gl3.obj `if test -f 'wx-sdl2-video-gl3.c'; then $(CYGPATH_W) 'wx-sdl2-video-gl3.c'; else $(CYGPATH_W) '$(srcdir)/wx-sdl2-video-gl3.c'; fi`
+
+pcem-wx-glslp-parser.o: wx-glslp-parser.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-wx-glslp-parser.o -MD -MP -MF $(DEPDIR)/pcem-wx-glslp-parser.Tpo -c -o pcem-wx-glslp-parser.o `test -f 'wx-glslp-parser.c' || echo '$(srcdir)/'`wx-glslp-parser.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-wx-glslp-parser.Tpo $(DEPDIR)/pcem-wx-glslp-parser.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='wx-glslp-parser.c' object='pcem-wx-glslp-parser.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-wx-glslp-parser.o `test -f 'wx-glslp-parser.c' || echo '$(srcdir)/'`wx-glslp-parser.c
+
+pcem-wx-glslp-parser.obj: wx-glslp-parser.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-wx-glslp-parser.obj -MD -MP -MF $(DEPDIR)/pcem-wx-glslp-parser.Tpo -c -o pcem-wx-glslp-parser.obj `if test -f 'wx-glslp-parser.c'; then $(CYGPATH_W) 'wx-glslp-parser.c'; else $(CYGPATH_W) '$(srcdir)/wx-glslp-parser.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-wx-glslp-parser.Tpo $(DEPDIR)/pcem-wx-glslp-parser.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='wx-glslp-parser.c' object='pcem-wx-glslp-parser.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-wx-glslp-parser.obj `if test -f 'wx-glslp-parser.c'; then $(CYGPATH_W) 'wx-glslp-parser.c'; else $(CYGPATH_W) '$(srcdir)/wx-glslp-parser.c'; fi`
+
+pcem-wx-shader_man.o: wx-shader_man.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-wx-shader_man.o -MD -MP -MF $(DEPDIR)/pcem-wx-shader_man.Tpo -c -o pcem-wx-shader_man.o `test -f 'wx-shader_man.c' || echo '$(srcdir)/'`wx-shader_man.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-wx-shader_man.Tpo $(DEPDIR)/pcem-wx-shader_man.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='wx-shader_man.c' object='pcem-wx-shader_man.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-wx-shader_man.o `test -f 'wx-shader_man.c' || echo '$(srcdir)/'`wx-shader_man.c
+
+pcem-wx-shader_man.obj: wx-shader_man.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-wx-shader_man.obj -MD -MP -MF $(DEPDIR)/pcem-wx-shader_man.Tpo -c -o pcem-wx-shader_man.obj `if test -f 'wx-shader_man.c'; then $(CYGPATH_W) 'wx-shader_man.c'; else $(CYGPATH_W) '$(srcdir)/wx-shader_man.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-wx-shader_man.Tpo $(DEPDIR)/pcem-wx-shader_man.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='wx-shader_man.c' object='pcem-wx-shader_man.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-wx-shader_man.obj `if test -f 'wx-shader_man.c'; then $(CYGPATH_W) 'wx-shader_man.c'; else $(CYGPATH_W) '$(srcdir)/wx-shader_man.c'; fi`
+
 pcem-allegro-gui.o: allegro-gui.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-allegro-gui.o -MD -MP -MF $(DEPDIR)/pcem-allegro-gui.Tpo -c -o pcem-allegro-gui.o `test -f 'allegro-gui.c' || echo '$(srcdir)/'`allegro-gui.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-allegro-gui.Tpo $(DEPDIR)/pcem-allegro-gui.Po
@@ -3849,6 +3918,20 @@ pcem-wx-resources.obj: wx-resources.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='wx-resources.cpp' object='pcem-wx-resources.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-wx-resources.obj `if test -f 'wx-resources.cpp'; then $(CYGPATH_W) 'wx-resources.cpp'; else $(CYGPATH_W) '$(srcdir)/wx-resources.cpp'; fi`
+
+pcem-wx-shaderconfig.o: wx-shaderconfig.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-wx-shaderconfig.o -MD -MP -MF $(DEPDIR)/pcem-wx-shaderconfig.Tpo -c -o pcem-wx-shaderconfig.o `test -f 'wx-shaderconfig.cc' || echo '$(srcdir)/'`wx-shaderconfig.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-wx-shaderconfig.Tpo $(DEPDIR)/pcem-wx-shaderconfig.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='wx-shaderconfig.cc' object='pcem-wx-shaderconfig.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-wx-shaderconfig.o `test -f 'wx-shaderconfig.cc' || echo '$(srcdir)/'`wx-shaderconfig.cc
+
+pcem-wx-shaderconfig.obj: wx-shaderconfig.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-wx-shaderconfig.obj -MD -MP -MF $(DEPDIR)/pcem-wx-shaderconfig.Tpo -c -o pcem-wx-shaderconfig.obj `if test -f 'wx-shaderconfig.cc'; then $(CYGPATH_W) 'wx-shaderconfig.cc'; else $(CYGPATH_W) '$(srcdir)/wx-shaderconfig.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-wx-shaderconfig.Tpo $(DEPDIR)/pcem-wx-shaderconfig.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='wx-shaderconfig.cc' object='pcem-wx-shaderconfig.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-wx-shaderconfig.obj `if test -f 'wx-shaderconfig.cc'; then $(CYGPATH_W) 'wx-shaderconfig.cc'; else $(CYGPATH_W) '$(srcdir)/wx-shaderconfig.cc'; fi`
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
