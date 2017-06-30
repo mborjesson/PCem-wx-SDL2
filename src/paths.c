@@ -70,7 +70,7 @@ void set_roms_paths(char* path)
         {
                 if (path[i] == path_separator[0] || i == len-1)
                 {
-                        z = (i-j) + ((i == len-1) ? 1 : 0);
+                        z = (i-j) + ((i == len-1) ? 1 : 0) + 1;
                         safe_strncpy(s, path+j, z);
                         s[511 < z ? 511 : z] = 0;
                         append_slash(s, 512);

@@ -6,6 +6,7 @@
 #include "ibm.h"
 #include "config.h"
 #include "device.h"
+#include "midi.h"
 #include "plat-midi.h"
 #include "resources.h"
 #include "win.h"
@@ -59,10 +60,10 @@ static BOOL CALLBACK deviceconfig_dlgproc(HWND hdlg, UINT message, WPARAM wParam
                                         case CONFIG_MIDI:
                                         val_int = config_get_int(CFG_MACHINE, NULL, config->name, config->default_int);
                                         
-                                        num  = midi_get_num_devs();
+                                        num  = plat_midi_get_num_devs();
                                         for (c = 0; c < num; c++)
                                         {
-                                                midi_get_dev_name(c, s);
+                                                plat_midi_get_dev_name(c, s);
                                                 SendMessage(h, CB_ADDSTRING, 0, (LPARAM)(LPCSTR)s);
                                                 if (val_int == c)
                                                         SendMessage(h, CB_SETCURSEL, c, 0);

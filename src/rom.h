@@ -1,4 +1,5 @@
 FILE *romfopen(char *fn, char *mode);
+int rom_getfile(char* fn, char *s, int size);
 int rom_present(char *fn);
 
 typedef struct rom_t

@@ -4,17 +4,42 @@
 
 //#define USE_ALLEGRO_MIDI
 
-void midi_init()
+void* plat_midi_init()
 {
 #ifdef USE_ALLEGRO_MIDI
 	install_sound(DIGI_NONE, MIDI_AUTODETECT, NULL);
 #endif
+	return 0;
 }
 
-void midi_close()
+void plat_midi_close(void* p)
 {
 #ifdef USE_ALLEGRO_MIDI
 	remove_sound();
+#endif
+}
+
+void plat_midi_play_msg(uint8_t* val)
+{
+}
+
+void plat_midi_play_sysex(uint8_t* data, unsigned int len)
+{
+}
+
+int plat_midi_get_num_devs()
+{
+#ifdef USE_ALLEGRO_MIDI
+        return 1;
+#else
+        return 0;
+#endif
+}
+
+void plat_midi_get_dev_name(int num, char *s)
+{
+#ifdef USE_ALLEGRO_MIDI
+        strcpy(s, "Allegro");
 #endif
 }
 
@@ -22,7 +47,7 @@ static int midi_cmd_pos, midi_len;
 static uint8_t midi_command[3];
 static int midi_lengths[8] = {3, 3, 3, 3, 2, 2, 3, 0};
 
-void midi_write(uint8_t val)
+int plat_midi_write(uint8_t val)
 {
         if (val & 0x80)
         {
@@ -42,4 +67,9 @@ void midi_write(uint8_t val)
                         midi_out(midi_command, midi_len);
 #endif
         }
+        return 1;
+}
+
+void plat_midi_add_status_info(char *s, int max_len, struct midi_device_t* device)
+{
 }

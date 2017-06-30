@@ -570,4 +570,7 @@ void speedchanged();
 
 void saveconfig(char *fn);
 
+void delay_ms(unsigned int ms);
+unsigned int get_ticks();
+
 #define UNUSED(x) (void)x

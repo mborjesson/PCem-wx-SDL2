@@ -24,9 +24,11 @@ void sound_reset();
 
 void initalmain(int argc, char *argv[]);
 void inital();
+void closeal();
 
 void givealbuffer(int32_t *buf);
 void givealbuffer_cd(int16_t *buf);
+void givealbuffer_munt(int16_t *buf);
 
 extern int sound_buf_len;
 void sound_update_buf_length();

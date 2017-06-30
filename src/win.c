@@ -32,7 +32,6 @@
 #include "video.h"
 
 #include "plat-joystick.h"
-#include "plat-midi.h"
 #include "plat-mouse.h"
 #include "plat-keyboard.h"
 
@@ -120,6 +119,16 @@ void warning(const char *format, ...)
         va_end(ap);
         
         MessageBox(ghwnd, buf, "PCem", MB_OK);
+}
+
+unsigned int get_ticks()
+{
+	return GetTickCount();
+}
+
+void delay_ms(unsigned int ms)
+{
+	Sleep(ms);
 }
 
 void updatewindowsize(int x, int y)
@@ -701,7 +710,6 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
                 keyboard_init();
                 mouse_init();
                 joystick_init();
-                midi_init();
         
                 if (start_in_fullscreen)
                 {
@@ -768,7 +776,6 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
                 keyboard_close();
                 mouse_close();
                 joystick_close();
-                midi_close();
 
                 DestroyWindow(hwnd);
                 CloseHandle(ghMutex);

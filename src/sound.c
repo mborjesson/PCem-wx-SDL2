@@ -18,6 +18,7 @@
 #include "sound_sb.h"
 #include "sound_sb_dsp.h"
 #include "sound_wss.h"
+#include "midi.h"
 
 #include "timer.h"
 #include "thread.h"
@@ -203,12 +204,12 @@ static int32_t *outbuffer;
 void sound_init()
 {
         initalmain(0,NULL);
-        inital();
 
         outbuffer = malloc(MAXSOUNDBUFLEN * 2 * sizeof(int32_t));
         
         sound_cd_event = thread_create_event();
         sound_cd_thread_h = thread_create(sound_cd_thread, NULL);
+
 }
 
 void sound_add_handler(void (*get_buffer)(int32_t *buffer, int len, void *p), void *p)
@@ -230,6 +231,8 @@ void sound_poll(void *priv)
                 thread_set_event(sound_cd_event);
         }
         
+        midi_poll();
+
         sound_pos_global++;
         if (sound_pos_global == SOUNDBUFLEN)
         {

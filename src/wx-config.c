@@ -12,6 +12,7 @@
 #include "nvr.h"
 #include "sound.h"
 #include "video.h"
+#include "midi.h"
 #include "vid_voodoo.h"
 
 extern int pause;
@@ -20,6 +21,7 @@ extern int is486;
 static int romstolist[ROM_MAX], listtomodel[ROM_MAX], romstomodel[ROM_MAX],
                 modeltolist[ROM_MAX];
 static int settings_sound_to_list[20], settings_list_to_sound[20];
+static int settings_midi_to_list[20], settings_list_to_midi[20];
 static int settings_mouse_to_list[20], settings_list_to_mouse[20];
 static int settings_network_to_list[20], settings_list_to_network[20];
 static char *hdd_names[16];
@@ -40,6 +42,15 @@ static int mouse_valid(int type, int model)
                         && !(models[model].flags & MODEL_OLIM24))
                 return 0;
         return 1;
+}
+
+static int mpu401_available(int sound_card)
+{
+        char* name = sound_card_get_internal_name(sound_card);
+        if (name && (!strcmp(name, "sb16") || !strcmp(name, "sbawe32")))
+                return TRUE;
+
+        return FALSE;
 }
 
 static void recalc_vid_list(void* hdlg, int model)
@@ -114,6 +125,34 @@ static void recalc_snd_list(void* hdlg, int model)
                 c++;
         }
         wx_sendmessage(h, WX_CB_SETCURSEL, settings_sound_to_list[sound_card_current], 0);
+}
+
+static void recalc_midi_list(void* hdlg, int model)
+{
+        void* h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOMIDI"));
+        int c = 0, d = 0;
+
+        wx_sendmessage(h, WX_CB_RESETCONTENT, 0, 0);
+
+        while (1)
+        {
+                char *s = midi_device_getname(c);
+
+                if (!s[0])
+                        break;
+
+                settings_midi_to_list[c] = d;
+
+                if (midi_device_available(c))
+                {
+                        wx_sendmessage(h, WX_CB_ADDSTRING, 0, (LONG_PARAM) s);
+                        settings_list_to_midi[d] = c;
+                        d++;
+                }
+
+                c++;
+        }
+        wx_sendmessage(h, WX_CB_SETCURSEL, settings_midi_to_list[midi_device_current], 0);
 }
 
 static void recalc_hdd_list(void* hdlg, int model, int use_selected_hdd)
@@ -191,7 +230,7 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
         int c, d;
         int rom, gfx, mem, fpu;
         int temp_cpu, temp_cpu_m, temp_model;
-        int temp_GAMEBLASTER, temp_GUS, temp_SSI2001, temp_voodoo, temp_sound_card_current;
+        int temp_GAMEBLASTER, temp_GUS, temp_SSI2001, temp_voodoo, temp_sound_card_current, temp_midi_device_current;
         int temp_dynarec;
         int cpu_flags;
         int temp_fda_type, temp_fdb_type;
@@ -245,8 +284,7 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
 
                         h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBO3"));
                         c = 0;
-                        while (models[romstomodel[romset]].cpu[cpu_manufacturer].cpus[c].cpu_type
-                        != -1)
+                        while (models[romstomodel[romset]].cpu[cpu_manufacturer].cpus[c].cpu_type != -1)
                         {
                                 wx_sendmessage(h, WX_CB_ADDSTRING, 0,
                                 (LONG_PARAM) models[romstomodel[romset]].cpu[cpu_manufacturer].cpus[c].name);
@@ -256,6 +294,11 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                         wx_sendmessage(h, WX_CB_SETCURSEL, cpu, 0);
 
                         recalc_snd_list(hdlg, romstomodel[romset]);
+                        recalc_midi_list(hdlg, romstomodel[romset]);
+
+                        c = mpu401_available(sound_card_current);
+                        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_COMBOMIDI")), c);
+                        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_CONFIGUREMIDI")), c);
 
                         h = wx_getdlgitem(hdlg, WX_ID("IDC_CHECK3"));
                         wx_sendmessage(h, WX_BM_SETCHECK, GAMEBLASTER, 0);
@@ -317,6 +360,12 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
 
                         h = wx_getdlgitem(hdlg, WX_ID("IDC_CONFIGURESND"));
                         if (sound_card_has_config(sound_card_current))
+                                wx_enablewindow(h, TRUE);
+                        else
+                                wx_enablewindow(h, FALSE);
+
+                        h = wx_getdlgitem(hdlg, WX_ID("IDC_CONFIGUREMIDI"));
+                        if (midi_device_has_config(midi_device_current))
                                 wx_enablewindow(h, TRUE);
                         else
                                 wx_enablewindow(h, FALSE);
@@ -460,8 +509,10 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 temp_voodoo = wx_sendmessage(h, WX_BM_GETCHECK, 0, 0);
 
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOSND"));
-                                temp_sound_card_current = settings_list_to_sound[wx_sendmessage(h,
-                                WX_CB_GETCURSEL, 0, 0)];
+                                temp_sound_card_current = settings_list_to_sound[wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0)];
+
+                                h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOMIDI"));
+                                temp_midi_device_current = settings_list_to_midi[wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0)];
 
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_CHECKDYNAREC"));
                                 temp_dynarec = wx_sendmessage(h, WX_BM_GETCHECK, 0, 0);
@@ -484,6 +535,7 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 if (temp_model != model || gfx != gfxcard || mem != mem_size ||
                                     fpu != hasfpu || temp_GAMEBLASTER != GAMEBLASTER || temp_GUS != GUS ||
                                     temp_SSI2001 != SSI2001 || temp_sound_card_current != sound_card_current ||
+                                    temp_midi_device_current != midi_device_current ||
                                     temp_voodoo != voodoo_enabled || temp_dynarec != cpu_use_dynarec ||
                                     temp_fda_type != fdd_get_type(0) || temp_fdb_type != fdd_get_type(1) ||
                                     temp_mouse_type != mouse_type || hdd_changed)
@@ -501,6 +553,7 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                                 GUS = temp_GUS;
                                                 SSI2001 = temp_SSI2001;
                                                 sound_card_current = temp_sound_card_current;
+                                                midi_device_current = temp_midi_device_current;
                                                 voodoo_enabled = temp_voodoo;
                                                 cpu_use_dynarec = temp_dynarec;
                                                 mouse_type = temp_mouse_type;
@@ -676,6 +729,8 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 recalc_hdd_list(hdlg, temp_model, 1);
 
                                 recalc_snd_list(hdlg, temp_model);
+
+                                recalc_midi_list(hdlg, temp_model);
                         }
                         else if (wParam == WX_ID("IDC_COMBOCPUM"))
                         {
@@ -785,20 +840,39 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                         else if (wParam == WX_ID("IDC_CONFIGURESND"))
                         {
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOSND"));
-                                temp_sound_card_current = settings_list_to_sound[wx_sendmessage(h,
-                                WX_CB_GETCURSEL, 0, 0)];
+                                temp_sound_card_current = settings_list_to_sound[wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0)];
 
-                                deviceconfig_open(hdlg,
-                                (void *) sound_card_getdevice(temp_sound_card_current));
+                                deviceconfig_open(hdlg, (void *) sound_card_getdevice(temp_sound_card_current));
                         }
                         else if (wParam == WX_ID("IDC_COMBOSND"))
                         {
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOSND"));
-                                temp_sound_card_current = settings_list_to_sound[wx_sendmessage(h,
-                                WX_CB_GETCURSEL, 0, 0)];
+                                temp_sound_card_current = settings_list_to_sound[wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0)];
 
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_CONFIGURESND"));
                                 if (sound_card_has_config(temp_sound_card_current))
+                                        wx_enablewindow(h, TRUE);
+                                else
+                                        wx_enablewindow(h, FALSE);
+
+                                c = mpu401_available(temp_sound_card_current);
+                                wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_COMBOMIDI")), c);
+                                wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_CONFIGUREMIDI")), c);
+                        }
+                        else if (wParam == WX_ID("IDC_CONFIGUREMIDI"))
+                        {
+                                h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOMIDI"));
+                                temp_midi_device_current = settings_list_to_midi[wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0)];
+
+                                deviceconfig_open(hdlg, (void *) midi_device_getdevice(temp_midi_device_current));
+                        }
+                        else if (wParam == WX_ID("IDC_COMBOMIDI"))
+                        {
+                                h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOMIDI"));
+                                temp_midi_device_current = settings_list_to_midi[wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0)];
+
+                                h = wx_getdlgitem(hdlg, WX_ID("IDC_CONFIGUREMIDI"));
+                                if (midi_device_has_config(temp_midi_device_current))
                                         wx_enablewindow(h, TRUE);
                                 else
                                         wx_enablewindow(h, FALSE);
