@@ -1,8 +1,8 @@
 #include <SDL2/SDL.h>
+#include "video.h"
 #include "wx-sdl2-video.h"
 #include "wx-utils.h"
 #include "ibm.h"
-#include "video.h"
 #include "wx-display.h"
 #include "plat-keyboard.h"
 
@@ -53,27 +53,8 @@ extern void toggle_fullscreen();
 
 void display_resize(int width, int height)
 {
-        /* Video scaling-code is borrowed from 86Box */
-        switch(video_scale)
-        {
-                case 0:
-                        winsizex = width >> 1;
-                        winsizey = height >> 1;
-                        break;
-                case 2:
-                        winsizex = (width * 3) >> 1;
-                        winsizey = (height * 3) >> 1;
-                        break;
-                case 3:
-                        winsizex = width << 1;
-                        winsizey = height << 1;
-                        break;
-                case 1:
-                default:
-                        winsizex = width;
-                        winsizey = height;
-                        break;
-        }
+        winsizex = width*(video_scale+1) >> 1;
+        winsizey = height*(video_scale+1) >> 1;
 
         SDL_Rect rect;
         rect.x = rect.y = 0;
@@ -389,7 +370,7 @@ int window_create()
 {
         window = SDL_CreateWindow("PCem Display",
                         rect.x, rect.y, rect.w, rect.h,
-                        vid_resize ? SDL_WINDOW_RESIZABLE : 0);
+                        requested_render_driver.sdl_window_params | (vid_resize ? SDL_WINDOW_RESIZABLE : 0));
         if (!window)
         {
                 char message[200];

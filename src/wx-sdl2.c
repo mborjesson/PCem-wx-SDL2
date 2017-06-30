@@ -91,8 +91,14 @@ int video_height = 480;
 char menuitem[60];
 
 extern int config_selection_open(void* hwnd, int inited);
+extern int shader_manager_open(void* hwnd);
 
 extern void sdl_set_window_title(const char* title);
+
+extern float gl3_simulated_refresh_rate;
+extern float gl3_input_scale;
+extern int gl3_input_stretch;
+extern char gl3_shader_file[20][512];
 
 void warning(const char *format, ...)
 {
@@ -223,24 +229,63 @@ Uint32 timer_onesec(Uint32 interval, void* param)
 
 void sdl_loadconfig()
 {
-        video_fullscreen = config_get_int(CFG_GLOBAL, "SDL2", "fullscreen", video_fullscreen);
-        video_fullscreen_mode = config_get_int(CFG_GLOBAL, "SDL2", "fullscreen_mode", video_fullscreen_mode);
-        video_scale = config_get_int(CFG_GLOBAL, "SDL2", "scale", video_scale);
-        video_scale_mode = config_get_int(CFG_GLOBAL, "SDL2", "scale_mode", video_scale_mode);
-        video_vsync = config_get_int(CFG_GLOBAL, "SDL2", "vsync", video_vsync);
-        video_focus_dim = config_get_int(CFG_GLOBAL, "SDL2", "focus_dim", video_focus_dim);
-        requested_render_driver = sdl_get_render_driver_by_name(config_get_string(CFG_GLOBAL, "SDL2", "render_driver", ""), RENDERER_SOFTWARE);
+        vid_resize = config_get_int(CFG_MACHINE, NULL, "vid_resize", 0);
+        video_fullscreen_scale = config_get_int(CFG_MACHINE, NULL, "video_fullscreen_scale", 0);
+        video_fullscreen_first = config_get_int(CFG_MACHINE, NULL, "video_fullscreen_first", 1);
+
+        video_fullscreen = config_get_int(CFG_MACHINE, "SDL2", "fullscreen", video_fullscreen);
+        video_fullscreen_mode = config_get_int(CFG_MACHINE, "SDL2", "fullscreen_mode", video_fullscreen_mode);
+        video_scale = config_get_int(CFG_MACHINE, "SDL2", "scale", video_scale);
+        video_scale_mode = config_get_int(CFG_MACHINE, "SDL2", "scale_mode", video_scale_mode);
+        video_vsync = config_get_int(CFG_MACHINE, "SDL2", "vsync", video_vsync);
+        video_focus_dim = config_get_int(CFG_MACHINE, "SDL2", "focus_dim", video_focus_dim);
+        requested_render_driver = sdl_get_render_driver_by_name(config_get_string(CFG_MACHINE, "SDL2", "render_driver", ""), RENDERER_SOFTWARE);
+
+        gl3_input_scale = config_get_float(CFG_MACHINE, "GL3", "input_scale", gl3_input_scale);
+        gl3_input_stretch = config_get_int(CFG_MACHINE, "GL3", "input_stretch", gl3_input_stretch);
+        gl3_simulated_refresh_rate = config_get_float(CFG_MACHINE, "GL3", "simulated_refresh_rate", gl3_simulated_refresh_rate);
+
+        memset(&gl3_shader_file, 0, sizeof(gl3_shader_file));
+        int num_shaders = config_get_int(CFG_MACHINE, "GL3 Shaders", "shaders", 0);
+        char s[20];
+        int i;
+        for (i = 0; i < num_shaders; ++i)
+        {
+                sprintf(s, "shader%d", i);
+                strncpy(gl3_shader_file[i], config_get_string(CFG_MACHINE, "GL3 Shaders", s, ""), 511);
+                gl3_shader_file[i][511] = 0;
+        }
 }
 
 void sdl_saveconfig()
 {
-        config_set_int(CFG_GLOBAL, "SDL2", "fullscreen", video_fullscreen);
-        config_set_int(CFG_GLOBAL, "SDL2", "fullscreen_mode", video_fullscreen_mode);
-        config_set_int(CFG_GLOBAL, "SDL2", "scale", video_scale);
-        config_set_int(CFG_GLOBAL, "SDL2", "scale_mode", video_scale_mode);
-        config_set_int(CFG_GLOBAL, "SDL2", "vsync", video_vsync);
-        config_set_int(CFG_GLOBAL, "SDL2", "focus_dim", video_focus_dim);
-        config_set_string(CFG_GLOBAL, "SDL2", "render_driver", (char*)requested_render_driver.sdl_id);
+        config_set_int(CFG_MACHINE, NULL, "vid_resize", vid_resize);
+        config_set_int(CFG_MACHINE, NULL, "video_fullscreen_scale", video_fullscreen_scale);
+        config_set_int(CFG_MACHINE, NULL, "video_fullscreen_first", video_fullscreen_first);
+
+        config_set_int(CFG_MACHINE, "SDL2", "fullscreen", video_fullscreen);
+        config_set_int(CFG_MACHINE, "SDL2", "fullscreen_mode", video_fullscreen_mode);
+        config_set_int(CFG_MACHINE, "SDL2", "scale", video_scale);
+        config_set_int(CFG_MACHINE, "SDL2", "scale_mode", video_scale_mode);
+        config_set_int(CFG_MACHINE, "SDL2", "vsync", video_vsync);
+        config_set_int(CFG_MACHINE, "SDL2", "focus_dim", video_focus_dim);
+        config_set_string(CFG_MACHINE, "SDL2", "render_driver", (char*)requested_render_driver.sdl_id);
+
+        config_set_float(CFG_MACHINE, "GL3", "input_scale", gl3_input_scale);
+        config_set_int(CFG_MACHINE, "GL3", "input_stretch", gl3_input_stretch);
+        config_set_float(CFG_MACHINE, "GL3", "simulated_refresh_rate", gl3_simulated_refresh_rate);
+
+        char s[20];
+        int i;
+        for (i = 0; i < 20; ++i)
+        {
+                sprintf(s, "shader%d", i);
+                if (strlen(gl3_shader_file[i]))
+                        config_set_string(CFG_MACHINE, "GL3 Shaders", s, gl3_shader_file[i]);
+                else
+                        break;
+        }
+        config_set_int(CFG_MACHINE, "GL3 Shaders", "shaders", i);
 }
 
 void update_cdrom_menu(void* hmenu)
@@ -317,23 +362,21 @@ void wx_setupmenu()
         for (c = 1; c < num_renderers; ++c)
         {
                 sprintf(menuitem, "IDM_VID_RENDER_DRIVER[%d]", drivers[c].id);
-                wx_enablemenuitem(menu, WX_ID(menuitem), 0);
-        }
-        SDL_RendererInfo renderInfo;
-        for (c = 0; c < SDL_GetNumRenderDrivers(); ++c)
-        {
-                SDL_GetRenderDriverInfo(c, &renderInfo);
-                sdl_render_driver* driver = sdl_get_render_driver_by_name_ptr(renderInfo.name);
-
-                if (driver)
-                {
-                        pclog("Renderer: %s (%d)\n", renderInfo.name, driver->id);
-                        sprintf(menuitem, "IDM_VID_RENDER_DRIVER[%d]", driver->id);
-                        wx_enablemenuitem(menu, WX_ID(menuitem), 1);
-                }
+                wx_enablemenuitem(menu, WX_ID(menuitem), drivers[c].renderer_available(&drivers[c]));
         }
         sprintf(menuitem, "IDM_VID_RENDER_DRIVER[%d]", requested_render_driver.id);
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
+
+        wx_enablemenuitem(menu, WX_ID("IDM_VID_SDL2"), requested_render_driver.id != RENDERER_GL3);
+        wx_enablemenuitem(menu, WX_ID("IDM_VID_GL3"), requested_render_driver.id == RENDERER_GL3);
+
+        sprintf(menuitem, "IDM_VID_GL3_INPUT_STRETCH[%d]", gl3_input_stretch);
+        wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
+        sprintf(menuitem, "IDM_VID_GL3_INPUT_SCALE[%d]", (int)((gl3_input_scale-0.5)*2));
+        wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
+        sprintf(menuitem, "IDM_VID_GL3_SIMULATED_REFRESH_RATE[%g]", gl3_simulated_refresh_rate);
+        wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
+
 }
 
 void sdl_onconfigloaded()
@@ -735,6 +778,7 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
         else if (ID_RANGE("IDM_VID_FS[start]", "IDM_VID_FS[end]"))
         {
                 video_fullscreen_scale = wParam - wx_xrcid("IDM_VID_FS[start]");
+                display_resize(video_width, video_height);
                 saveconfig(NULL);
         }
         else if (ID_RANGE("IDM_VID_SCALE_MODE[start]", "IDM_VID_SCALE_MODE[end]"))
@@ -758,6 +802,11 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
         {
                 requested_render_driver = sdl_get_render_driver_by_id(wParam - wx_xrcid("IDM_VID_RENDER_DRIVER[start]"), RENDERER_AUTO);
                 window_doreset = 1;
+
+                /* update enabled menu-items */
+                wx_enablemenuitem(menu, WX_ID("IDM_VID_SDL2"), requested_render_driver.id != RENDERER_GL3);
+                wx_enablemenuitem(menu, WX_ID("IDM_VID_GL3"), requested_render_driver.id == RENDERER_GL3);
+
                 saveconfig(NULL);
         }
         else if (ID_IS("IDM_VID_VSYNC"))
@@ -770,6 +819,38 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
         {
                 video_focus_dim = checked;
                 saveconfig(NULL);
+        }
+        else if (ID_RANGE("IDM_VID_GL3_INPUT_STRETCH[start]", "IDM_VID_GL3_INPUT_STRETCH[end]"))
+        {
+                gl3_input_stretch = wParam - wx_xrcid("IDM_VID_GL3_INPUT_STRETCH[start]");
+                saveconfig(NULL);
+        }
+        else if (ID_RANGE("IDM_VID_GL3_INPUT_SCALE[start]", "IDM_VID_GL3_INPUT_SCALE[end]"))
+        {
+                int input_scale = wParam - wx_xrcid("IDM_VID_GL3_INPUT_SCALE[start]");
+                gl3_input_scale = input_scale/2.0f+0.5f;
+                saveconfig(NULL);
+        }
+        else if (ID_RANGE("IDM_VID_GL3_SIMULATED_REFRESH_RATE[start]", "IDM_VID_GL3_SIMULATED_REFRESH_RATE[end]"))
+        {
+                gl3_simulated_refresh_rate = wParam - wx_xrcid("IDM_VID_GL3_SIMULATED_REFRESH_RATE[start]");
+                saveconfig(NULL);
+        }
+        else if (ID_IS("IDM_VID_GL3_SHADER_MANAGER"))
+        {
+                if (shader_manager_open(hwnd))
+                {
+                        renderer_doreset = 1;
+                        saveconfig(NULL);
+                }
+//                if (!getfile(hwnd, "GLSL Shaders (*.glslp;*.glsl)|*.glslp;*.glsl|All files (*.*)|*.*", gl3_shader_file))
+//                {
+//                        strncpy(gl3_shader_file, openfilestring, 511);
+//                        gl3_shader_file[511] = 0;
+//                        renderer_doreset = 1;
+//                        saveconfig(NULL);
+//                }
+
         }
         else if (ID_RANGE("IDM_SND_BUF[start]", "IDM_SND_BUF[end]"))
         {
