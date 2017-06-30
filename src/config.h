@@ -1,7 +1,11 @@
+float config_get_float(int is_global, char *head, char *name, float def);
 int config_get_int(int is_global, char *head, char *name, int def);
 char *config_get_string(int is_global, char *head, char *name, char *def);
+void config_set_float(int is_global, char *head, char *name, float val);
 void config_set_int(int is_global, char *head, char *name, int val);
 void config_set_string(int is_global, char *head, char *name, char *val);
+
+int config_free_section(int is_global, char *head);
 
 void add_config_callback(void(*loadconfig)(), void(*saveconfig)(), void(*onloaded)());
 
