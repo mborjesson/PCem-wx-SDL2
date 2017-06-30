@@ -14,6 +14,8 @@ typedef void (*WX_CALLBACK)();
 extern "C" {
 #endif
         int wx_messagebox(void* nothing, const char* message, const char* title, int style);
+        void wx_simple_messagebox(const char* title, const char *format, ...);
+
         int wx_xrcid(const char* s);
         int wx_filedialog(void* window, const char* title, const char* path, const char* extensions, const char* extension, int open, char* file);
         void wx_checkmenuitem(void* window, int id, int checked);
@@ -72,6 +74,21 @@ extern "C" {
         int wx_file_exists(char* path);
         int wx_dir_exists(char* path);
 
+        void* wx_image_load(const char* path);
+        void wx_image_rescale(void* image, int width, int height);
+        void wx_image_get_size(void* image, int* width, int* height);
+        unsigned char* wx_image_get_data(void* image);
+        unsigned char* wx_image_get_alpha(void* image);
+        void wx_image_free(void* image);
+
+        void* wx_config_load(const char* path);
+        int wx_config_get_string(void* config, const char* name, char* dst, int size, const char* defVal);
+        int wx_config_get_int(void* config, const char* name, int* dst, int defVal);
+        int wx_config_get_float(void* config, const char* name, float* dst, float defVal);
+        int wx_config_get_bool(void* config, const char* name, int* dst, int defVal);
+        int wx_config_has_entry(void* config, const char* name);
+        void wx_config_free(void* config);
+
         int confirm();
 #ifdef __cplusplus
 }
@@ -111,6 +128,8 @@ extern void (*wx_idle_func)(void* window, void* event);
 #define WX_LB_GETTEXT 62
 #define WX_LB_DELETESTRING 63
 #define WX_LB_INSERTSTRING 64
+#define WX_LB_RESETCONTENT 65
+#define WX_LB_SETCURSEL 66
 
 #define WX_MB_OK wxOK
 #define WX_MB_OKCANCEL wxOK|wxCANCEL

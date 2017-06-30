@@ -20,12 +20,13 @@ OBJ = 386.o 386_dynarec.o 386_dynarec_ops.o 808x.o acer386sx.o ali1429.o amstrad
 	vid_svga_render.o vid_tandy.o vid_tandysl.o vid_tgui9440.o vid_tkd8001_ramdac.o vid_tvga.o vid_unk_ramdac.o \
 	vid_vga.o vid_voodoo.o vid_wy700.o video.o wd76c10.o x86seg.o x87.o xtide.o win-midi.o \
 	wx-main.o wx-config_sel.o wx-dialogbox.o wx-utils.o wx-app.o wx-sdl2-joystick.o wx-sdl2-mouse.o wx-sdl2-keyboard.o wx-sdl2-video.o \
-	wx-sdl2.o wx-config.o wx-deviceconfig.o wx-sdl2-hdconf.o wx-status.o wx-sdl2-status.o wx-resources.o wx-thread.o wx-common.o wx-sdl2-display.o
+	wx-sdl2.o wx-config.o wx-deviceconfig.o wx-sdl2-hdconf.o wx-status.o wx-sdl2-status.o wx-resources.o wx-thread.o wx-common.o wx-sdl2-display.o \
+	wx-sdl2-video-renderer.o wx-sdl2-video-gl3.o wx-glslp-parser.o wx-shader_man.o wx-shaderconfig.o
 DBOBJ = cdrom_image.o dbopl.o nukedopl.o vid_cga_comp.o
 SIDOBJ = convolve.o convolve-sse.o envelope.o extfilt.o filter.o pot.o sid.o voice.o wave6581__ST.o wave6581_P_T.o wave6581_PS_.o wave6581_PST.o wave8580__ST.o wave8580_P_T.o wave8580_PS_.o wave8580_PST.o wave.o
 MUNTOBJ = Analog.o BReverbModel.o File.o FileStream.o LA32Ramp.o LA32FloatWaveGenerator.o LA32WaveGenerator.o MidiStreamParser.o Part.o Partial.o PartialManager.o Poly.o ROMInfo.o Synth.o Tables.o TVA.o TVF.o TVP.o sha1.o c_interface.o
 
-LIBS = -mwindows -lopenal32 -lstdc++ -lwxbase31u -lwxmsw31u_core -lwxmsw31u_xrc -lmingw32 -lSDL2main -lSDL2  -mwindows  -Wl,--no-undefined -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid -static
+LIBS = -mwindows -lopengl32 -lopenal32 -lstdc++ -lwxbase31u -lwxmsw31u_core -lwxmsw31u_xrc -lmingw32 -lSDL2main -lSDL2  -mwindows  -Wl,--no-undefined -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid -static
 
 PCem-wx-SDL2.exe: $(OBJ) $(DBOBJ) $(SIDOBJ) $(MUNTOBJ)
 	$(CC) $(OBJ) $(DBOBJ) $(SIDOBJ) $(MUNTOBJ) -o "PCem-wx-SDL2.exe" $(LIBS)

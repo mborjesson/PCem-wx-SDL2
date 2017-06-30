@@ -1,16 +1,29 @@
-#include <SDL2/SDL.h>
-
 #define RENDERER_AUTO 0
 #define RENDERER_DIRECT3D 1
 #define RENDERER_OPENGL 2
 #define RENDERER_OPENGLES2 3
 #define RENDERER_OPENGLES 4
 #define RENDERER_SOFTWARE 5
+#define RENDERER_GL3 6
+
+struct sdl_render_driver;
+
+typedef struct sdl_renderer_t {
+        int (*init)(SDL_Window* window, struct sdl_render_driver driver, BITMAP* screen);
+        void (*close)();
+        void (*update)(SDL_Window* window, SDL_Rect updated_rect, BITMAP* screen);
+        void (*present)(SDL_Window* window, SDL_Rect texture_rect, SDL_Rect window_rect, BITMAP* screen);
+        int always_update;
+} sdl_renderer_t;
 
 typedef struct sdl_render_driver {
         int id;
         const char* sdl_id;
         const char* name;
+        int sdl_window_params;
+        sdl_renderer_t* (*renderer_create)();
+        void (*renderer_close)(sdl_renderer_t* renderer);
+        int (*renderer_available)(struct sdl_render_driver* driver);
 } sdl_render_driver;
 
 #ifdef __cplusplus

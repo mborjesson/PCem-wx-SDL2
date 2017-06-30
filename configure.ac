@@ -89,6 +89,9 @@ else
          wxWidgets version is $reqwx or above.
          ])
    fi
+   AC_CHECK_LIB([GL], [glGetError], [], \
+      [echo "You need to install the OpenGL library."
+       exit -1])
    LIBS="$LIBS $WX_LIBS $SDL_LIBS"
 fi
 

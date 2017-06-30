@@ -8,6 +8,8 @@
 #include <wx/spinctrl.h>
 #include <wx/xrc/xmlres.h>
 #include <wx/stdpaths.h>
+#include <wx/fileconf.h>
+#include <wx/wfstream.h>
 
 #include "wx-dialogbox.h"
 #include "wx-app.h"
@@ -26,6 +28,18 @@ int wx_messagebox(void* window, const char* message, const char* title = NULL, i
 {
         return wxMessageBox(message, title, style | wxCENTRE, (wxWindow*) window);
 }
+
+void wx_simple_messagebox(const char* title, const char *format, ...)
+{
+        char message[2048];
+        va_list ap;
+        va_start(ap, format);
+        vsnprintf(message, 2047, format, ap);
+        message[2047] = 0;
+        va_end(ap);
+        wx_messagebox(0, message, title, WX_MB_OK);
+}
+
 
 int wx_textentrydialog(void* window, const char* message, const char* title, const char* value, int min_length, int max_length, LONG_PARAM result)
 {
@@ -300,6 +314,11 @@ int wx_sendmessage(void* window, int type, INT_PARAM param1, LONG_PARAM param2)
         {
                 return ((wxListBox*) window)->GetSelection();
         }
+        case WX_LB_SETCURSEL:
+        {
+                ((wxListBox*) window)->SetSelection(param1);
+                break;
+        }
         case WX_LB_GETTEXT:
         {
                 strcpy((char*) param2, ((wxListBox*) window)->GetString(param1));
@@ -313,6 +332,11 @@ int wx_sendmessage(void* window, int type, INT_PARAM param1, LONG_PARAM param2)
         case WX_LB_DELETESTRING:
         {
                 ((wxListBox*) window)->Delete(param1);
+                break;
+        }
+        case WX_LB_RESETCONTENT:
+        {
+                ((wxListBox*) window)->Clear();
                 break;
         }
         }
@@ -497,3 +521,103 @@ int wx_dir_exists(char* path)
         wxFileName p(path);
         return p.DirExists();
 }
+
+void* wx_image_load(const char* path)
+{
+        wxLogNull logNull; /* removes sRGB-warnings on Windows */
+        wxImage* image = new wxImage(path);
+        if (image->IsOk())
+                return image;
+        delete image;
+        return 0;
+}
+
+void wx_image_free(void* image)
+{
+        delete (wxImage*)image;
+}
+
+void wx_image_rescale(void* image, int width, int height)
+{
+        ((wxImage*)image)->Rescale(width, height);
+}
+
+void wx_image_get_size(void* image, int* width, int* height)
+{
+        *width = ((wxImage*)image)->GetWidth();
+        *height = ((wxImage*)image)->GetHeight();
+}
+
+unsigned char* wx_image_get_data(void* image)
+{
+        return ((wxImage*)image)->GetData();
+}
+
+unsigned char* wx_image_get_alpha(void* image)
+{
+        return ((wxImage*)image)->GetAlpha();
+}
+
+/* wxFileConfig */
+
+void* wx_config_load(const char* path)
+{
+        wxFileInputStream stream(path);
+        if (stream.IsOk())
+                return new wxFileConfig(stream);
+        return 0;
+}
+int wx_config_get_string(void* config, const char* name, char* dst, int size, const char* defVal)
+{
+        wxFileConfig* c = ((wxFileConfig*)config);
+        wxString val;
+        bool res = c->Read(name, &val, wxString(defVal));
+        strncpy(dst, val.GetData().AsChar(), size-1);
+        dst[size-1] = 0;
+        return res;
+}
+int wx_config_get_int(void* config, const char* name, int* dst, int defVal)
+{
+        wxFileConfig* c = ((wxFileConfig*)config);
+        return c->Read(name, dst, defVal);
+}
+
+int wx_config_get_float(void* config, const char* name, float* dst, float defVal)
+{
+        wxFileConfig* c = ((wxFileConfig*)config);
+        return c->Read(name, dst, defVal);
+
+}
+
+int wx_config_get_bool(void* config, const char* name, int* dst, int defVal)
+{
+        wxFileConfig* c = ((wxFileConfig*)config);
+        wxString val;
+        bool res = 1;
+        if (c->Read(name, &val))
+        {
+                val.LowerCase();
+                if (val.StartsWith("true"))
+                        *dst = 1;
+                else if (val.StartsWith("false"))
+                        *dst = 0;
+                else
+                        res = 0;
+        }
+        if (!res)
+                res = c->Read(name, (bool*)dst, (bool)defVal);
+
+        return res;
+}
+
+int wx_config_has_entry(void* config, const char* name)
+{
+        wxFileConfig* c = ((wxFileConfig*)config);
+        return c->HasEntry(name);
+}
+
+void wx_config_free(void* config)
+{
+        delete (wxFileConfig*)config;
+}
+
