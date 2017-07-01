@@ -1,15 +1,16 @@
 #include "wx-deviceconfig.h"
 
 #include "wx-utils.h"
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #include "wx-dialogbox.h"
 
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
-#include "wx/xrc/xmlres.h"
+#include <wx/xrc/xmlres.h>
+#include <wx/spinctrl.h>
 
 extern "C"
 {
@@ -55,7 +56,7 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam,
                                 break;
 
                         case CONFIG_SELECTION:
-                                h = wx_getdlgitem(hdlg, id + 1);
+                                h = wx_getdlgitem(hdlg, id);
                                 val_int = config_get_int(CFG_MACHINE, config_device->name, config->name, config->default_int);
 
                                 c = 0;
@@ -68,11 +69,11 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam,
                                         c++;
                                 }
 
-                                id += 2;
+                                id++;
                                 break;
 
                         case CONFIG_MIDI:
-                                h = wx_getdlgitem(hdlg, id + 1);
+                                h = wx_getdlgitem(hdlg, id);
                                 val_int = config_get_int(CFG_MACHINE, NULL, config->name, config->default_int);
 
                                 num = plat_midi_get_num_devs();
@@ -84,8 +85,29 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam,
                                                 wx_sendmessage(h, WX_CB_SETCURSEL, c, 0);
                                 }
 
+                                id++;
+                                break;
+
+                        case CONFIG_FILE:
+                        {
+                                h = wx_getdlgitem(hdlg, id);
+                                char* str = config_get_string(CFG_MACHINE, config_device->name, config->name, 0);
+                                if (str)
+                                        wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)str);
+
                                 id += 2;
                                 break;
+                        }
+                        case CONFIG_SPINNER:
+                        {
+                                h = wx_getdlgitem(hdlg, id);
+                                val_int = config_get_int(CFG_MACHINE, config_device->name, config->name, config->default_int);
+
+                                wx_sendmessage(h, WX_UDM_SETPOS, 0, val_int);
+
+                                id++;
+                                break;
+                        }
                         }
                         config++;
                 }
@@ -93,14 +115,14 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam,
                 return TRUE;
 
         case WX_COMMAND:
-                switch (wParam)
-                {
-                case wxID_OK:
+        {
+                if (wParam == wxID_OK)
                 {
                         int id = IDC_CONFIG_BASE;
                         device_config_t *config = config_device->config;
                         int c;
                         int changed = 0;
+                        char s[256];
 
                         while (config->type != -1)
                         {
@@ -121,7 +143,7 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam,
                                         break;
 
                                 case CONFIG_SELECTION:
-                                        h = wx_getdlgitem(hdlg, id + 1);
+                                        h = wx_getdlgitem(hdlg, id);
                                         val_int = config_get_int(CFG_MACHINE, config_device->name, config->name, config->default_int);
 
                                         c = wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0);
@@ -132,11 +154,11 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam,
                                         if (val_int != selection->value)
                                                 changed = 1;
 
-                                        id += 2;
+                                        id++;
                                         break;
 
                                 case CONFIG_MIDI:
-                                        h = wx_getdlgitem(hdlg, id + 1);
+                                        h = wx_getdlgitem(hdlg, id);
                                         val_int = config_get_int(CFG_MACHINE, NULL, config->name, config->default_int);
 
                                         c = wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0);
@@ -144,9 +166,35 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam,
                                         if (val_int != c)
                                                 changed = 1;
 
+                                        id++;
+                                        break;
+
+                                case CONFIG_FILE:
+                                {
+                                        h = wx_getdlgitem(hdlg, id);
+                                        char* str = config_get_string(CFG_MACHINE, config_device->name, config->name, (char*)"");
+                                        wx_sendmessage(h, WX_WM_GETTEXT, 0, (LONG_PARAM)s);
+                                        if (strcmp(str, s))
+                                                changed = 1;
+
                                         id += 2;
                                         break;
                                 }
+                                case CONFIG_SPINNER:
+                                {
+                                        h = wx_getdlgitem(hdlg, id);
+                                        val_int = config_get_int(CFG_MACHINE, config_device->name, config->name, config->default_int);
+
+                                        c = wx_sendmessage(h, WX_UDM_GETPOS, 0, 0);
+
+                                        if (val_int != c)
+                                                changed = 1;
+
+                                        id++;
+                                        break;
+                                }
+                                }
+
                                 config++;
                         }
 
@@ -181,22 +229,41 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam,
                                         break;
 
                                 case CONFIG_SELECTION:
-                                        h = wx_getdlgitem(hdlg, id + 1);
+                                        h = wx_getdlgitem(hdlg, id);
                                         c = wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0);
                                         for (; c > 0; c--)
                                                 selection++;
                                         config_set_int(CFG_MACHINE, config_device->name, config->name, selection->value);
 
-                                        id += 2;
+                                        id++;
                                         break;
 
                                 case CONFIG_MIDI:
-                                        h = wx_getdlgitem(hdlg, id + 1);
+                                        h = wx_getdlgitem(hdlg, id);
                                         c = wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0);
                                         config_set_int(CFG_MACHINE, NULL, config->name, c);
 
+                                        id++;
+                                        break;
+
+                                case CONFIG_FILE:
+                                {
+                                        h = wx_getdlgitem(hdlg, id);
+                                        wx_sendmessage(h, WX_WM_GETTEXT, 0, (LONG_PARAM)s);
+                                        config_set_string(CFG_MACHINE, config_device->name, config->name, s);
+
                                         id += 2;
                                         break;
+                                }
+                                case CONFIG_SPINNER:
+                                {
+                                        h = wx_getdlgitem(hdlg, id);
+                                        c = wx_sendmessage(h, WX_UDM_GETPOS, 0, 0);
+                                        config_set_int(CFG_MACHINE, config_device->name, config->name, c);
+
+                                        id++;
+                                        break;
+                                }
                                 }
                                 config++;
                         }
@@ -210,11 +277,83 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam,
                         wx_enddialog(hdlg, 0);
                         return TRUE;
                 }
-                case wxID_CANCEL:
+                else if (wParam == wxID_CANCEL)
+                {
                         wx_enddialog(hdlg, 0);
                         return TRUE;
                 }
+                else
+                {
+                        int id = IDC_CONFIG_BASE;
+                        device_config_t *config = config_device->config;
+                        int c, d;
+                        char s[256];
+                        char file_filter[512];
+
+                        while (config->type != -1)
+                        {
+                                void* h = 0;
+
+                                switch (config->type)
+                                {
+                                case CONFIG_BINARY:
+                                case CONFIG_SELECTION:
+                                case CONFIG_SPINNER:
+                                case CONFIG_MIDI:
+                                        id++;
+                                        break;
+
+                                case CONFIG_FILE:
+                                        if (wParam == id+1)
+                                        {
+                                                h = wx_getdlgitem(hdlg, id);
+                                                wx_sendmessage(h, WX_WM_GETTEXT, 0, (LONG_PARAM)s);
+                                                file_filter[0] = 0;
+
+                                                c = 0;
+                                                while (config->file_filter[c].description[0])
+                                                {
+                                                        if (c > 0)
+                                                                strcat(file_filter, "|");
+                                                        strcat(file_filter, config->file_filter[c].description);
+                                                        strcat(file_filter, " (");
+                                                        d = 0;
+                                                        while (config->file_filter[c].extensions[d][0])
+                                                        {
+                                                                if (d > 0)
+                                                                        strcat(file_filter, ";");
+                                                                strcat(file_filter, "*.");
+                                                                strcat(file_filter, config->file_filter[c].extensions[d]);
+                                                                d++;
+                                                        }
+                                                        strcat(file_filter, ")|");
+                                                        d = 0;
+                                                        while (config->file_filter[c].extensions[d][0])
+                                                        {
+                                                                if (d > 0)
+                                                                        strcat(file_filter, ";");
+                                                                strcat(file_filter, "*.");
+                                                                strcat(file_filter, config->file_filter[c].extensions[d]);
+                                                                d++;
+                                                        }
+                                                        c++;
+                                                }
+                                                strcat(file_filter, "|All files (*.*)|*.*");
+
+                                                int ret = !wx_filedialog(hdlg, "Open", s, file_filter, 0, 1, s);
+
+                                                if (ret)
+                                                        wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)s);
+                                        }
+                                        id += 2;
+                                        break;
+                                }
+                                config++;
+                        }
+
+                }
                 break;
+        }
         }
         return FALSE;
 }
@@ -249,11 +388,37 @@ void deviceconfig_open(void* hwnd, device_t *device)
                 case CONFIG_SELECTION:
                 case CONFIG_MIDI:
                 {
-                        sizer->Add(new wxStaticText(&dialog, id++, config->description), 0, wxALL);
+                        sizer->Add(new wxStaticText(&dialog, wxID_ANY, config->description), 0, wxALL);
                         wxComboBox* cb = new wxComboBox(&dialog, id++);
                         cb->SetEditable(false);
                         sizer->Add(cb, 0, wxALL);
                         break;
+                }
+                case CONFIG_FILE:
+                {
+                        sizer->Add(new wxStaticText(&dialog, wxID_ANY, config->description), 0, wxALL);
+
+                        wxBoxSizer* sz = new wxBoxSizer(wxHORIZONTAL);
+                        sizer->Add(sz, 0, wxALL, 0);
+
+                        wxTextCtrl* tc = new wxTextCtrl(&dialog, id++);
+                        tc->SetEditable(false);
+                        sz->Add(tc, 0, wxALL);
+
+                        wxButton* button = new wxButton(&dialog, id++, "Browse");
+                        sz->Add(button, 0, wxALL);
+
+                        break;
+                }
+                case CONFIG_SPINNER:
+                {
+                        sizer->Add(new wxStaticText(&dialog, wxID_ANY, config->description), 0, wxALL);
+                        wxSpinCtrlDouble* spinner = new wxSpinCtrlDouble(&dialog, id++);
+                        spinner->SetRange(config->spinner.min, config->spinner.max);
+                        spinner->SetDigits(0);
+                        spinner->SetIncrement(config->spinner.step > 0 ? config->spinner.step : 1);
+                        spinner->SetValue(config->default_int);
+                        sizer->Add(spinner, 0, wxALL);
                 }
                 }
 

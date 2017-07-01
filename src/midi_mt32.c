@@ -267,32 +267,11 @@ static device_config_t mt32_config[] =
         {
                 .name = "output_gain",
                 .description = "Output Gain",
-                .type = CONFIG_SELECTION,
-                .selection =
+                .type = CONFIG_SPINNER,
+                .spinner =
                 {
-                        {
-                                .description = "100%",
-                                .value = 100
-                        },
-                        {
-                                .description = "75%",
-                                .value = 75
-                        },
-                        {
-                                .description = "50%",
-                                .value = 50
-                        },
-                        {
-                                .description = "25%",
-                                .value = 25
-                        },
-                        {
-                                .description = "0%",
-                                .value = 0
-                        },
-                        {
-                                .description = ""
-                        }
+                        .min = 0,
+                        .max = 100
                 },
                 .default_int = 100
         },
@@ -305,32 +284,11 @@ static device_config_t mt32_config[] =
         {
                 .name = "reverb_output_gain",
                 .description = "Reverb Output Gain",
-                .type = CONFIG_SELECTION,
-                .selection =
+                .type = CONFIG_SPINNER,
+                .spinner =
                 {
-                        {
-                                .description = "100%",
-                                .value = 100
-                        },
-                        {
-                                .description = "75%",
-                                .value = 75
-                        },
-                        {
-                                .description = "50%",
-                                .value = 50
-                        },
-                        {
-                                .description = "25%",
-                                .value = 25
-                        },
-                        {
-                                .description = "0%",
-                                .value = 0
-                        },
-                        {
-                                .description = ""
-                        }
+                        .min = 0,
+                        .max = 100
                 },
                 .default_int = 100
         },
