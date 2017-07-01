@@ -34,6 +34,8 @@ static struct shader_texture scene_texture;
 
 static glsl_t* active_shader;
 
+static glw_t* glw;
+
 static GLfloat matrix[] = {
         1, 0, 0, 0,
         0, 1, 0, 0,
@@ -107,18 +109,18 @@ static int compile_shader(GLenum shader_type, const char* prepend, const char* p
                 source[2] = program;
 
 
-        GLuint shader = glCreateShader(shader_type);
-        glShaderSource(shader, 3, source, NULL);
-        glCompileShader(shader);
+        GLuint shader = glw->glCreateShader(shader_type);
+        glw->glShaderSource(shader, 3, source, NULL);
+        glw->glCompileShader(shader);
 
         GLint status = 0;
-        glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+        glw->glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
         if (!status)
         {
                 GLint length;
-                glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
+                glw->glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
                 char* log = malloc(length);
-                glGetShaderInfoLog(shader, length, &length, log);
+                glw->glGetShaderInfoLog(shader, length, &length, log);
                 wx_simple_messagebox("GLSL Error", "Could not compile shader:\n%s", log);
                 pclog("Could not compile shader: %s\n", log);
 //                pclog("Shader: %s\n", program);
@@ -135,26 +137,26 @@ static int compile_shader(GLenum shader_type, const char* prepend, const char* p
 static int create_program(struct shader_program* program)
 {
         GLint status;
-        program->id = glCreateProgram();
-        glAttachShader(program->id, program->vertex_shader);
-        glAttachShader(program->id, program->fragment_shader);
+        program->id = glw->glCreateProgram();
+        glw->glAttachShader(program->id, program->vertex_shader);
+        glw->glAttachShader(program->id, program->fragment_shader);
 
-        glLinkProgram(program->id);
+        glw->glLinkProgram(program->id);
 
-        glDeleteShader(program->vertex_shader);
-        glDeleteShader(program->fragment_shader);
+        glw->glDeleteShader(program->vertex_shader);
+        glw->glDeleteShader(program->fragment_shader);
 
         program->vertex_shader = program->fragment_shader = 0;
 
-        glGetProgramiv(program->id, GL_LINK_STATUS, &status);
+        glw->glGetProgramiv(program->id, GL_LINK_STATUS, &status);
 
         if (!status)
         {
                 int maxLength;
                 int length;
-                glGetProgramiv(program->id, GL_INFO_LOG_LENGTH, &maxLength);
+                glw->glGetProgramiv(program->id, GL_INFO_LOG_LENGTH, &maxLength);
                 char* log = malloc(maxLength);
-                glGetProgramInfoLog(program->id, maxLength, &length, log);
+                glw->glGetProgramInfoLog(program->id, maxLength, &length, log);
                 wx_simple_messagebox("GLSL Error", "Program not linked:\n%s", log);
                 free(log);
                 return 0;
@@ -165,12 +167,12 @@ static int create_program(struct shader_program* program)
 
 static GLuint get_uniform(GLuint program, const char* name)
 {
-        return glGetUniformLocation(program, name);
+        return glw->glGetUniformLocation(program, name);
 }
 
 static GLuint get_attrib(GLuint program, const char* name)
 {
-        return glGetAttribLocation(program, name);
+        return glw->glGetAttribLocation(program, name);
 }
 
 static void find_uniforms(struct glsl_shader* glsl, int num_pass)
@@ -179,7 +181,7 @@ static void find_uniforms(struct glsl_shader* glsl, int num_pass)
         char s[50];
         struct shader_pass* pass = &glsl->passes[num_pass];
         int p = pass->program.id;
-        glUseProgram(p);
+        glw->glUseProgram(p);
 
         struct shader_uniforms* u = &pass->uniforms;
 
@@ -235,7 +237,7 @@ static void find_uniforms(struct glsl_shader* glsl, int num_pass)
         for (i = 0; i < glsl->num_parameters; ++i)
                 u->parameters[i] = get_uniform(p, glsl->parameters[i].id);
 
-        glUseProgram(0);
+        glw->glUseProgram(0);
 }
 
 static void set_scale_mode(char* scale, int* dst)
@@ -271,7 +273,7 @@ static void create_texture(struct shader_texture* tex)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, tex->mag_filter);
         glTexImage2D(GL_TEXTURE_2D, 0, tex->internal_format, tex->width, tex->height, 0, tex->format, tex->type, tex->data);
         if (tex->mipmap)
-                glGenerateMipmap(GL_TEXTURE_2D);
+                glw->glGenerateMipmap(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -286,23 +288,23 @@ static void delete_fbo(struct shader_fbo* fbo)
 {
         if (fbo->id >= 0)
         {
-                glDeleteFramebuffers(1, &fbo->id);
+                glw->glDeleteFramebuffers(1, &fbo->id);
                 delete_texture(&fbo->texture);
         }
 }
 
 static void delete_program(struct shader_program* program)
 {
-        if (program->vertex_shader) glDeleteShader(program->vertex_shader);
-        if (program->fragment_shader) glDeleteShader(program->fragment_shader);
-        glDeleteProgram(program->id);
+        if (program->vertex_shader) glw->glDeleteShader(program->vertex_shader);
+        if (program->fragment_shader) glw->glDeleteShader(program->fragment_shader);
+        glw->glDeleteProgram(program->id);
 }
 
 static void delete_vbo(struct shader_vbo* vbo)
 {
-        if (vbo->color >= 0) glDeleteBuffers(1, &vbo->color);
-        glDeleteBuffers(1, &vbo->vertex_coord);
-        glDeleteBuffers(1, &vbo->tex_coord);
+        if (vbo->color >= 0) glw->glDeleteBuffers(1, &vbo->color);
+        glw->glDeleteBuffers(1, &vbo->vertex_coord);
+        glw->glDeleteBuffers(1, &vbo->tex_coord);
 }
 
 static void delete_pass(struct shader_pass* pass)
@@ -310,7 +312,7 @@ static void delete_pass(struct shader_pass* pass)
         delete_fbo(&pass->fbo);
         delete_vbo(&pass->vbo);
         delete_program(&pass->program);
-        glDeleteVertexArrays(1, &pass->vertex_array);
+        glw->glDeleteVertexArrays(1, &pass->vertex_array);
 }
 
 static void delete_prev(struct shader_prev* prev)
@@ -349,14 +351,14 @@ static void create_fbo(struct shader_fbo* fbo)
 {
         create_texture(&fbo->texture);
 
-        glGenFramebuffers(1, &fbo->id);
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo->id);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbo->texture.id, 0);
+        glw->glGenFramebuffers(1, &fbo->id);
+        glw->glBindFramebuffer(GL_FRAMEBUFFER, fbo->id);
+        glw->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbo->texture.id, 0);
 
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        if (glw->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
                 pclog("Could not create framebuffer!\n");
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glw->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 static void setup_fbo(struct shader* shader, struct shader_fbo* fbo)
@@ -397,7 +399,7 @@ static void recreate_fbo(struct shader_fbo* fbo, int width, int height)
 {
         if (width != fbo->texture.width || height != fbo->texture.height)
         {
-                glDeleteFramebuffers(1, &fbo->id);
+                glw->glDeleteFramebuffers(1, &fbo->id);
                 glDeleteTextures(1, &fbo->texture.id);
                 fbo->texture.width = width;
                 fbo->texture.height = height;
@@ -412,7 +414,7 @@ static int create_default_shader(struct shader_pass* pass)
                         !compile_shader(GL_FRAGMENT_SHADER, 0, fragment_shader_default_src, &pass->program.fragment_shader) ||
                         !create_program(&pass->program))
                 return 0;
-        glGenVertexArrays(1, &pass->vertex_array);
+        glw->glGenVertexArrays(1, &pass->vertex_array);
 
         struct shader_uniforms* u = &pass->uniforms;
         int p = pass->program.id;
@@ -582,7 +584,7 @@ static glsl_t* load_glslp(glsl_t* glsl, int num_shader, const char* f)
                                 }
                                 pass->frame_count_mod = shader->frame_count_mod;
 
-                                glGenVertexArrays(1, &pass->vertex_array);
+                                glw->glGenVertexArrays(1, &pass->vertex_array);
                                 find_uniforms(gshader, i);
                                 setup_scale(shader, pass);
                                 if (i == p->num_shaders-1) /* last pass may or may not be an fbo depending on scale */
@@ -725,7 +727,7 @@ int gl3_init(SDL_Window* window, sdl_render_driver requested_render_driver, BITM
 
         //SDL_GL_MakeCurrent(window, context);
 
-        glw_init();
+        glw = glw_init();
 
         glEnable(GL_TEXTURE_2D);
 
@@ -805,19 +807,19 @@ int gl3_init(SDL_Window* window, sdl_render_driver requested_render_driver, BITM
 
         /* set the scene shader buffers */
         {
-                glBindVertexArray(active_shader->scene.vertex_array);
+                glw->glBindVertexArray(active_shader->scene.vertex_array);
 
                 struct shader_vbo* vbo = &active_shader->scene.vbo;
 
-                glGenBuffers(1, &vbo->vertex_coord);
-                glBindBuffer(GL_ARRAY_BUFFER, vbo->vertex_coord);
-                glBufferData(GL_ARRAY_BUFFER, sizeof(inv_vertex), inv_vertex, GL_STATIC_DRAW);
-                glVertexAttribPointer(active_shader->scene.uniforms.vertex_coord, 2, GL_FLOAT, GL_FALSE, 2*sizeof(GLfloat), (GLvoid*)0);
+                glw->glGenBuffers(1, &vbo->vertex_coord);
+                glw->glBindBuffer(GL_ARRAY_BUFFER, vbo->vertex_coord);
+                glw->glBufferData(GL_ARRAY_BUFFER, sizeof(inv_vertex), inv_vertex, GL_STATIC_DRAW);
+                glw->glVertexAttribPointer(active_shader->scene.uniforms.vertex_coord, 2, GL_FLOAT, GL_FALSE, 2*sizeof(GLfloat), (GLvoid*)0);
 
-                glGenBuffers(1, &vbo->tex_coord);
-                glBindBuffer(GL_ARRAY_BUFFER, vbo->tex_coord);
-                glBufferData(GL_ARRAY_BUFFER, sizeof(tex_coords), tex_coords, GL_DYNAMIC_DRAW);
-                glVertexAttribPointer(active_shader->scene.uniforms.tex_coord, 2, GL_FLOAT, GL_TRUE, 2*sizeof(GLfloat), (GLvoid*)0);
+                glw->glGenBuffers(1, &vbo->tex_coord);
+                glw->glBindBuffer(GL_ARRAY_BUFFER, vbo->tex_coord);
+                glw->glBufferData(GL_ARRAY_BUFFER, sizeof(tex_coords), tex_coords, GL_DYNAMIC_DRAW);
+                glw->glVertexAttribPointer(active_shader->scene.uniforms.tex_coord, 2, GL_FLOAT, GL_TRUE, 2*sizeof(GLfloat), (GLvoid*)0);
         }
 
         /* set buffers for all passes */
@@ -828,27 +830,27 @@ int gl3_init(SDL_Window* window, sdl_render_driver requested_render_driver, BITM
                 {
                         struct shader_uniforms* u = &shader->passes[i].uniforms;
 
-                        glBindVertexArray(shader->passes[i].vertex_array);
+                        glw->glBindVertexArray(shader->passes[i].vertex_array);
 
                         struct shader_vbo* vbo = &shader->passes[i].vbo;
 
-                        glGenBuffers(1, &vbo->vertex_coord);
-                        glBindBuffer(GL_ARRAY_BUFFER, vbo->vertex_coord);
-                        glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
+                        glw->glGenBuffers(1, &vbo->vertex_coord);
+                        glw->glBindBuffer(GL_ARRAY_BUFFER, vbo->vertex_coord);
+                        glw->glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
 
-                        glVertexAttribPointer(u->vertex_coord, 2, GL_FLOAT, GL_FALSE, 2*sizeof(GLfloat), (GLvoid*)0);
+                        glw->glVertexAttribPointer(u->vertex_coord, 2, GL_FLOAT, GL_FALSE, 2*sizeof(GLfloat), (GLvoid*)0);
 
-                        glGenBuffers(1, &vbo->tex_coord);
-                        glBindBuffer(GL_ARRAY_BUFFER, vbo->tex_coord);
-                        glBufferData(GL_ARRAY_BUFFER, sizeof(tex_coords), tex_coords, GL_DYNAMIC_DRAW);
-                        glVertexAttribPointer(u->tex_coord, 2, GL_FLOAT, GL_TRUE, 2*sizeof(GLfloat), (GLvoid*)0);
+                        glw->glGenBuffers(1, &vbo->tex_coord);
+                        glw->glBindBuffer(GL_ARRAY_BUFFER, vbo->tex_coord);
+                        glw->glBufferData(GL_ARRAY_BUFFER, sizeof(tex_coords), tex_coords, GL_DYNAMIC_DRAW);
+                        glw->glVertexAttribPointer(u->tex_coord, 2, GL_FLOAT, GL_TRUE, 2*sizeof(GLfloat), (GLvoid*)0);
 
                         if (u->color)
                         {
-                                glGenBuffers(1, &vbo->color);
-                                glBindBuffer(GL_ARRAY_BUFFER, vbo->color);
-                                glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
-                                glVertexAttribPointer(u->color, 4, GL_FLOAT, GL_FALSE, 4*sizeof(GLfloat), (GLvoid*)0);
+                                glw->glGenBuffers(1, &vbo->color);
+                                glw->glBindBuffer(GL_ARRAY_BUFFER, vbo->color);
+                                glw->glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
+                                glw->glVertexAttribPointer(u->color, 4, GL_FLOAT, GL_FALSE, 4*sizeof(GLfloat), (GLvoid*)0);
                         }
                 }
         }
@@ -863,30 +865,30 @@ int gl3_init(SDL_Window* window, sdl_render_driver requested_render_driver, BITM
 
                         struct shader_vbo* vbo = &prev_pass->vbo;
 
-                        glBindVertexArray(prev_pass->vertex_array);
+                        glw->glBindVertexArray(prev_pass->vertex_array);
 
-                        glGenBuffers(1, &vbo->vertex_coord);
-                        glBindBuffer(GL_ARRAY_BUFFER, vbo->vertex_coord);
-                        glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
-                        glVertexAttribPointer(prev_pass->uniforms.vertex_coord, 2, GL_FLOAT, GL_FALSE, 2*sizeof(GLfloat), (GLvoid*)0);
+                        glw->glGenBuffers(1, &vbo->vertex_coord);
+                        glw->glBindBuffer(GL_ARRAY_BUFFER, vbo->vertex_coord);
+                        glw->glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
+                        glw->glVertexAttribPointer(prev_pass->uniforms.vertex_coord, 2, GL_FLOAT, GL_FALSE, 2*sizeof(GLfloat), (GLvoid*)0);
 
-                        glGenBuffers(1, &vbo->tex_coord);
-                        glBindBuffer(GL_ARRAY_BUFFER, vbo->tex_coord);
-                        glBufferData(GL_ARRAY_BUFFER, sizeof(tex_coords), tex_coords, GL_DYNAMIC_DRAW);
-                        glVertexAttribPointer(prev_pass->uniforms.tex_coord, 2, GL_FLOAT, GL_TRUE, 2*sizeof(GLfloat), (GLvoid*)0);
+                        glw->glGenBuffers(1, &vbo->tex_coord);
+                        glw->glBindBuffer(GL_ARRAY_BUFFER, vbo->tex_coord);
+                        glw->glBufferData(GL_ARRAY_BUFFER, sizeof(tex_coords), tex_coords, GL_DYNAMIC_DRAW);
+                        glw->glVertexAttribPointer(prev_pass->uniforms.tex_coord, 2, GL_FLOAT, GL_TRUE, 2*sizeof(GLfloat), (GLvoid*)0);
 
                         for (j = 0; j < MAX_PREV; ++j)
                         {
                                 struct shader_prev* prev = &shader->prev[j];
                                 struct shader_vbo* prev_vbo = &prev->vbo;
 
-                                glGenBuffers(1, &prev_vbo->vertex_coord);
-                                glBindBuffer(GL_ARRAY_BUFFER, prev_vbo->vertex_coord);
-                                glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
+                                glw->glGenBuffers(1, &prev_vbo->vertex_coord);
+                                glw->glBindBuffer(GL_ARRAY_BUFFER, prev_vbo->vertex_coord);
+                                glw->glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
 
-                                glGenBuffers(1, &prev_vbo->tex_coord);
-                                glBindBuffer(GL_ARRAY_BUFFER, prev_vbo->tex_coord);
-                                glBufferData(GL_ARRAY_BUFFER, sizeof(tex_coords), tex_coords, GL_DYNAMIC_DRAW);
+                                glw->glGenBuffers(1, &prev_vbo->tex_coord);
+                                glw->glBindBuffer(GL_ARRAY_BUFFER, prev_vbo->tex_coord);
+                                glw->glBufferData(GL_ARRAY_BUFFER, sizeof(tex_coords), tex_coords, GL_DYNAMIC_DRAW);
                         }
                 }
         }
@@ -897,19 +899,19 @@ int gl3_init(SDL_Window* window, sdl_render_driver requested_render_driver, BITM
                 struct shader_pass* final_pass = &active_shader->final_pass;
                 create_default_shader(final_pass);
 
-                glBindVertexArray(final_pass->vertex_array);
+                glw->glBindVertexArray(final_pass->vertex_array);
 
                 struct shader_vbo* vbo = &final_pass->vbo;
 
-                glGenBuffers(1, &vbo->vertex_coord);
-                glBindBuffer(GL_ARRAY_BUFFER, vbo->vertex_coord);
-                glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
-                glVertexAttribPointer(final_pass->uniforms.vertex_coord, 2, GL_FLOAT, GL_FALSE, 2*sizeof(GLfloat), (GLvoid*)0);
+                glw->glGenBuffers(1, &vbo->vertex_coord);
+                glw->glBindBuffer(GL_ARRAY_BUFFER, vbo->vertex_coord);
+                glw->glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
+                glw->glVertexAttribPointer(final_pass->uniforms.vertex_coord, 2, GL_FLOAT, GL_FALSE, 2*sizeof(GLfloat), (GLvoid*)0);
 
-                glGenBuffers(1, &vbo->tex_coord);
-                glBindBuffer(GL_ARRAY_BUFFER, vbo->tex_coord);
-                glBufferData(GL_ARRAY_BUFFER, sizeof(tex_coords), tex_coords, GL_DYNAMIC_DRAW);
-                glVertexAttribPointer(final_pass->uniforms.tex_coord, 2, GL_FLOAT, GL_TRUE, 2*sizeof(GLfloat), (GLvoid*)0);
+                glw->glGenBuffers(1, &vbo->tex_coord);
+                glw->glBindBuffer(GL_ARRAY_BUFFER, vbo->tex_coord);
+                glw->glBufferData(GL_ARRAY_BUFFER, sizeof(tex_coords), tex_coords, GL_DYNAMIC_DRAW);
+                glw->glVertexAttribPointer(final_pass->uniforms.tex_coord, 2, GL_FLOAT, GL_TRUE, 2*sizeof(GLfloat), (GLvoid*)0);
         }
 
 
@@ -932,8 +934,8 @@ int gl3_init(SDL_Window* window, sdl_render_driver requested_render_driver, BITM
         glVertexAttribPointer(debug_pass->uniforms.tex_coord, 2, GL_FLOAT, GL_TRUE, 2*sizeof(GLfloat), (GLvoid*)0);
 #endif
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
+        glw->glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glw->glBindVertexArray(0);
 
         return SDL_TRUE;
 }
@@ -954,6 +956,7 @@ void gl3_close()
                 SDL_GL_DeleteContext(context);
                 context = NULL;
         }
+        glw_free(glw);
 }
 
 void gl3_update(SDL_Window* window, SDL_Rect updated_rect, BITMAP* screen)
@@ -986,37 +989,37 @@ static void render_pass(struct render_data* data)
 
 //        pclog("pass %d: %gx%g, %gx%g -> %gx%g, %gx%g, %gx%g\n", num_pass, pass->state.input_size[0], pass->state.input_size[1], pass->state.input_texture_size[0], pass->state.input_texture_size[1], pass->state.output_size[0], pass->state.output_size[1], pass->state.output_texture_size[0], pass->state.output_texture_size[1], output_size[0], output_size[1]);
 
-        glBindVertexArray(data->shader_pass->vertex_array);
+        glw->glBindVertexArray(data->shader_pass->vertex_array);
 
         GLint p = data->shader_pass->program.id;
         struct shader_uniforms* u = &data->shader_pass->uniforms;
 
-        glUseProgram(p);
+        glw->glUseProgram(p);
 
-        glActiveTexture(GL_TEXTURE0 + texture_unit);
+        glw->glActiveTexture(GL_TEXTURE0 + texture_unit);
         glBindTexture(GL_TEXTURE_2D, data->texture);
-        glUniform1i(u->texture, texture_unit);
+        glw->glUniform1i(u->texture, texture_unit);
         texture_unit++;
 
-        if (u->color >= 0)              glEnableVertexAttribArray(u->color);
+        if (u->color >= 0)              glw->glEnableVertexAttribArray(u->color);
 
-        if (u->mvp_matrix >= 0)         glUniformMatrix4fv(u->mvp_matrix, 1, 0, matrix);
-        if (u->frame_direction >= 0)    glUniform1i(u->frame_direction, 1);
+        if (u->mvp_matrix >= 0)         glw->glUniformMatrix4fv(u->mvp_matrix, 1, 0, matrix);
+        if (u->frame_direction >= 0)    glw->glUniform1i(u->frame_direction, 1);
 
         int framecnt = data->frame_count;
         if (data->shader_pass->frame_count_mod > 0)
                 framecnt = framecnt%data->shader_pass->frame_count_mod;
-        if (u->frame_count >= 0)        glUniform1i(u->frame_count, framecnt);
+        if (u->frame_count >= 0)        glw->glUniform1i(u->frame_count, framecnt);
 
-        if (u->input_size >= 0)         glUniform2fv(u->input_size, 1, data->shader_pass->state.input_size);
-        if (u->texture_size >= 0)       glUniform2fv(u->texture_size, 1, data->shader_pass->state.input_texture_size);
-        if (u->output_size >= 0)        glUniform2fv(u->output_size, 1, data->output_size);
+        if (u->input_size >= 0)         glw->glUniform2fv(u->input_size, 1, data->shader_pass->state.input_size);
+        if (u->texture_size >= 0)       glw->glUniform2fv(u->texture_size, 1, data->shader_pass->state.input_texture_size);
+        if (u->output_size >= 0)        glw->glUniform2fv(u->output_size, 1, data->output_size);
 
         if (data->shader)
         {
                 /* parameters */
                 for (i = 0; i < data->shader->num_parameters; ++i)
-                        if (u->parameters[i] >= 0) glUniform1f(u->parameters[i], data->shader->parameters[i].value);
+                        if (u->parameters[i] >= 0) glw->glUniform1f(u->parameters[i], data->shader->parameters[i].value);
 
                 if (data->pass > 0)
                 {
@@ -1024,35 +1027,35 @@ static void render_pass(struct render_data* data)
                         struct shader_pass* orig = data->orig_pass;
                         if (u->orig.texture >= 0)
                         {
-                                glActiveTexture(GL_TEXTURE0 + texture_unit);
+                                glw->glActiveTexture(GL_TEXTURE0 + texture_unit);
                                 glBindTexture(GL_TEXTURE_2D, orig->fbo.texture.id);
-                                glUniform1i(u->orig.texture, texture_unit);
+                                glw->glUniform1i(u->orig.texture, texture_unit);
                                 texture_unit++;
                         }
-                        if (u->orig.input_size >= 0)         glUniform2fv(u->orig.input_size, 1, orig->state.input_size);
-                        if (u->orig.texture_size >= 0)       glUniform2fv(u->orig.texture_size, 1, orig->state.input_texture_size);
+                        if (u->orig.input_size >= 0)         glw->glUniform2fv(u->orig.input_size, 1, orig->state.input_size);
+                        if (u->orig.texture_size >= 0)       glw->glUniform2fv(u->orig.texture_size, 1, orig->state.input_texture_size);
 
                         for (i = 0; i < data->pass; ++i)
                         {
                                 if (u->pass[i].texture >= 0)
                                 {
-                                        glActiveTexture(GL_TEXTURE0 + texture_unit);
+                                        glw->glActiveTexture(GL_TEXTURE0 + texture_unit);
                                         glBindTexture(GL_TEXTURE_2D, passes[i].fbo.texture.id);
-                                        glUniform1i(u->pass[i].texture, texture_unit);
+                                        glw->glUniform1i(u->pass[i].texture, texture_unit);
                                         texture_unit++;
                                 }
-                                if (u->pass[i].texture_size >= 0)       glUniform2fv(u->pass[i].texture_size, 1, passes[i].state.input_texture_size);
-                                if (u->pass[i].input_size >= 0)         glUniform2fv(u->pass[i].input_size, 1, passes[i].state.input_size);
+                                if (u->pass[i].texture_size >= 0)       glw->glUniform2fv(u->pass[i].texture_size, 1, passes[i].state.input_texture_size);
+                                if (u->pass[i].input_size >= 0)         glw->glUniform2fv(u->pass[i].input_size, 1, passes[i].state.input_size);
 
                                 if (u->prev_pass[i].texture >= 0)
                                 {
-                                        glActiveTexture(GL_TEXTURE0 + texture_unit);
+                                        glw->glActiveTexture(GL_TEXTURE0 + texture_unit);
                                         glBindTexture(GL_TEXTURE_2D, passes[i].fbo.texture.id);
-                                        glUniform1i(u->prev_pass[i].texture, texture_unit);
+                                        glw->glUniform1i(u->prev_pass[i].texture, texture_unit);
                                         texture_unit++;
                                 }
-                                if (u->prev_pass[i].texture_size >= 0)  glUniform2fv(u->prev_pass[i].texture_size, 1, passes[i].state.input_texture_size);
-                                if (u->prev_pass[i].input_size >= 0)    glUniform2fv(u->prev_pass[i].input_size, 1, passes[i].state.input_size);
+                                if (u->prev_pass[i].texture_size >= 0)  glw->glUniform2fv(u->prev_pass[i].texture_size, 1, passes[i].state.input_texture_size);
+                                if (u->prev_pass[i].input_size >= 0)    glw->glUniform2fv(u->prev_pass[i].input_size, 1, passes[i].state.input_size);
 
                         }
                 }
@@ -1064,17 +1067,17 @@ static void render_pass(struct render_data* data)
                         {
                                 if (u->prev[i].texture >= 0)
                                 {
-                                        glActiveTexture(GL_TEXTURE0 + texture_unit);
+                                        glw->glActiveTexture(GL_TEXTURE0 + texture_unit);
                                         glBindTexture(GL_TEXTURE_2D, data->shader->prev[i].fbo.texture.id);
-                                        glUniform1i(u->prev[i].texture, texture_unit);
+                                        glw->glUniform1i(u->prev[i].texture, texture_unit);
                                         texture_unit++;
                                 }
                                 if (u->prev[i].tex_coord >= 0)
                                 {
-                                        glBindBuffer(GL_ARRAY_BUFFER, data->shader->prev[i].vbo.tex_coord);
-                                        glVertexAttribPointer(u->prev[i].tex_coord, 2, GL_FLOAT, GL_TRUE, 2*sizeof(GLfloat), (GLvoid*)0);
-                                        glEnableVertexAttribArray(u->prev[i].tex_coord);
-                                        glBindBuffer(GL_ARRAY_BUFFER, 0);
+                                        glw->glBindBuffer(GL_ARRAY_BUFFER, data->shader->prev[i].vbo.tex_coord);
+                                        glw->glVertexAttribPointer(u->prev[i].tex_coord, 2, GL_FLOAT, GL_TRUE, 2*sizeof(GLfloat), (GLvoid*)0);
+                                        glw->glEnableVertexAttribArray(u->prev[i].tex_coord);
+                                        glw->glBindBuffer(GL_ARRAY_BUFFER, 0);
                                 }
                         }
                 }
@@ -1083,41 +1086,41 @@ static void render_pass(struct render_data* data)
                 {
                         if (u->lut_textures[i] >= 0)
                         {
-                                glActiveTexture(GL_TEXTURE0 + texture_unit);
+                                glw->glActiveTexture(GL_TEXTURE0 + texture_unit);
                                 glBindTexture(GL_TEXTURE_2D, data->shader->lut_textures[i].texture.id);
-                                glUniform1i(u->lut_textures[i], texture_unit);
+                                glw->glUniform1i(u->lut_textures[i], texture_unit);
                                 texture_unit++;
                         }
 
                 }
         }
 
-        glEnableVertexAttribArray(u->vertex_coord);
-        glEnableVertexAttribArray(u->tex_coord);
+        glw->glEnableVertexAttribArray(u->vertex_coord);
+        glw->glEnableVertexAttribArray(u->tex_coord);
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-        glActiveTexture(GL_TEXTURE0);
+        glw->glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        glDisableVertexAttribArray(data->shader_pass->uniforms.vertex_coord);
-        glDisableVertexAttribArray(data->shader_pass->uniforms.tex_coord);
-        if (data->shader_pass->uniforms.color >= 0)  glDisableVertexAttribArray(data->shader_pass->uniforms.color);
+        glw->glDisableVertexAttribArray(data->shader_pass->uniforms.vertex_coord);
+        glw->glDisableVertexAttribArray(data->shader_pass->uniforms.tex_coord);
+        if (data->shader_pass->uniforms.color >= 0)  glw->glDisableVertexAttribArray(data->shader_pass->uniforms.color);
 
         if (data->shader && data->shader->has_prev)
         {
                 for (i = 0; i < MAX_PREV; ++i)
                 {
                         if (u->prev[i].tex_coord >= 0)
-                                glDisableVertexAttribArray(u->prev[i].tex_coord);
+                                glw->glDisableVertexAttribArray(u->prev[i].tex_coord);
 
                 }
         }
 
-        glBindVertexArray(0);
+        glw->glBindVertexArray(0);
 
 
-        glUseProgram(0);
+        glw->glUseProgram(0);
 }
 
 void gl3_present(SDL_Window* window, SDL_Rect video_rect, SDL_Rect window_rect, BITMAP* screen)
@@ -1156,7 +1159,7 @@ void gl3_present(SDL_Window* window, SDL_Rect video_rect, SDL_Rect window_rect, 
 
                 recreate_fbo(&active_shader->scene.fbo, pass->state.output_texture_size[0], pass->state.output_texture_size[1]);
 
-                glBindFramebuffer(GL_FRAMEBUFFER, active_shader->scene.fbo.id);
+                glw->glBindFramebuffer(GL_FRAMEBUFFER, active_shader->scene.fbo.id);
                 glClearColor(0, 0, 0, 1);
                 glClear(GL_COLOR_BUFFER_BIT);
 
@@ -1189,11 +1192,11 @@ void gl3_present(SDL_Window* window, SDL_Rect video_rect, SDL_Rect window_rect, 
                         maxx, maxy
                 };
 
-                glBindVertexArray(pass->vertex_array);
+                glw->glBindVertexArray(pass->vertex_array);
 
-                glBindBuffer(GL_ARRAY_BUFFER, pass->vbo.tex_coord);
-                glBufferSubData(GL_ARRAY_BUFFER, 0, 8*sizeof(GLfloat), tex_coords);
-                glBindBuffer(GL_ARRAY_BUFFER, 0);
+                glw->glBindBuffer(GL_ARRAY_BUFFER, pass->vbo.tex_coord);
+                glw->glBufferSubData(GL_ARRAY_BUFFER, 0, 8*sizeof(GLfloat), tex_coords);
+                glw->glBindBuffer(GL_ARRAY_BUFFER, 0);
 
                 memset(&data, 0, sizeof(struct render_data));
                 data.pass = -1;
@@ -1202,7 +1205,7 @@ void gl3_present(SDL_Window* window, SDL_Rect video_rect, SDL_Rect window_rect, 
                 data.output_size = orig_output_size;
                 render_pass(&data);
 
-                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                glw->glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
         struct shader_pass* orig = &active_shader->scene;
@@ -1248,7 +1251,7 @@ void gl3_present(SDL_Window* window, SDL_Rect video_rect, SDL_Rect window_rect, 
                         {
                                 recreate_fbo(&pass->fbo, pass->state.output_texture_size[0], pass->state.output_texture_size[1]);
 
-                                glBindFramebuffer(GL_FRAMEBUFFER, pass->fbo.id);
+                                glw->glBindFramebuffer(GL_FRAMEBUFFER, pass->fbo.id);
                                 glViewport(0, 0, pass->state.output_size[0], pass->state.output_size[1]);
                         }
                         else
@@ -1271,11 +1274,11 @@ void gl3_present(SDL_Window* window, SDL_Rect video_rect, SDL_Rect window_rect, 
                         pass->state.tex_coords[6] = maxx;
                         pass->state.tex_coords[7] = maxy;
 
-                        glBindVertexArray(pass->vertex_array);
+                        glw->glBindVertexArray(pass->vertex_array);
 
-                        glBindBuffer(GL_ARRAY_BUFFER, pass->vbo.tex_coord);
-                        glBufferSubData(GL_ARRAY_BUFFER, 0, 8*sizeof(GLfloat), input->state.tex_coords);
-                        glBindBuffer(GL_ARRAY_BUFFER, 0);
+                        glw->glBindBuffer(GL_ARRAY_BUFFER, pass->vbo.tex_coord);
+                        glw->glBufferSubData(GL_ARRAY_BUFFER, 0, 8*sizeof(GLfloat), input->state.tex_coords);
+                        glw->glBindBuffer(GL_ARRAY_BUFFER, 0);
 
                         memset(&data, 0, sizeof(struct render_data));
                         data.shader = shader;
@@ -1288,13 +1291,13 @@ void gl3_present(SDL_Window* window, SDL_Rect video_rect, SDL_Rect window_rect, 
 
                         render_pass(&data);
 
-                        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                        glw->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
                         if (pass->fbo.texture.mipmap)
                         {
-                                glActiveTexture(GL_TEXTURE0);
+                                glw->glActiveTexture(GL_TEXTURE0);
                                 glBindTexture(GL_TEXTURE_2D, pass->fbo.texture.id);
-                                glGenerateMipmap(GL_TEXTURE_2D);
+                                glw->glGenerateMipmap(GL_TEXTURE_2D);
                                 glBindTexture(GL_TEXTURE_2D, 0);
 
 
@@ -1321,21 +1324,21 @@ void gl3_present(SDL_Window* window, SDL_Rect video_rect, SDL_Rect window_rect, 
 
                         memcpy(&prev_pass->fbo, &prev->fbo, sizeof(struct shader_fbo));
 
-                        glBindFramebuffer(GL_FRAMEBUFFER, prev->fbo.id);
+                        glw->glBindFramebuffer(GL_FRAMEBUFFER, prev->fbo.id);
                         glClearColor(0, 0, 0, 1);
                         glClear(GL_COLOR_BUFFER_BIT);
 
                         glViewport(0, 0, pass->state.output_size[0], pass->state.output_size[1]);
 
-                        glBindVertexArray(prev_pass->vertex_array);
+                        glw->glBindVertexArray(prev_pass->vertex_array);
 
-                        glBindBuffer(GL_ARRAY_BUFFER, prev->vbo.tex_coord);
-                        glBufferSubData(GL_ARRAY_BUFFER, 0, 8*sizeof(GLfloat), pass->state.tex_coords);
-                        glBindBuffer(GL_ARRAY_BUFFER, 0);
+                        glw->glBindBuffer(GL_ARRAY_BUFFER, prev->vbo.tex_coord);
+                        glw->glBufferSubData(GL_ARRAY_BUFFER, 0, 8*sizeof(GLfloat), pass->state.tex_coords);
+                        glw->glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-                        glBindBuffer(GL_ARRAY_BUFFER, prev_pass->vbo.tex_coord);
-                        glBufferSubData(GL_ARRAY_BUFFER, 0, 8*sizeof(GLfloat), pass->state.tex_coords);
-                        glBindBuffer(GL_ARRAY_BUFFER, 0);
+                        glw->glBindBuffer(GL_ARRAY_BUFFER, prev_pass->vbo.tex_coord);
+                        glw->glBufferSubData(GL_ARRAY_BUFFER, 0, 8*sizeof(GLfloat), pass->state.tex_coords);
+                        glw->glBindBuffer(GL_ARRAY_BUFFER, 0);
 
                         memset(&data, 0, sizeof(struct render_data));
                         data.shader = shader;
@@ -1346,7 +1349,7 @@ void gl3_present(SDL_Window* window, SDL_Rect video_rect, SDL_Rect window_rect, 
 
                         render_pass(&data);
 
-                        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                        glw->glBindFramebuffer(GL_FRAMEBUFFER, 0);
                 }
 
                 orig = input;
@@ -1390,11 +1393,11 @@ void gl3_present(SDL_Window* window, SDL_Rect video_rect, SDL_Rect window_rect, 
                 pass->state.tex_coords[6] = maxx;
                 pass->state.tex_coords[7] = maxy;
 
-                glBindVertexArray(pass->vertex_array);
+                glw->glBindVertexArray(pass->vertex_array);
 
-                glBindBuffer(GL_ARRAY_BUFFER, pass->vbo.tex_coord);
-                glBufferSubData(GL_ARRAY_BUFFER, 0, 8*sizeof(GLfloat), input->state.tex_coords);
-                glBindBuffer(GL_ARRAY_BUFFER, 0);
+                glw->glBindBuffer(GL_ARRAY_BUFFER, pass->vbo.tex_coord);
+                glw->glBufferSubData(GL_ARRAY_BUFFER, 0, 8*sizeof(GLfloat), input->state.tex_coords);
+                glw->glBindBuffer(GL_ARRAY_BUFFER, 0);
 
                 memset(&data, 0, sizeof(struct render_data));
                 data.pass = -2;
