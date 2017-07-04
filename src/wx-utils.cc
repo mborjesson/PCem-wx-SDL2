@@ -287,10 +287,17 @@ int wx_sendmessage(void* window, int type, INT_PARAM param1, LONG_PARAM param2)
                         strcpy((char*) param2, ((wxStaticText*) window)->GetLabel());
                 break;
         case WX_UDM_SETPOS:
-                ((wxSpinCtrl*) window)->SetValue(param2);
+                if (((wxWindow*) window)->GetClassInfo()->IsKindOf(CLASSINFO(wxSpinCtrlDouble)))
+                        ((wxSpinCtrlDouble*) window)->SetValue(param2);
+                else if (((wxWindow*) window)->GetClassInfo()->IsKindOf(CLASSINFO(wxTextCtrl)))
+                        ((wxSpinCtrl*) window)->SetValue(param2);
                 break;
         case WX_UDM_GETPOS:
-                return ((wxSpinCtrl*) window)->GetValue();
+                if (((wxWindow*) window)->GetClassInfo()->IsKindOf(CLASSINFO(wxSpinCtrlDouble)))
+                        return ((wxSpinCtrlDouble*) window)->GetValue();
+                else if (((wxWindow*) window)->GetClassInfo()->IsKindOf(CLASSINFO(wxTextCtrl)))
+                        return ((wxSpinCtrl*) window)->GetValue();
+                return 0;
         case WX_UDM_SETRANGE:
         {
                 int min = (param2 >> 16) & 0xffff;
