@@ -53,7 +53,7 @@ int wx_textentrydialog(void* window, const char* message, const char* title, con
                         wxString value = dlg.GetValue();
                         if (value.Length() >= min_length)
                         {
-                                strcpy((char*)result, value);
+                                strcpy((char*)result, value.mb_str());
                                 return TRUE;
                         }
                 }
@@ -88,10 +88,10 @@ int wx_filedialog(void* window, const char* title, const char* path,
                         if (!p.EndsWith("."))
                                 p += ".";
                         p += extension;
-                        strcpy(file, p);
+                        strcpy(file, p.mb_str());
                 }
                 else
-                        strcpy(file, p);
+                        strcpy(file, p.mb_str());
                 return 0;
         }
         return 1;
@@ -251,7 +251,7 @@ int wx_sendmessage(void* window, int type, INT_PARAM param1, LONG_PARAM param2)
                 return ((wxComboBox*) window)->GetCurrentSelection();
                 break;
         case WX_CB_GETLBTEXT:
-                strcpy((char*) param2, ((wxComboBox*) window)->GetString(param1));
+                strcpy((char*) param2, ((wxComboBox*) window)->GetString(param1).mb_str());
                 break;
         case WX_CB_RESETCONTENT:
         {
@@ -282,9 +282,9 @@ int wx_sendmessage(void* window, int type, INT_PARAM param1, LONG_PARAM param2)
                 break;
         case WX_WM_GETTEXT:
                 if (((wxWindow*) window)->GetClassInfo()->IsKindOf(CLASSINFO(wxTextCtrl)))
-                        strcpy((char*) param2, ((wxTextCtrl*) window)->GetValue());
+                        strcpy((char*) param2, ((wxTextCtrl*) window)->GetValue().mb_str());
                 else
-                        strcpy((char*) param2, ((wxStaticText*) window)->GetLabel());
+                        strcpy((char*) param2, ((wxStaticText*) window)->GetLabel().mb_str());
                 break;
         case WX_UDM_SETPOS:
                 ((wxSpinCtrl*) window)->SetValue(param2);
@@ -321,7 +321,7 @@ int wx_sendmessage(void* window, int type, INT_PARAM param1, LONG_PARAM param2)
         }
         case WX_LB_GETTEXT:
         {
-                strcpy((char*) param2, ((wxListBox*) window)->GetString(param1));
+                strcpy((char*) param2, ((wxListBox*) window)->GetString(param1).mb_str());
                 break;
         }
         case WX_LB_INSERTSTRING:
@@ -471,7 +471,7 @@ void wx_get_home_directory(char* path)
         if (!home.EndsWith(wxFileName::GetPathSeparator())) {
                 home.Append(wxFileName::GetPathSeparator());
         }
-        strcpy(path, home);
+        strcpy(path, home.mb_str());
 }
 
 int wx_create_directory(char* path)
