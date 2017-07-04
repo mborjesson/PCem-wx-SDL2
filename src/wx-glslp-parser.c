@@ -49,16 +49,28 @@ static char* load_file(const char* fn)
         return data;
 }
 
-static void strip_parameters(const char* program)
+static void strip_lines(const char* program, const char* starts_with)
 {
         /* strip parameters */
-        char* ptr = strstr(program, "#pragma parameter");
+        char* ptr = strstr(program, starts_with);
         while (ptr)
         {
                 while (*ptr != '\n' && *ptr != '\0')
                         *ptr++ = ' ';
-                ptr = strstr(program, "#pragma parameter");
+                ptr = strstr(program, starts_with);
         }
+}
+
+static void strip_parameters(const char* program)
+{
+        /* strip parameters */
+        strip_lines(program, "#pragma parameter");
+}
+
+static void strip_defines(const char* program)
+{
+        /* strip texture define */
+        strip_lines(program, "#define texture");
 }
 
 static int has_parameter(glslp_t* glsl, char* id)
@@ -129,6 +141,7 @@ static glslp_t* glsl_parse(const char* f)
         strcpy(shader->shader_fn, f);
         shader->shader_program = load_file(f);
         strip_parameters(shader->shader_program);
+        strip_defines(shader->shader_program);
         shader->scale_x = shader->scale_y = 1.0f;
         strcpy(shader->scale_type_x, "source");
         strcpy(shader->scale_type_y, "source");
@@ -172,6 +185,7 @@ glslp_t* glslp_parse(const char* f)
                 snprintf(shader->shader_fn, sizeof(shader->shader_fn)-1, "%s%s", s, t);
                 shader->shader_program = load_file(shader->shader_fn);
                 strip_parameters(shader->shader_program);
+                strip_defines(shader->shader_program);
 
                 snprintf(s, sizeof(s)-1, "alias%d", i);
                 wx_config_get_string(cfg, s, shader->alias, sizeof(shader->alias), 0);

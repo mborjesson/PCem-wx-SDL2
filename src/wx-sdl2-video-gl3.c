@@ -106,8 +106,10 @@ static int compile_shader(GLenum shader_type, const char* prepend, const char* p
                 source[2] = line;
         }
         else
+        {
+                source[0] = "#version 130\n";
                 source[2] = program;
-
+        }
 
         GLuint shader = glw->glCreateShader(shader_type);
         glw->glShaderSource(shader, 3, source, NULL);
