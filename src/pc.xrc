@@ -86,6 +86,10 @@
 			<object class="wxMenuItem" name="IDM_FILE_RESET_CAD">
 				<label>_Ctrl+Alt+Del</label>
 			</object>
+			<object class="separator"/>
+			<object class="wxMenuItem" name="IDM_FILE_EXIT">
+				<label>_Shutdown</label>
+			</object>
 		</object>
 		<object class="wxMenu">
 			<label>_Disc</label>
@@ -373,13 +377,11 @@
 				</object>
 			</object>
 		</object>
-		<object class="separator"/>
-		<object class="wxMenuItem" name="IDM_STATUS">
-			<label>_Machine</label>
-		</object>
-		<object class="separator"/>
-		<object class="wxMenuItem" name="IDM_FILE_EXIT">
-			<label>_Stop emulation</label>
+		<object class="wxMenu">
+			<label>Misc</label>
+			<object class="wxMenuItem" name="IDM_STATUS">
+				<label>_Machine</label>
+			</object>
 		</object>
 	</object>
 
