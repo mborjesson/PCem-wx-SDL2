@@ -346,12 +346,13 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
                         if (!mousecapture)
                                 key_state = -key_state;
                         /* if key_state is 0 and modkeystate[c] is negative,
-                         an sdl_event should not generated */
+                         an sdl_event should not be generated */
                         if (key_state > 0 || modkeystate[c] > 0)
                         {
-                                steal = 1;
+                                steal = key_state != 0;
                                 SDL_Event event;
                                 event.key.keysym.scancode = s;
+                                event.key.timestamp = p->time;
 
                                 event.type = key_state ? SDL_KEYDOWN : SDL_KEYUP;
                                 SDL_PushEvent(&event);
@@ -505,7 +506,7 @@ int render()
 #endif
                         int key_idx = sdl_scancode(event.key.keysym.scancode);
                         if (key_idx != -1)
-                                rawinputkey[key_idx] = 1;
+                                rawinputkey[key_idx] = event.key.timestamp;
                         break;
                 }
                 case SDL_KEYUP:

@@ -93,26 +93,38 @@ void shaderconfig_open(void* hwnd, struct glslp_t* glsl) {
         wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
         root->Add(sizer, 0, wxALL, 5);
 
-        wxScrolledWindow* win = new wxScrolledWindow(&dialog, wxID_ANY, wxDefaultPosition, wxSize(300, 350), wxHSCROLL|wxVSCROLL);
+        wxPanel* panel = new wxPanel(&dialog, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxBORDER_SUNKEN);
+        sizer->Add(panel);
+
+        wxBoxSizer* panelSizer = new wxBoxSizer(wxVERTICAL);
+        panel->SetSizer(panelSizer);
+
+        wxScrolledWindow* win = new wxScrolledWindow(panel, wxID_ANY, wxDefaultPosition, wxSize(300, 350), wxHSCROLL|wxVSCROLL);
         win->SetScrollRate( 5, 5 );
-        sizer->Add(win, 1, wxEXPAND | wxALL, 5);
+        panelSizer->Add(win, 1, wxEXPAND | wxALL, 5);
 
         wxBoxSizer* winSizer = new wxBoxSizer(wxVERTICAL);
         win->SetSizer(winSizer);
 
         if (glsl->num_parameters > 0)
         {
+                wxPanel* scrollPanel = new wxPanel(win);
+                winSizer->Add(scrollPanel);
+
+                wxBoxSizer* scollPanelSizer = new wxBoxSizer(wxVERTICAL);
+                scrollPanel->SetSizer(scollPanelSizer);
+
                 for (i = 0; i < glsl->num_parameters; ++i)
                 {
                         struct parameter* p = &glsl->parameters[i];
-                        winSizer->Add(new wxStaticText(win, wxID_ANY, p->description), 0, wxALL);
-                        wxSpinCtrlDouble* spin = new wxSpinCtrlDouble(win, IDC_CONFIG_BASE+i);
+                        scollPanelSizer->Add(new wxStaticText(scrollPanel, wxID_ANY, p->description), 0, wxALL);
+                        wxSpinCtrlDouble* spin = new wxSpinCtrlDouble(scrollPanel, IDC_CONFIG_BASE+i);
                         spin->SetRange(p->min, p->max);
                         spin->SetIncrement(p->step);
                         spin->SetValue(p->value);
                         spin->SetDigits(2);
 
-                        winSizer->Add(spin, 0, wxALL);
+                        scollPanelSizer->Add(spin, 0, wxALL);
                 }
         }
         else
