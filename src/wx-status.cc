@@ -345,7 +345,7 @@ void StatusFrame::OnCommand(wxCommandEvent& event)
 void StatusFrame::OnMoveWindow(wxMoveEvent& event)
 {
         if (window_remember) {
-                wx_window_x = event.GetPosition().x;
-                wx_window_y = event.GetPosition().y;
+                wx_window_x = GetScreenPosition().x;
+                wx_window_y = GetScreenPosition().y;
         }
 }
