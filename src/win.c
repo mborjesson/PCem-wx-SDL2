@@ -324,7 +324,12 @@ static void initmenu(void)
         }
 }
 
+<<<<<<< HEAD
 int dir_exists(char* path) {
+=======
+int dir_exists(char *path)
+{
+>>>>>>> refs/heads/upstream
         DWORD dwAttrib = GetFileAttributes(path);
 
         return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
