@@ -224,8 +224,7 @@ static void sdl_blit_memtoscreen(int x, int y, int y1, int y2, int w, int h)
                 return; /*Nothing to do*/
         }
 
-        int xx, yy;
-        SDL_Rect rect;
+        int yy;
         SDL_LockMutex(blitMutex);
         for (yy = y1; yy < y2; yy++)
         {
@@ -301,7 +300,6 @@ int sdl_renderer_update(SDL_Window* window)
 void sdl_renderer_present(SDL_Window* window)
 {
         SDL_Rect wr;
-        int l, t, r, b;
         SDL_GetWindowSize(window, &wr.w, &wr.h);
         sdl_scale(video_fullscreen_scale, wr, &wr, texture_rect.w, texture_rect.h);
         renderer->present(window, texture_rect, wr, screen);
