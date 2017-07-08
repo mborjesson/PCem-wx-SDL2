@@ -418,6 +418,17 @@ int render()
         uint64_t start_time = timer_read();
         uint64_t end_time;
 
+        if (window_dosetresize)
+        {
+                window_dosetresize = 0;
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+                SDL_GetWindowSize(window, &rect.w, &rect.h);
+                SDL_SetWindowResizable(window, vid_resize);
+                SDL_SetWindowSize(window, rect.w, rect.h);
+#else
+                window_doreset = 1;
+#endif
+        }
         if (window_doreset)
         {
                 pclog("window_doreset\n");
@@ -471,7 +482,7 @@ int render()
                                 int flags = SDL_GetWindowFlags(window);
                                 if (!(flags&SDL_WINDOW_FULLSCREEN) && !(flags&SDL_WINDOW_FULLSCREEN_DESKTOP)) {
                                         if (event.window.event == SDL_WINDOWEVENT_MOVED) {
-                                                get_border_size(&border_x, &border_y, 0, 0);
+                                                get_border_size(&border_y, &border_x, 0, 0);
                                                 window_x = event.window.data1-border_x;
                                                 window_y = event.window.data2-border_y;
                                         } else if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
