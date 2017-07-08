@@ -59,7 +59,7 @@ static void check_hd_type(off64_t sz)
         }
         else
         {
-                if ((sz % 17) == 0 && sz <= 133693440)
+                if ((sz % 17) == 0 && sz <= 142606336)
                 {
                         hd_new_spt = 17;
 
@@ -76,7 +76,6 @@ static void check_hd_type(off64_t sz)
                                 }
                                 hd_new_hpc = c;
                         }
-
                         hd_new_cyl = (int)((sz / 512) / hd_new_hpc) / 17;
                 }
                 else
