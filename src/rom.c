@@ -4,25 +4,30 @@
 #include "config.h"
 #include "mem.h"
 #include "rom.h"
+#include "paths.h"
 
 FILE *romfopen(char *fn, char *mode)
 {
+        FILE *f;
         char s[512];
-        strcpy(s, pcempath);
-        put_backslash(s);
-        strcat(s, fn);
-        return fopen(s, mode);
+        int i;
+
+        for (i = 0; i < num_roms_paths; ++i)
+        {
+                get_roms_path(i, s, 511);
+                put_backslash(s);
+                strcat(s, fn);
+                f = fopen(s, mode);
+                if (f)
+                        return f;
+        }
+        return 0;
 }
 
 int rom_present(char *fn)
 {
         FILE *f;
-        char s[512];
-        
-        strcpy(s, pcempath);
-        put_backslash(s);
-        strcat(s, fn);
-        f = fopen(s, "rb");
+        f = romfopen(fn, "rb");
         if (f)
         {
                 fclose(f);
@@ -31,7 +36,7 @@ int rom_present(char *fn)
         return 0;
 }
 
-static uint8_t rom_read(uint32_t addr, void *p)
+uint8_t rom_read(uint32_t addr, void *p)
 {
         rom_t *rom = (rom_t *)p;
 //        pclog("rom_read : %08x %08x %02x\n", addr, rom->mask, rom->rom[addr & rom->mask]);

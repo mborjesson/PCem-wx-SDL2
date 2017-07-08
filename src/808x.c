@@ -23,6 +23,7 @@
 #include "timer.h"
 #include "x86.h"
 #include "x87.h"
+#include "paths.h"
 
 int xt_cpu_multi;
 int nmi = 0;
@@ -507,7 +508,7 @@ void dumpregs()
 //        return;
 //        savenvr();
 //        return;
-chdir(pcempath);
+        chdir(logs_path);
         nopageerrors=1;
 /*        f=fopen("rram3.dmp","wb");
         for (c=0;c<0x8000000;c++) putc(readmemb(c+0x10000000),f);
@@ -602,7 +603,7 @@ chdir(pcempath);
         if (is386)
         {
                 printf("386 in %s mode   stack in %s mode\n",(use32)?"32-bit":"16-bit",(stack32)?"32-bit":"16-bit");
-                printf("CR0=%08X CR2=%08X CR3=%08X\n",cr0,cr2,cr3);
+                printf("CR0=%08X CR2=%08X CR3=%08X CR4=%08x\n",cr0,cr2,cr3, cr4);
         }
         printf("Entries in readlookup : %i    writelookup : %i\n",readlnum,writelnum);
         for (c=0;c<1024*1024;c++)

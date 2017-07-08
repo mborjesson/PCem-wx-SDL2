@@ -244,8 +244,13 @@ uint32_t dr[8];
 #define V_FLAG  0x0800
 #define NT_FLAG 0x4000
 #define VM_FLAG 0x0002 /*In EFLAGS*/
+#define VIF_FLAG 0x0008 /*In EFLAGS*/
+#define VIP_FLAG 0x0010 /*In EFLAGS*/
 
 #define WP_FLAG 0x10000 /*In CR0*/
+
+#define CR4_VME (1 << 0)
+#define CR4_PVI (1 << 1)
 
 #define IOPL ((flags>>12)&3)
 
@@ -498,8 +503,6 @@ int gated,speakval,speakon;
 #define SND_WSS   9     /*Windows Sound System*/
 #define SND_PAS16 10    /*Pro Audio Spectrum 16*/
 
-char pcempath[512];
-
 
 /*Hard disc*/
 
@@ -556,8 +559,6 @@ void resetpc_cad();
 extern int start_in_fullscreen;
 extern int window_w, window_h, window_x, window_y, window_remember;
 
-void get_executable_name(char *s, int size);
-
 void startblit();
 void endblit();
 
@@ -573,6 +574,5 @@ void resetpchard();
 void speedchanged();
 
 void saveconfig(char *fn);
-void getpath();
 
 #define UNUSED(x) (void)x
