@@ -239,7 +239,7 @@ static const struct {
                 { SDL_SCANCODE_KP_1, 0x4f },
                 { SDL_SCANCODE_KP_2, 0x50 },
                 { SDL_SCANCODE_KP_3, 0x51 },
-                { SDL_SCANCODE_KP_4, 0x48 },
+                { SDL_SCANCODE_KP_4, 0x4b },
                 { SDL_SCANCODE_KP_5, 0x4c },
                 { SDL_SCANCODE_KP_6, 0x4d },
                 { SDL_SCANCODE_KP_7, 0x47 },
