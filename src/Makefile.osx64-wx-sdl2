@@ -29,8 +29,8 @@ MUNTOBJ = Analog.o BReverbModel.o File.o FileStream.o LA32Ramp.o LA32FloatWaveGe
 
 LIBS = -lopenal -lstdc++ -lpthread -lm $(shell wx-config --libs) $(shell sdl2-config --libs) -L/usr/local/opt/openal-soft/lib -framework OpenGL
 
-PCem64-wx-SDL2: $(OBJ) $(DBOBJ) $(SIDOBJ)
-	$(CC) $(OBJ) $(DBOBJ) $(SIDOBJ) -o "PCem64-wx-SDL2" $(LIBS)
+PCem64-wx-SDL2: $(OBJ) $(DBOBJ) $(SIDOBJ) $(MUNTOBJ) $(MUNTHELPEROBJ)
+	$(CC) $(OBJ) $(DBOBJ) $(SIDOBJ) $(MUNTOBJ) $(MUNTHELPEROBJ) -o "PCem64-wx-SDL2" $(LIBS)
 
 all : PCem64-wx-SDL2
 
