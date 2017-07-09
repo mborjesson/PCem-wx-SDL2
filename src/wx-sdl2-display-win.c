@@ -16,8 +16,8 @@
 
 HHOOK hKeyboardHook;
 
-HINSTANCE hinstance;
-HWND hwnd;
+static HINSTANCE hinstance = 0;
+static HWND hwnd = 0;
 static HMENU menu = 0;
 
 #define szClassName "PCemMainWnd"
@@ -349,8 +349,8 @@ void display_stop()
 }
 
 void sdl_set_window_title(const char* title) {
-        if (window)
-                SDL_SetWindowTitle(window, title);
+        if (hwnd && !is_fullscreen())
+                SetWindowText(hwnd, title);
 }
 
 int get_border_size(int* top, int* left, int* bottom, int* right)
@@ -716,11 +716,12 @@ int render()
                                 if (event.button.button == SDL_BUTTON_LEFT && !pause)
                                 {
                                         window_doinputgrab = 1;
-                                        if (video_fullscreen) {
+                                        if (video_fullscreen)
                                                 window_dofullscreen = 1;
-                                        }
                                 }
                         }
+                        else if (event.button.button == SDL_BUTTON_MIDDLE && !is_fullscreen())
+                                window_doinputrelease = 1;
                         break;
                 case SDL_MOUSEWHEEL:
                         if (mousecapture) mouse_wheel_update(event.wheel.y);
@@ -735,14 +736,19 @@ int render()
                                 window_doinputrelease = 1;
                         }
 
-                        if (window_remember) {
+                        if (window_remember)
+                        {
                                 int flags = SDL_GetWindowFlags(window);
-                                if (!(flags&SDL_WINDOW_FULLSCREEN) && !(flags&SDL_WINDOW_FULLSCREEN_DESKTOP)) {
-                                        if (event.window.event == SDL_WINDOWEVENT_MOVED) {
+                                if (!(flags&SDL_WINDOW_FULLSCREEN) && !(flags&SDL_WINDOW_FULLSCREEN_DESKTOP))
+                                {
+                                        if (event.window.event == SDL_WINDOWEVENT_MOVED)
+                                        {
                                                 get_border_size(&border_y, &border_x, 0, 0);
                                                 window_x = event.window.data1-border_x;
                                                 window_y = event.window.data2-border_y;
-                                        } else if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                                        }
+                                        else if (event.window.event == SDL_WINDOWEVENT_RESIZED)
+                                        {
                                                 window_w = event.window.data1;
                                                 window_h = event.window.data2;
                                         }
@@ -771,7 +777,8 @@ int render()
                 if (!is_fullscreen())
                         window_doinputrelease = 1;
         }
-        if (window_doremember) {
+        if (window_doremember)
+        {
                 window_doremember = 0;
                 SDL_GetWindowPosition(window, &window_x, &window_y);
                 SDL_GetWindowSize(window, &window_w, &window_h);
