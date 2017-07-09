@@ -31,22 +31,23 @@ char get_path_separator()
 #endif
 }
 
-int get_roms_path(int pos, char* s, int size)
+int get_roms_path(int pos, char *s, int size)
 {
         int j, i, z, len;
         char path_separator;
+        
         path_separator = get_path_separator();
         len = strlen(roms_paths);
         j = 0;
-        for (i = 0; i < len; ++i)
+        for (i = 0; i < len; i++)
         {
                 if (roms_paths[i] == path_separator || i == len-1)
                 {
                         if ((pos--) == 0)
                         {
-                                z = (i-j) + ((i == len-1) ? 1 : 0) + 1;
+                                z = (i-j) + ((i == len-1) ? 1 : 0);
                                 safe_strncpy(s, roms_paths+j, size);
-                                s[size-1 < z ? size-1 : z] = 0;
+                                s[(size-1 < z) ? size-1 : z] = 0;
                                 return 1;
                         }
                         j = i+1;
@@ -55,31 +56,32 @@ int get_roms_path(int pos, char* s, int size)
         return 0;
 }
 
-void set_roms_paths(char* path)
+void set_roms_paths(char *path)
 {
         char s[512];
         int j, i, z, len;
         char path_separator[2];
+        
         roms_paths[0] = 0;
         path_separator[0] = get_path_separator();
         path_separator[1] = 0;
         len = strlen(path);
         j = 0;
         num_roms_paths = 0;
-        for (i = 0; i < len; ++i)
+        for (i = 0; i < len; i++)
         {
                 if (path[i] == path_separator[0] || i == len-1)
                 {
                         z = (i-j) + ((i == len-1) ? 1 : 0) + 1;
                         safe_strncpy(s, path+j, z);
-                        s[511 < z ? 511 : z] = 0;
+                        s[(511 < z) ? 511 : z] = 0;
                         append_slash(s, 512);
                         if (dir_exists(s))
                         {
                                 if (num_roms_paths > 0)
                                         strcat(roms_paths, path_separator);
                                 strcat(roms_paths, s);
-                                ++num_roms_paths;
+                                num_roms_paths++;
                         }
                         j = i+1;
                 }
@@ -134,19 +136,19 @@ void set_default_configs_path(char *s)
 
 void paths_loadconfig()
 {
-        char* cfg_roms_paths = config_get_string(CFG_GLOBAL, "Paths", "roms_paths", 0);
+        char *cfg_roms_paths = config_get_string(CFG_GLOBAL, "Paths", "roms_paths", 0);
+        char *cfg_nvr_path = config_get_string(CFG_GLOBAL, "Paths", "nvr_path", 0);
+        char *cfg_configs_path = config_get_string(CFG_GLOBAL, "Paths", "configs_path", 0);
+        char *cfg_logs_path = config_get_string(CFG_GLOBAL, "Paths", "logs_path", 0);
+
         if (cfg_roms_paths)
                 safe_strncpy(default_roms_paths, cfg_roms_paths, 4096);
-        char* cfg_nvr_path = config_get_string(CFG_GLOBAL, "Paths", "nvr_path", 0);
         if (cfg_nvr_path)
                 safe_strncpy(default_nvr_path, cfg_nvr_path, 512);
-        char* cfg_configs_path = config_get_string(CFG_GLOBAL, "Paths", "configs_path", 0);
         if (cfg_configs_path)
                 safe_strncpy(default_configs_path, cfg_configs_path, 512);
-        char* cfg_logs_path = config_get_string(CFG_GLOBAL, "Paths", "logs_path", 0);
         if (cfg_logs_path)
                 safe_strncpy(default_logs_path, cfg_logs_path, 512);
-
 }
 
 void paths_saveconfig()
