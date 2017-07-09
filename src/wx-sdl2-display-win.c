@@ -269,10 +269,10 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         break;
         case WM_KILLFOCUS:
                 infocus=0;
-                releasemouse();
-                memset(rawinputkey, 0, sizeof(rawinputkey));
                 if (is_fullscreen())
                         window_dowindowed = 1;
+                window_doinputrelease = 1;
+                memset(rawinputkey, 0, sizeof(rawinputkey));
         break;
         case WM_CLOSE:
         case WM_DESTROY:
@@ -729,12 +729,6 @@ int render()
                 case SDL_WINDOWEVENT:
                         if (event.window.event == SDL_WINDOWEVENT_CLOSE)
                                 wx_stop_emulation(window_ptr);
-                        if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
-                        {
-                                if (is_fullscreen())
-                                        window_dowindowed = 1;
-                                window_doinputrelease = 1;
-                        }
 
                         if (window_remember)
                         {
