@@ -29,7 +29,7 @@
 #include "timer.h"
 #include "midi.h"
 #include "sound.h"
-#include <malloc.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include "sound_mpu401.h"
 
