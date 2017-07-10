@@ -107,7 +107,7 @@ static int compile_shader(GLenum shader_type, const char* prepend, const char* p
         }
         else
         {
-                source[0] = "#version 130\n";
+//                source[0] = "#version 130\n";
                 source[2] = program;
         }
 
