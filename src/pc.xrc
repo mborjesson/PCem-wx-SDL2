@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <!-- http://docs.wxwidgets.org/trunk/overview_xrcformat.html -->
 <resource xmlns="http://www.wxwidgets.org/wxxrc" version="2.5.3.0">
 	<object class="wxBitmap" name="BITMAP_HARDDISK">icons/drive.png</object>
