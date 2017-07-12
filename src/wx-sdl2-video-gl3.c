@@ -667,6 +667,7 @@ static glsl_t* load_shaders(int num, char shaders[MAX_USER_SHADERS][512])
         {
                 delete_glsl(glsl);
                 memset(glsl, 0, sizeof(glsl_t));
+                wx_simple_messagebox("Error loading shaders", "One or more shaders could not be loaded.");
         }
         return glsl;
 }
