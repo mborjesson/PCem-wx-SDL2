@@ -322,8 +322,8 @@ void StatusFrame::OnCommand(wxCommandEvent& event)
                 show_mount_paths = event.IsChecked();
         else if (event.GetId() == XRCID("IDM_SHOW_MACHINE_ON_START"))
                 show_machine_on_start = event.IsChecked();
-        else if (event.GetId() == XRCID("IDM_HDCONF"))
-                hdconf_open(this);
+//        else if (event.GetId() == XRCID("IDM_HDCONF"))
+//                hdconf_open(this);
         else if (event.GetId() == XRCID("IDM_CONFIG"))
                 config_open(this);
         else if (event.GetId() == XRCID("IDM_RESET_CONFIRMATION_DIALOGS"))

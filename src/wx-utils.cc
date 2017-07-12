@@ -211,6 +211,11 @@ void wx_showwindow(void* window, int show)
         wxQueueEvent((wxWindow*)window, event);
 }
 
+int wx_iswindowvisible(void* window)
+{
+        return ((wxWindow*) window)->IsShown();
+}
+
 void wx_togglewindow(void* window)
 {
         wx_showwindow(window, -1);
@@ -280,6 +285,7 @@ int wx_sendmessage(void* window, int type, INT_PARAM param1, LONG_PARAM param2)
         case WX_CB_RESETCONTENT:
         {
 #ifndef __WXOSX_MAC__
+                ((wxComboBox*) window)->SetValue("");
                 ((wxComboBox*) window)->Clear();
 #else
                 /* Clear() does not work on OSX */

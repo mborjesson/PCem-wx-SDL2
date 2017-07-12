@@ -7,10 +7,31 @@
 extern void config_open(void* hwnd);
 extern void hdconf_open(void* hwnd);
 
+static void select_config(void* hdlg, char* name)
+{
+        char s[512];
+        int num, c, p;
+        void* h;
+
+        h = wx_getdlgitem(hdlg, WX_ID("IDC_LIST"));
+        num = wx_sendmessage(h, WX_LB_GETCOUNT, 0, 0);
+
+        for (c = 0; c < num; c++)
+        {
+                wx_sendmessage(h, WX_LB_GETTEXT, c, (LONG_PARAM)s);
+                if (!strcmp(s, name))
+                {
+                        wx_sendmessage(h, WX_LB_SETCURSEL, c, 0);
+                        return;
+                }
+        }
+
+}
+
 static void config_list_update(void* hdlg)
 {
         char s[512];
-        int num, c;
+        int num, c, p;
         void* h;
 
         strcpy(s, configs_path);
@@ -18,9 +39,11 @@ static void config_list_update(void* hdlg)
         strcat(s, "*.cfg");
         pclog("Dir %s\n", s);
 
+        h = wx_getdlgitem(hdlg, WX_ID("IDC_LIST"));
+        p = wx_sendmessage(h, WX_LB_GETCURSEL, 0, 0);
+
         wx_dlgdirlist(hdlg, s, WX_ID("IDC_LIST"), 0, 0);
 
-        h = wx_getdlgitem(hdlg, WX_ID("IDC_LIST"));
         num = wx_sendmessage(h, WX_LB_GETCOUNT, 0, 0);
 
         for (c = 0; c < num; c++)
@@ -38,6 +61,19 @@ static void config_list_update(void* hdlg)
                 wx_sendmessage(h, WX_LB_DELETESTRING, c, 0);
                 wx_sendmessage(h, WX_LB_INSERTSTRING, c, (LONG_PARAM)s);
         }
+
+        if (num > 0)
+        {
+                if (p >= num)
+                        p = num-1;
+                else if (p < 0)
+                        p = 0;
+                wx_sendmessage(h, WX_LB_SETCURSEL, p, 0);
+        }
+        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_RENAME")), num);
+        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_DELETE")), num);
+        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_CONFIG")), num);
+        wx_enablewindow(wx_getdlgitem(hdlg, wxID_OK), num);
 }
 
 static int config_selection_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
@@ -108,6 +144,7 @@ static int config_selection_dlgproc(void* hdlg, int message, INT_PARAM wParam, L
                                         saveconfig(openfilestring);
 
                                         config_list_update(hdlg);
+                                        select_config(hdlg, name);
                                 }
 
                                 return TRUE;
@@ -138,25 +175,25 @@ static int config_selection_dlgproc(void* hdlg, int message, INT_PARAM wParam, L
                         }
                         else if (wParam == WX_ID("IDC_HDCONF"))
                         {
-                                char s[512];
-
-                                int ret = wx_dlgdirselectex(hdlg, (LONG_PARAM)s, 512, WX_ID("IDC_LIST"));
-
-                                pclog("wx_dlgdirselectex returned %i %s\n", ret, s);
-                                if (s[0])
-                                {
-                                        char cfg[512];
-
-                                        strcpy(cfg, configs_path);
-                                        put_backslash(cfg);
-                                        strcat(cfg, s);
-                                        strcat(cfg, "cfg");
-                                        pclog("Config name %s\n", cfg);
-
-                                        loadconfig(cfg);
-                                        hdconf_open(hdlg);
-                                        saveconfig(cfg);
-                                }
+//                                char s[512];
+//
+//                                int ret = wx_dlgdirselectex(hdlg, (LONG_PARAM)s, 512, WX_ID("IDC_LIST"));
+//
+//                                pclog("wx_dlgdirselectex returned %i %s\n", ret, s);
+//                                if (s[0])
+//                                {
+//                                        char cfg[512];
+//
+//                                        strcpy(cfg, configs_path);
+//                                        put_backslash(cfg);
+//                                        strcat(cfg, s);
+//                                        strcat(cfg, "cfg");
+//                                        pclog("Config name %s\n", cfg);
+//
+//                                        loadconfig(cfg);
+//                                        hdconf_open(hdlg);
+//                                        saveconfig(cfg);
+//                                }
 
                                 return TRUE;
                         }

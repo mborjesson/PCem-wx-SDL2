@@ -40,6 +40,7 @@ extern "C" {
         void wx_setdlgitemtext(void* window, int id, char* str);
         void wx_enablewindow(void* window, int enabled);
         void wx_showwindow(void* window, int show);
+        int wx_iswindowvisible(void* window);
         void* wx_getnativewindow(void* window);
         void wx_callback(void* window, WX_CALLBACK callback);
         void wx_togglewindow(void* window);
