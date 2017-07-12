@@ -274,7 +274,8 @@ int wx_sendmessage(void* window, int type, INT_PARAM param1, LONG_PARAM param2)
                 ((wxComboBox*) window)->Append((char*) param2);
                 break;
         case WX_CB_SETCURSEL:
-                ((wxComboBox*) window)->Select(param1);
+                if (param1 >= 0 && param1 < ((wxComboBox*) window)->GetCount())
+                        ((wxComboBox*) window)->Select(param1);
                 break;
         case WX_CB_GETCURSEL:
                 return ((wxComboBox*) window)->GetCurrentSelection();
