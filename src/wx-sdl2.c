@@ -75,6 +75,7 @@ emulation_state_t emulation_state = EMULATION_STOPPED;
 int pause = 0;
 
 int window_doreset = 0;
+int window_dosetresize = 0;
 int renderer_doreset = 0;
 int window_dofullscreen = 0;
 int window_dowindowed = 0;
@@ -159,11 +160,8 @@ uint64_t main_time;
 
 int mainthread(void* param)
 {
-        int i;
-
         SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH);
 
-        int t = 0;
         int frames = 0;
         uint32_t old_time, new_time;
 
@@ -315,19 +313,19 @@ void update_cdrom_menu(void* hmenu)
 
 void wx_initmenu()
 {
-        char s[32];
         menu = wx_getmenu(ghwnd);
 
         void* cdrom_submenu = wx_getsubmenu(menu, WX_ID("IDM_CDROM"));
 
 #ifdef __WINDOWS__
+        char s[32];
         int c;
         /* Loop through each Windows drive letter and test to see if
            it's a CDROM */
         for (c='A';c<='Z';c++)
         {
                 sprintf(s,"%c:\\",c);
-                if (GetDriveType(s)==DRIVE_CDROM)
+                if (GetDriveTypeA(s)==DRIVE_CDROM)
                 {
                         sprintf(s, "Host CD/DVD Drive (%c:)", c);
                         wx_appendmenu(cdrom_submenu, IDM_CDROM_REAL+(c-'A'), s, wxITEM_RADIO);
@@ -400,10 +398,10 @@ extern void wx_saveconfig();
 
 int pc_main(int argc, char** argv)
 {
-        char s[512];
         paths_init();
 
 #ifdef __linux__
+        char s[512];
         /* create directories if they don't exist */
         if (!wx_setup(pcem_path))
                 return FALSE;
@@ -673,7 +671,6 @@ void atapi_close(void)
 
 int wx_handle_command(void* hwnd, int wParam, int checked)
 {
-        SDL_Rect rect;
         void* hmenu;
         char temp_image_path[1024];
         int new_cdrom_drive;
@@ -746,8 +743,8 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
         }
         else if (ID_IS("IDM_BPB_DISABLE"))
         {
-                bpb_disable = checked;
-                wx_checkmenuitem(hmenu, WX_ID("IDM_BPB_DISABLE"), bpb_disable ? WX_MB_CHECKED : WX_MB_UNCHECKED);
+                bpb_disable = !bpb_disable;
+                wx_checkmenuitem(hmenu, wParam, bpb_disable);
                 saveconfig(NULL);
         }
         else if (ID_IS("IDM_MACHINE_TOGGLE"))
@@ -757,13 +754,14 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
         }
         else if (ID_IS("IDM_VID_RESIZE"))
         {
-                vid_resize = checked;
-                window_doreset = 1;
+                vid_resize = !vid_resize;
+                wx_checkmenuitem(hmenu, wParam, vid_resize);
+                window_dosetresize = 1;
                 saveconfig(NULL);
         }
         else if (ID_IS("IDM_VID_REMEMBER"))
         {
-                window_remember = checked;
+                window_remember = !window_remember;
                 wx_checkmenuitem(hmenu, WX_ID("IDM_VID_REMEMBER"),
                                 window_remember ? WX_MB_CHECKED : WX_MB_UNCHECKED);
                 window_doremember = 1;
@@ -778,7 +776,8 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                                         "Use CTRL + ALT + PAGE DOWN to return to windowed mode",
                                         "PCem", WX_MB_OK);
                 }
-                video_fullscreen = checked;
+                video_fullscreen = !video_fullscreen;
+                wx_checkmenuitem(hmenu, wParam, video_fullscreen);
                 saveconfig(NULL);
         }
         else if (ID_IS("IDM_VID_FULLSCREEN_TOGGLE"))
@@ -789,23 +788,27 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
         {
                 video_fullscreen_scale = wParam - wx_xrcid("IDM_VID_FS[start]");
                 display_resize(video_width, video_height);
+                wx_checkmenuitem(hmenu, wParam, WX_MB_CHECKED);
                 saveconfig(NULL);
         }
         else if (ID_RANGE("IDM_VID_SCALE_MODE[start]", "IDM_VID_SCALE_MODE[end]"))
         {
                 video_scale_mode = wParam - wx_xrcid("IDM_VID_SCALE_MODE[start]");
                 renderer_doreset = 1;
+                wx_checkmenuitem(hmenu, wParam, WX_MB_CHECKED);
                 saveconfig(NULL);
         }
         else if (ID_RANGE("IDM_VID_SCALE[start]", "IDM_VID_SCALE[end]"))
         {
                 video_scale = wParam - wx_xrcid("IDM_VID_SCALE[start]");
+                wx_checkmenuitem(hmenu, wParam, WX_MB_CHECKED);
                 display_resize(video_width, video_height);
                 saveconfig(NULL);
         }
         else if (ID_RANGE("IDM_VID_FS_MODE[start]", "IDM_VID_FS_MODE[end]"))
         {
                 video_fullscreen_mode = wParam - wx_xrcid("IDM_VID_FS_MODE[start]");
+                wx_checkmenuitem(hmenu, wParam, WX_MB_CHECKED);
                 saveconfig(NULL);
         }
         else if (ID_RANGE("IDM_VID_RENDER_DRIVER[start]", "IDM_VID_RENDER_DRIVER[end]"))
@@ -817,33 +820,39 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                 wx_enablemenuitem(menu, WX_ID("IDM_VID_SDL2"), requested_render_driver.id != RENDERER_GL3);
                 wx_enablemenuitem(menu, WX_ID("IDM_VID_GL3"), requested_render_driver.id == RENDERER_GL3);
 
+                wx_checkmenuitem(hmenu, wParam, WX_MB_CHECKED);
                 saveconfig(NULL);
         }
         else if (ID_IS("IDM_VID_VSYNC"))
         {
-                video_vsync = checked;
+                video_vsync = !video_vsync;
+                wx_checkmenuitem(menu, wParam, video_vsync);
                 renderer_doreset = 1;
                 saveconfig(NULL);
         }
         else if (ID_IS("IDM_VID_LOST_FOCUS_DIM"))
         {
-                video_focus_dim = checked;
+                video_focus_dim = !video_focus_dim;
+                wx_checkmenuitem(menu, wParam, video_focus_dim);
                 saveconfig(NULL);
         }
         else if (ID_RANGE("IDM_VID_GL3_INPUT_STRETCH[start]", "IDM_VID_GL3_INPUT_STRETCH[end]"))
         {
                 gl3_input_stretch = wParam - wx_xrcid("IDM_VID_GL3_INPUT_STRETCH[start]");
+                wx_checkmenuitem(menu, wParam, WX_MB_CHECKED);
                 saveconfig(NULL);
         }
         else if (ID_RANGE("IDM_VID_GL3_INPUT_SCALE[start]", "IDM_VID_GL3_INPUT_SCALE[end]"))
         {
                 int input_scale = wParam - wx_xrcid("IDM_VID_GL3_INPUT_SCALE[start]");
                 gl3_input_scale = input_scale/2.0f+0.5f;
+                wx_checkmenuitem(menu, wParam, WX_MB_CHECKED);
                 saveconfig(NULL);
         }
         else if (ID_RANGE("IDM_VID_GL3_SIMULATED_REFRESH_RATE[start]", "IDM_VID_GL3_SIMULATED_REFRESH_RATE[end]"))
         {
                 gl3_simulated_refresh_rate = wParam - wx_xrcid("IDM_VID_GL3_SIMULATED_REFRESH_RATE[start]");
+                wx_checkmenuitem(menu, wParam, WX_MB_CHECKED);
                 saveconfig(NULL);
         }
         else if (ID_IS("IDM_VID_GL3_SHADER_MANAGER"))
@@ -865,6 +874,7 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
         else if (ID_RANGE("IDM_SND_BUF[start]", "IDM_SND_BUF[end]"))
         {
                 sound_buf_len = MIN_SND_BUF*1<<(wParam - wx_xrcid("IDM_SND_BUF[start]"));
+                wx_checkmenuitem(menu, wParam, WX_MB_CHECKED);
                 saveconfig(NULL);
         }
         else if (ID_IS("IDM_CDROM_DISABLED"))

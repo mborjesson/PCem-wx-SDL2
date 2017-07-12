@@ -27,8 +27,9 @@ extern "C" {
 
         void* wx_getsubmenu(void* window, int id);
         void wx_appendmenu(void* sub_menu, int id, const char* title, enum wxItemKind type);
+        void* wx_getnativemenu(void* menu);
 
-        int wx_textentrydialog(void* window, const char* message, const char* title, const char* value, int min_length, int max_length, LONG_PARAM result);
+        int wx_textentrydialog(void* window, const char* message, const char* title, const char* value, unsigned int min_length, unsigned int max_length, LONG_PARAM result);
 
         int wx_dlgdirlist(void* window, const char* path, int id, int static_path, int file_type);
         int wx_dlgdirselectex(void* window, LONG_PARAM path, int count, int id);
@@ -39,6 +40,8 @@ extern "C" {
         void wx_setdlgitemtext(void* window, int id, char* str);
         void wx_enablewindow(void* window, int enabled);
         void wx_showwindow(void* window, int show);
+        int wx_iswindowvisible(void* window);
+        void* wx_getnativewindow(void* window);
         void wx_callback(void* window, WX_CALLBACK callback);
         void wx_togglewindow(void* window);
 
@@ -90,6 +93,10 @@ extern "C" {
         void wx_config_free(void* config);
 
         int confirm();
+
+#ifdef _WIN32
+        void wx_winsendmessage(void* window, int msg, INT_PARAM wParam, LONG_PARAM lParam);
+#endif
 #ifdef __cplusplus
 }
 #endif

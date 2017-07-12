@@ -11,6 +11,7 @@ src/roms/
 src/nvr
 src/configs
 src/*.dmp
+src/*.res
 pclog.txt
 pcem.log
 autom4te.cache

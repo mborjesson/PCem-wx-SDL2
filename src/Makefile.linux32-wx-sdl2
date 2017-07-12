@@ -5,8 +5,8 @@ WXRC = wxrc
 CFLAGS = -O3 -fomit-frame-pointer -msse2 -m32 $(shell wx-config --cxxflags) $(shell sdl2-config --cflags)
 OBJ = 386.o 386_dynarec.o 386_dynarec_ops.o 808x.o acer386sx.o ali1429.o amstrad.o cdrom-ioctl-linux.o cdrom-image.o cdrom-null.o \
 codegen.o codegen_ops.o codegen_timing_486.o codegen_timing_686.o codegen_timing_pentium.o codegen_timing_winchip.o codegen_x86.c compaq.o config.o cpu.o \
-dac.o dells200.o device.o disc.o disc_fdi.o disc_img.o disc_sector.o dma.o fdc.o fdc37c665.o fdd.o fdi2raw.o gameport.o \
-hdd.o hdd_esdi.o headland.o i430lx.o i430fx.o i430vx.o ide.o intel.o intel_flash.o io.o jim.o joystick_ch_flightstick_pro.o joystick_standard.o joystick_sw_pad.o \
+dac.o dells200.o device.o disc.o disc_fdi.o disc_img.o disc_sector.o dma.o esdi_at.o fdc.o fdc37c665.o fdd.o fdi2raw.o gameport.o \
+hdd.o hdd_esdi.o hdd_file.o headland.o i430lx.o i430fx.o i430vx.o ide.o intel.o intel_flash.o io.o jim.o joystick_ch_flightstick_pro.o joystick_standard.o joystick_sw_pad.o \
 joystick_tm_fcs.o keyboard.o keyboard_amstrad.o keyboard_at.o keyboard_olim24.o keyboard_pcjr.o keyboard_xt.o \
 laserxt.o lpt.o mca.o mcr.o mem.o mfm_at.o mfm_xebec.o model.o mouse.o mouse_ps2.o mouse_serial.o neat.o nmi.o nvr.o olivetti_m24.o \
 opti495.o paths.o pc.o pci.o pic.o piix.o pit.o ppi.o ps1.o ps2.o ps2_mca.o ps2_nvr.o rom.o rtc.o scat.o serial.o sio.o sis496.o sound.o \
@@ -21,7 +21,7 @@ vid_stg_ramdac.o vid_svga.o vid_svga_render.o vid_tandy.o vid_tandysl.o vid_tgui
 vid_tkd8001_ramdac.o vid_tvga.o vid_unk_ramdac.o vid_vga.o vid_voodoo.o vid_wy700.o video.o wd76c10.o \
 x86seg.o x87.o xtide.o sound_dbopl.o sound_resid.o \
 wx-main.o wx-config_sel.o wx-dialogbox.o wx-utils.o wx-app.o wx-sdl2-joystick.o wx-sdl2-mouse.o wx-sdl2-keyboard.o wx-sdl2-video.o wx-sdl2-midi.o \
-wx-sdl2.o wx-config.o wx-deviceconfig.o wx-sdl2-hdconf.o wx-status.o wx-sdl2-status.o wx-resources.o wx-thread.o wx-common.o wx-sdl2-display.o \
+wx-sdl2.o wx-config.o wx-deviceconfig.o wx-status.o wx-sdl2-status.o wx-resources.o wx-thread.o wx-common.o wx-sdl2-display.o \
 wx-sdl2-video-renderer.o wx-sdl2-video-gl3.o wx-glslp-parser.o wx-shader_man.o wx-shaderconfig.o
 DBOBJ = cdrom_image.o dbopl.o nukedopl.o vid_cga_comp.o
 SIDOBJ = convolve.o convolve-sse.o envelope.o extfilt.o filter.o pot.o sid.o voice.o wave6581__ST.o wave6581_P_T.o wave6581_PS_.o wave6581_PST.o wave8580__ST.o wave8580_P_T.o wave8580_PS_.o wave8580_PST.o wave.o

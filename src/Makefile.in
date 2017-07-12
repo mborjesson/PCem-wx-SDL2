@@ -94,7 +94,7 @@ host_triplet = @host@
 bin_PROGRAMS = pcem$(EXEEXT)
 @USE_WX_TRUE@am__append_1 = wx-main.cc wx-config_sel.c wx-dialogbox.cc wx-utils.cc wx-app.cc \
 @USE_WX_TRUE@ wx-sdl2-joystick.c wx-sdl2-mouse.c wx-sdl2-keyboard.c wx-sdl2-video.c wx-sdl2-midi.c \
-@USE_WX_TRUE@ wx-sdl2.c wx-config.c wx-deviceconfig.cc wx-sdl2-hdconf.c wx-status.cc wx-sdl2-status.c \
+@USE_WX_TRUE@ wx-sdl2.c wx-config.c wx-deviceconfig.cc wx-status.cc wx-sdl2-status.c \
 @USE_WX_TRUE@ wx-resources.cpp wx-thread.c wx-common.c wx-sdl2-display.c wx-sdl2-video-renderer.c wx-sdl2-video-gl3.c \
 @USE_WX_TRUE@ wx-glslp-parser.c wx-shader_man.c wx-shaderconfig.cc
 
@@ -124,12 +124,12 @@ am__pcem_SOURCES_DIST = 386.c 386_dynarec.c 386_dynarec_ops.c 808x.c \
 	codegen_timing_486.c codegen_timing_686.c \
 	codegen_timing_pentium.c codegen_timing_winchip.c compaq.c \
 	config.c cpu.c dac.c dells200.c device.c disc.c disc_fdi.c \
-	disc_img.c disc_sector.c dma.c fdc.c fdc37c665.c fdd.c \
-	fdi2raw.c gameport.c hdd.c hdd_esdi.c headland.c i430lx.c \
-	i430fx.c i430vx.c ide.c intel.c intel_flash.c io.c jim.c \
-	joystick_ch_flightstick_pro.c joystick_standard.c \
-	joystick_sw_pad.c joystick_tm_fcs.c keyboard.c \
-	keyboard_amstrad.c keyboard_at.c keyboard_olim24.c \
+	disc_img.c disc_sector.c dma.c esdi_at.c fdc.c fdc37c665.c \
+	fdd.c fdi2raw.c gameport.c hdd.c hdd_esdi.c hdd_file.c \
+	headland.c i430lx.c i430fx.c i430vx.c ide.c intel.c \
+	intel_flash.c io.c jim.c joystick_ch_flightstick_pro.c \
+	joystick_standard.c joystick_sw_pad.c joystick_tm_fcs.c \
+	keyboard.c keyboard_amstrad.c keyboard_at.c keyboard_olim24.c \
 	keyboard_pcjr.c keyboard_xt.c laserxt.c lpt.c mca.c mcr.c \
 	midi.c midi_mt32.c midi_system.c mem.c mfm_at.c mfm_xebec.c \
 	model.c mouse.c mouse_ps2.c mouse_serial.c neat.c nmi.c nvr.c \
@@ -172,14 +172,13 @@ am__pcem_SOURCES_DIST = 386.c 386_dynarec.c 386_dynarec_ops.c 808x.c \
 	wx-dialogbox.cc wx-utils.cc wx-app.cc wx-sdl2-joystick.c \
 	wx-sdl2-mouse.c wx-sdl2-keyboard.c wx-sdl2-video.c \
 	wx-sdl2-midi.c wx-sdl2.c wx-config.c wx-deviceconfig.cc \
-	wx-sdl2-hdconf.c wx-status.cc wx-sdl2-status.c \
-	wx-resources.cpp wx-thread.c wx-common.c wx-sdl2-display.c \
-	wx-sdl2-video-renderer.c wx-sdl2-video-gl3.c wx-glslp-parser.c \
-	wx-shader_man.c wx-shaderconfig.cc allegro-gui.c \
-	allegro-gui-config-sel.c allegro-gui-configure.c \
-	allegro-gui-deviceconfig.c allegro-gui-hdconf.c \
-	allegro-joystick.c allegro-keyboard.c allegro-main.c \
-	allegro-midi.c allegro-mouse.c allegro-video.c \
+	wx-status.cc wx-sdl2-status.c wx-resources.cpp wx-thread.c \
+	wx-common.c wx-sdl2-display.c wx-sdl2-video-renderer.c \
+	wx-sdl2-video-gl3.c wx-glslp-parser.c wx-shader_man.c \
+	wx-shaderconfig.cc allegro-gui.c allegro-gui-config-sel.c \
+	allegro-gui-configure.c allegro-gui-deviceconfig.c \
+	allegro-gui-hdconf.c allegro-joystick.c allegro-keyboard.c \
+	allegro-main.c allegro-midi.c allegro-mouse.c allegro-video.c \
 	thread-pthread.c codegen_x86.c codegen_x86-64.c
 @USE_WX_TRUE@am__objects_1 = pcem-wx-main.$(OBJEXT) \
 @USE_WX_TRUE@	pcem-wx-config_sel.$(OBJEXT) \
@@ -192,7 +191,6 @@ am__pcem_SOURCES_DIST = 386.c 386_dynarec.c 386_dynarec_ops.c 808x.c \
 @USE_WX_TRUE@	pcem-wx-sdl2-midi.$(OBJEXT) \
 @USE_WX_TRUE@	pcem-wx-sdl2.$(OBJEXT) pcem-wx-config.$(OBJEXT) \
 @USE_WX_TRUE@	pcem-wx-deviceconfig.$(OBJEXT) \
-@USE_WX_TRUE@	pcem-wx-sdl2-hdconf.$(OBJEXT) \
 @USE_WX_TRUE@	pcem-wx-status.$(OBJEXT) \
 @USE_WX_TRUE@	pcem-wx-sdl2-status.$(OBJEXT) \
 @USE_WX_TRUE@	pcem-wx-resources.$(OBJEXT) \
@@ -231,10 +229,11 @@ am_pcem_OBJECTS = pcem-386.$(OBJEXT) pcem-386_dynarec.$(OBJEXT) \
 	pcem-dells200.$(OBJEXT) pcem-device.$(OBJEXT) \
 	pcem-disc.$(OBJEXT) pcem-disc_fdi.$(OBJEXT) \
 	pcem-disc_img.$(OBJEXT) pcem-disc_sector.$(OBJEXT) \
-	pcem-dma.$(OBJEXT) pcem-fdc.$(OBJEXT) pcem-fdc37c665.$(OBJEXT) \
-	pcem-fdd.$(OBJEXT) pcem-fdi2raw.$(OBJEXT) \
-	pcem-gameport.$(OBJEXT) pcem-hdd.$(OBJEXT) \
-	pcem-hdd_esdi.$(OBJEXT) pcem-headland.$(OBJEXT) \
+	pcem-dma.$(OBJEXT) pcem-esdi_at.$(OBJEXT) pcem-fdc.$(OBJEXT) \
+	pcem-fdc37c665.$(OBJEXT) pcem-fdd.$(OBJEXT) \
+	pcem-fdi2raw.$(OBJEXT) pcem-gameport.$(OBJEXT) \
+	pcem-hdd.$(OBJEXT) pcem-hdd_esdi.$(OBJEXT) \
+	pcem-hdd_file.$(OBJEXT) pcem-headland.$(OBJEXT) \
 	pcem-i430lx.$(OBJEXT) pcem-i430fx.$(OBJEXT) \
 	pcem-i430vx.$(OBJEXT) pcem-ide.$(OBJEXT) pcem-intel.$(OBJEXT) \
 	pcem-intel_flash.$(OBJEXT) pcem-io.$(OBJEXT) \
@@ -522,12 +521,12 @@ pcem_SOURCES = 386.c 386_dynarec.c 386_dynarec_ops.c 808x.c \
 	codegen_timing_486.c codegen_timing_686.c \
 	codegen_timing_pentium.c codegen_timing_winchip.c compaq.c \
 	config.c cpu.c dac.c dells200.c device.c disc.c disc_fdi.c \
-	disc_img.c disc_sector.c dma.c fdc.c fdc37c665.c fdd.c \
-	fdi2raw.c gameport.c hdd.c hdd_esdi.c headland.c i430lx.c \
-	i430fx.c i430vx.c ide.c intel.c intel_flash.c io.c jim.c \
-	joystick_ch_flightstick_pro.c joystick_standard.c \
-	joystick_sw_pad.c joystick_tm_fcs.c keyboard.c \
-	keyboard_amstrad.c keyboard_at.c keyboard_olim24.c \
+	disc_img.c disc_sector.c dma.c esdi_at.c fdc.c fdc37c665.c \
+	fdd.c fdi2raw.c gameport.c hdd.c hdd_esdi.c hdd_file.c \
+	headland.c i430lx.c i430fx.c i430vx.c ide.c intel.c \
+	intel_flash.c io.c jim.c joystick_ch_flightstick_pro.c \
+	joystick_standard.c joystick_sw_pad.c joystick_tm_fcs.c \
+	keyboard.c keyboard_amstrad.c keyboard_at.c keyboard_olim24.c \
 	keyboard_pcjr.c keyboard_xt.c laserxt.c lpt.c mca.c mcr.c \
 	midi.c midi_mt32.c midi_system.c mem.c mfm_at.c mfm_xebec.c \
 	model.c mouse.c mouse_ps2.c mouse_serial.c neat.c nmi.c nvr.c \
@@ -725,6 +724,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-disc_sector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-dma.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-envelope.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-esdi_at.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-extfilt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-fdc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-fdc37c665.Po@am__quote@
@@ -734,6 +734,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-gameport.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-hdd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-hdd_esdi.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-hdd_file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-headland.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-i430fx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-i430lx.Po@am__quote@
@@ -884,7 +885,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-resources.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-sdl2-display.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-sdl2-hdconf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-sdl2-joystick.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-sdl2-keyboard.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-wx-sdl2-midi.Po@am__quote@
@@ -1281,6 +1281,20 @@ pcem-dma.obj: dma.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-dma.obj `if test -f 'dma.c'; then $(CYGPATH_W) 'dma.c'; else $(CYGPATH_W) '$(srcdir)/dma.c'; fi`
 
+pcem-esdi_at.o: esdi_at.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-esdi_at.o -MD -MP -MF $(DEPDIR)/pcem-esdi_at.Tpo -c -o pcem-esdi_at.o `test -f 'esdi_at.c' || echo '$(srcdir)/'`esdi_at.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-esdi_at.Tpo $(DEPDIR)/pcem-esdi_at.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='esdi_at.c' object='pcem-esdi_at.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-esdi_at.o `test -f 'esdi_at.c' || echo '$(srcdir)/'`esdi_at.c
+
+pcem-esdi_at.obj: esdi_at.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-esdi_at.obj -MD -MP -MF $(DEPDIR)/pcem-esdi_at.Tpo -c -o pcem-esdi_at.obj `if test -f 'esdi_at.c'; then $(CYGPATH_W) 'esdi_at.c'; else $(CYGPATH_W) '$(srcdir)/esdi_at.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-esdi_at.Tpo $(DEPDIR)/pcem-esdi_at.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='esdi_at.c' object='pcem-esdi_at.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-esdi_at.obj `if test -f 'esdi_at.c'; then $(CYGPATH_W) 'esdi_at.c'; else $(CYGPATH_W) '$(srcdir)/esdi_at.c'; fi`
+
 pcem-fdc.o: fdc.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-fdc.o -MD -MP -MF $(DEPDIR)/pcem-fdc.Tpo -c -o pcem-fdc.o `test -f 'fdc.c' || echo '$(srcdir)/'`fdc.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-fdc.Tpo $(DEPDIR)/pcem-fdc.Po
@@ -1378,6 +1392,20 @@ pcem-hdd_esdi.obj: hdd_esdi.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='hdd_esdi.c' object='pcem-hdd_esdi.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-hdd_esdi.obj `if test -f 'hdd_esdi.c'; then $(CYGPATH_W) 'hdd_esdi.c'; else $(CYGPATH_W) '$(srcdir)/hdd_esdi.c'; fi`
+
+pcem-hdd_file.o: hdd_file.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-hdd_file.o -MD -MP -MF $(DEPDIR)/pcem-hdd_file.Tpo -c -o pcem-hdd_file.o `test -f 'hdd_file.c' || echo '$(srcdir)/'`hdd_file.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-hdd_file.Tpo $(DEPDIR)/pcem-hdd_file.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='hdd_file.c' object='pcem-hdd_file.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-hdd_file.o `test -f 'hdd_file.c' || echo '$(srcdir)/'`hdd_file.c
+
+pcem-hdd_file.obj: hdd_file.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-hdd_file.obj -MD -MP -MF $(DEPDIR)/pcem-hdd_file.Tpo -c -o pcem-hdd_file.obj `if test -f 'hdd_file.c'; then $(CYGPATH_W) 'hdd_file.c'; else $(CYGPATH_W) '$(srcdir)/hdd_file.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-hdd_file.Tpo $(DEPDIR)/pcem-hdd_file.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='hdd_file.c' object='pcem-hdd_file.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-hdd_file.obj `if test -f 'hdd_file.c'; then $(CYGPATH_W) 'hdd_file.c'; else $(CYGPATH_W) '$(srcdir)/hdd_file.c'; fi`
 
 pcem-headland.o: headland.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-headland.o -MD -MP -MF $(DEPDIR)/pcem-headland.Tpo -c -o pcem-headland.o `test -f 'headland.c' || echo '$(srcdir)/'`headland.c
@@ -3254,20 +3282,6 @@ pcem-wx-config.obj: wx-config.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='wx-config.c' object='pcem-wx-config.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-wx-config.obj `if test -f 'wx-config.c'; then $(CYGPATH_W) 'wx-config.c'; else $(CYGPATH_W) '$(srcdir)/wx-config.c'; fi`
-
-pcem-wx-sdl2-hdconf.o: wx-sdl2-hdconf.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-wx-sdl2-hdconf.o -MD -MP -MF $(DEPDIR)/pcem-wx-sdl2-hdconf.Tpo -c -o pcem-wx-sdl2-hdconf.o `test -f 'wx-sdl2-hdconf.c' || echo '$(srcdir)/'`wx-sdl2-hdconf.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-wx-sdl2-hdconf.Tpo $(DEPDIR)/pcem-wx-sdl2-hdconf.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='wx-sdl2-hdconf.c' object='pcem-wx-sdl2-hdconf.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-wx-sdl2-hdconf.o `test -f 'wx-sdl2-hdconf.c' || echo '$(srcdir)/'`wx-sdl2-hdconf.c
-
-pcem-wx-sdl2-hdconf.obj: wx-sdl2-hdconf.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-wx-sdl2-hdconf.obj -MD -MP -MF $(DEPDIR)/pcem-wx-sdl2-hdconf.Tpo -c -o pcem-wx-sdl2-hdconf.obj `if test -f 'wx-sdl2-hdconf.c'; then $(CYGPATH_W) 'wx-sdl2-hdconf.c'; else $(CYGPATH_W) '$(srcdir)/wx-sdl2-hdconf.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-wx-sdl2-hdconf.Tpo $(DEPDIR)/pcem-wx-sdl2-hdconf.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='wx-sdl2-hdconf.c' object='pcem-wx-sdl2-hdconf.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-wx-sdl2-hdconf.obj `if test -f 'wx-sdl2-hdconf.c'; then $(CYGPATH_W) 'wx-sdl2-hdconf.c'; else $(CYGPATH_W) '$(srcdir)/wx-sdl2-hdconf.c'; fi`
 
 pcem-wx-sdl2-status.o: wx-sdl2-status.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-wx-sdl2-status.o -MD -MP -MF $(DEPDIR)/pcem-wx-sdl2-status.Tpo -c -o pcem-wx-sdl2-status.o `test -f 'wx-sdl2-status.c' || echo '$(srcdir)/'`wx-sdl2-status.c

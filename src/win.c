@@ -324,7 +324,8 @@ static void initmenu(void)
         }
 }
 
-int dir_exists(char* path) {
+int dir_exists(char *path)
+{
         DWORD dwAttrib = GetFileAttributes(path);
 
         return (dwAttrib != INVALID_FILE_ATTRIBUTES &&

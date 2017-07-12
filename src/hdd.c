@@ -2,6 +2,7 @@
 #include "device.h"
 #include "hdd.h"
 
+#include "esdi_at.h"
 #include "hdd_esdi.h"
 #include "mfm_at.h"
 #include "mfm_xebec.h"
@@ -21,13 +22,14 @@ static struct
         int is_mfm;
 } hdd_controllers[] = 
 {
-        {"None",                              "none",      &null_hdd_device,  0},
-        {"AT Fixed Disk Adapter",             "mfm_at",    &mfm_at_device,    1},
-        {"DTC 5150X",                         "dtc5150x",  &dtc_5150x_device, 1},
-        {"Fixed Disk Adapter (Xebec)",        "mfm_xebec", &mfm_xebec_device, 1},
-        {"IBM ESDI Fixed Disk Adapter (MCA)", "esdi_mca",  &hdd_esdi_device,  1},
-        {"XTIDE",                             "xtide",     &xtide_device,     0},
-        {"XTIDE (AT)",                        "xtide_at",  &xtide_at_device,  0},
+        {"None",                              "none",       &null_hdd_device,   0},
+        {"AT Fixed Disk Adapter",             "mfm_at",     &mfm_at_device,     1},
+        {"DTC 5150X",                         "dtc5150x",   &dtc_5150x_device,  1},
+        {"Fixed Disk Adapter (Xebec)",        "mfm_xebec",  &mfm_xebec_device,  1},
+        {"IBM ESDI Fixed Disk Adapter (MCA)", "esdi_mca",   &hdd_esdi_device,   1},
+        {"Western Digital WD1007V-SE1 (ESDI)","wd1007vse1", &wd1007vse1_device, 0},
+        {"XTIDE",                             "xtide",      &xtide_device,      0},
+        {"XTIDE (AT)",                        "xtide_at",   &xtide_at_device,   0},
         {"", "", NULL, 0}
 };
 
@@ -51,22 +53,27 @@ int hdd_controller_available(int hdd)
         return device_available(hdd_controllers[hdd].device);
 }
 
-int hdd_controller_current_is_mfm()
+int hdd_controller_is_mfm(char* internal_name)
 {
         int c = 0;
         
         while (hdd_controllers[c].device)
         {
-                if (!strcmp(hdd_controller_name, hdd_controllers[c].internal_name))
+                if (!strcmp(internal_name, hdd_controllers[c].internal_name))
                 {
                         hdd_controller_current = c;
-                        if (strcmp(hdd_controller_name, "none"))
+                        if (strcmp(internal_name, "none"))
                                 return hdd_controllers[c].is_mfm;
                 }
                 c++;
         }
 
         return 0;
+}
+
+int hdd_controller_current_is_mfm()
+{
+        return hdd_controller_is_mfm(hdd_controller_name);
 }
 
 void hdd_controller_init(char *internal_name)

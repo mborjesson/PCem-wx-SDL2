@@ -1,5 +1,7 @@
 #include <SDL2/SDL.h>
 #include <stdint.h>
+#include <string.h>
+#include <stdio.h>
 #include "video.h"
 #include "wx-utils.h"
 #include "wx-sdl2-video.h"
