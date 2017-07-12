@@ -32,6 +32,8 @@ typedef struct mt32_t
         int midi_pos;
 
         int status_show_instruments;
+
+        char model_name[50];
 } mt32_t;
 
 void showLCDMessage(void *instance_data, const char *message)
@@ -80,7 +82,7 @@ static const mt32emu_report_handler_i_v0 handler_v0 = {
 
 static const mt32emu_report_handler_i handler = { &handler_v0 };
 
-static int roms_present = -1;
+static int roms_present[] = { -1, -1 };
 
 mt32emu_return_code mt32_check(const char* func, mt32emu_return_code ret, mt32emu_return_code expected)
 {
@@ -94,9 +96,16 @@ mt32emu_return_code mt32_check(const char* func, mt32emu_return_code ret, mt32em
 
 int mt32_available()
 {
-        if (roms_present < 0)
-                roms_present = (rom_present("mt32/mt32_control.rom") && rom_present("mt32/mt32_pcm.rom"));
-        return roms_present;
+        if (roms_present[0] < 0)
+                roms_present[0] = (rom_present("mt32/mt32_control.rom") && rom_present("mt32/mt32_pcm.rom"));
+        return roms_present[0];
+}
+
+int cm32l_available()
+{
+        if (roms_present[1] < 0)
+                roms_present[1] = (rom_present("cm32l/cm32l_control.rom") && rom_present("cm32l/cm32l_pcm.rom"));
+        return roms_present[1];
 }
 
 void mt32_stream(mt32emu_context context, int16_t* stream, int len)
@@ -142,7 +151,7 @@ void mt32_sysex(midi_device_t* device, uint8_t* data, unsigned int len)
         if (context) mt32_check("mt32emu_play_sysex", mt32emu_play_sysex(context, data, len), MT32EMU_RC_OK);
 }
 
-void* mt32_init()
+static void* mt32emu_init(char* control_rom, char* pcm_rom)
 {
         char s[512];
 
@@ -150,9 +159,9 @@ void* mt32_init()
         memset(data, 0, sizeof(mt32_t));
         mt32emu_context context = mt32emu_create_context(handler, data);
         if (
-                !rom_getfile("mt32/mt32_control.rom", s, 512) ||
+                !rom_getfile(control_rom, s, 512) ||
                 !mt32_check("mt32emu_add_rom_file", mt32emu_add_rom_file(context, s), MT32EMU_RC_ADDED_CONTROL_ROM) ||
-                !rom_getfile("mt32/mt32_pcm.rom", s, 512) ||
+                !rom_getfile(pcm_rom, s, 512) ||
                 !mt32_check("mt32emu_add_rom_file", mt32emu_add_rom_file(context, s), MT32EMU_RC_ADDED_PCM_ROM) ||
                 !mt32_check("mt32emu_open_synth", mt32emu_open_synth(context), MT32EMU_RC_OK))
         {
@@ -194,6 +203,22 @@ void* mt32_init()
 
         midi_init(dev);
 
+        return dev;
+}
+
+void* mt32_init()
+{
+        midi_device_t* dev = mt32emu_init("mt32/mt32_control.rom", "mt32/mt32_pcm.rom");
+        if (dev)
+                strcpy(((mt32_t*)dev->data)->model_name, "MT-32");
+        return dev;
+}
+
+void* cm32l_init()
+{
+        midi_device_t* dev = mt32emu_init("cm32l/cm32l_control.rom", "cm32l/cm32l_pcm.rom");
+        if (dev)
+                strcpy(((mt32_t*)dev->data)->model_name, "CM-32L");
         return dev;
 }
 
@@ -239,12 +264,12 @@ void mt32_add_status_info(char *s, int max_len, void *p)
 //        snprintf(s, max_len, "MT-32 Partial count: %d\n", part_count);
         if (strlen(data->message))
         {
-                sprintf(temps, "MT-32 message: %s\n", data->message);
+                sprintf(temps, "%s message: %s\n", data->model_name, data->message);
                 strncat(s, temps, max_len);
         }
         if (mt32emu_is_active(context))
         {
-                sprintf(temps, "MT-32 playback frequency: %iHz\n", data->samplerate);
+                sprintf(temps, "%s playback frequency: %iHz\n", data->model_name, data->samplerate);
                 strncat(s, temps, max_len);
                 if (data->status_show_instruments)
                 {
@@ -252,14 +277,17 @@ void mt32_add_status_info(char *s, int max_len, void *p)
                         {
                                 const char* patch_name = mt32emu_get_patch_name(context, i);
         //                        mt32emu_get_playing_notes(context, i, &keys, &velocities);
-                                sprintf(temps, "MT-32 inst. %d: %s\n", i+1, patch_name);
+                                sprintf(temps, "%s inst. %d: %s\n", data->model_name, i+1, patch_name);
                                 strncat(s, temps, max_len);
                         }
                 }
                 strncat(s, "\n", max_len);
         }
         else
-                strncat(s, "MT-32 playback stopped\n\n", max_len);
+        {
+                strncat(s, data->model_name, max_len);
+                strncat(s, " playback stopped\n\n", max_len);
+        }
 }
 
 static device_config_t mt32_config[] =
@@ -358,6 +386,19 @@ device_t mt32_device =
         mt32_init,
         mt32_close,
         mt32_available,
+        NULL,
+        NULL,
+        mt32_add_status_info,
+        mt32_config
+};
+
+device_t cm32l_device =
+{
+        "Roland CM-32L Emulation",
+        0,
+        cm32l_init,
+        mt32_close,
+        cm32l_available,
         NULL,
         NULL,
         mt32_add_status_info,
