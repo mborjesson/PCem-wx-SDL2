@@ -2531,6 +2531,7 @@
 	</object>
 
 	<object class="wxDialog" name="ConfirmRememberDlg">
+		<style>wxDEFAULT_DIALOG_STYLE|wxSTAY_ON_TOP</style>
 		<title>PCem</title>
 		<centered>1</centered>
 		<object class="wxPanel" name="ROOT_PANEL">
