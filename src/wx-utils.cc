@@ -26,7 +26,7 @@ int confirm()
 
 int wx_messagebox(void* window, const char* message, const char* title = NULL, int style = 5)
 {
-        return wxMessageBox(message, title, style | wxCENTRE, (wxWindow*) window);
+        return wxMessageBox(message, title, style | wxCENTRE | wxSTAY_ON_TOP, (wxWindow*) window);
 }
 
 void wx_simple_messagebox(const char* title, const char *format, ...)
@@ -593,6 +593,8 @@ unsigned char* wx_image_get_alpha(void* image)
 
 void* wx_config_load(const char* path)
 {
+        if (!wxFileExists(path))
+                return 0;
         wxFileInputStream stream(path);
         if (stream.IsOk())
                 return new wxFileConfig(stream);
