@@ -5,6 +5,7 @@
 
 #ifdef __WINDOWS__
 #define BITMAP WINDOWS_BITMAP
+#undef UNICODE
 #include <windows.h>
 #include <windowsx.h>
 #undef BITMAP
