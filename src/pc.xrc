@@ -2429,6 +2429,7 @@
 	</object>
 
 	<object class="wxDialog" name="ShaderManagerDlg">
+		<style>wxDEFAULT_DIALOG_STYLE|wxSTAY_ON_TOP</style>
 		<title>PCem Shader Manager</title>
 		<centered>1</centered>
 		<object class="wxPanel" name="ROOT_PANEL">
