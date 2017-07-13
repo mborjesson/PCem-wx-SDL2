@@ -1,7 +1,6 @@
 #include "ibm.h"
 #include "config.h"
 #include "wx-utils.h"
-#include "wx-sdl2.h"
 #include "paths.h"
 
 extern void config_open(void* hwnd);
@@ -135,16 +134,18 @@ static int config_selection_dlgproc(void* hdlg, int message, INT_PARAM wParam, L
 //                                if (!getsfile(hdlg, "Configuration (*.cfg)|*.cfg|All files (*.*)|*.*", "", s, "cfg"))
                                 if (wx_textentrydialog(hdlg, "Enter name:", "New config", 0, 1, 64, (LONG_PARAM)name))
                                 {
-                                        strcpy(openfilestring, configs_path);
-                                        put_backslash(openfilestring);
-                                        strcat(openfilestring, name);
-                                        strcat(openfilestring, ".cfg");
+                                        char cfg[512];
 
-                                        pclog("Config %s\n", openfilestring);
+                                        strcpy(cfg, configs_path);
+                                        put_backslash(cfg);
+                                        strcat(cfg, name);
+                                        strcat(cfg, ".cfg");
+
+                                        pclog("Config %s\n", cfg);
 
                                         config_open(hdlg);
 
-                                        saveconfig(openfilestring);
+                                        saveconfig(cfg);
 
                                         config_list_update(hdlg);
                                         select_config(hdlg, name);
