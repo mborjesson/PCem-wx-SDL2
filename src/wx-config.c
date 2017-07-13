@@ -679,6 +679,9 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
 
                         recalc_hdd_list(hdlg, romstomodel[romset], 0);
 
+                        hd_changed = 0;
+                        new_cdrom_channel = cdrom_channel;
+
                         hdconf_init(hdlg);
 
                         return TRUE;
@@ -1111,23 +1114,42 @@ static void check_hd_type(void* hdlg, off64_t sz)
 static void update_hdd_cdrom(void* hdlg)
 {
         void* h;
+        int i, j, b;
+        char s[25];
 
-        h = wx_getdlgitem(hdlg, WX_ID("IDC_HDD[0]"));
-        wx_sendmessage(h, WX_BM_SETCHECK, (new_cdrom_channel == 0) ? 0 : 1, 0);
-        h = wx_getdlgitem(hdlg, WX_ID("IDC_CDROM[0]"));
-        wx_sendmessage(h, WX_BM_SETCHECK, (new_cdrom_channel == 0) ? 1 : 0, 0);
-        h = wx_getdlgitem(hdlg, WX_ID("IDC_HDD[1]"));
-        wx_sendmessage(h, WX_BM_SETCHECK, (new_cdrom_channel == 1) ? 0 : 1, 0);
-        h = wx_getdlgitem(hdlg, WX_ID("IDC_CDROM[1]"));
-        wx_sendmessage(h, WX_BM_SETCHECK, (new_cdrom_channel == 1) ? 1 : 0, 0);
-        h = wx_getdlgitem(hdlg, WX_ID("IDC_HDD[2]"));
-        wx_sendmessage(h, WX_BM_SETCHECK, (new_cdrom_channel == 2) ? 0 : 1, 0);
-        h = wx_getdlgitem(hdlg, WX_ID("IDC_CDROM[2]"));
-        wx_sendmessage(h, WX_BM_SETCHECK, (new_cdrom_channel == 2) ? 1 : 0, 0);
-        h = wx_getdlgitem(hdlg, WX_ID("IDC_HDD[3]"));
-        wx_sendmessage(h, WX_BM_SETCHECK, (new_cdrom_channel == 3) ? 0 : 1, 0);
-        h = wx_getdlgitem(hdlg, WX_ID("IDC_CDROM[3]"));
-        wx_sendmessage(h, WX_BM_SETCHECK, (new_cdrom_channel == 3) ? 1 : 0, 0);
+        int is_mfm = hdd_controller_selected_is_mfm(hdlg);
+
+        for (i = 0; i < 4; ++i)
+        {
+                b = !is_mfm && (new_cdrom_channel == i);
+                sprintf(s, "IDC_HDD[%d]", i);
+                h = wx_getdlgitem(hdlg, WX_ID(s));
+                wx_sendmessage(h, WX_BM_SETCHECK, b ? 0 : 1, 0);
+                sprintf(s, "IDC_CDROM[%d]", i);
+                h = wx_getdlgitem(hdlg, WX_ID(s));
+                wx_sendmessage(h, WX_BM_SETCHECK, b ? 1 : 0, 0);
+                sprintf(s, "IDC_EDIT_FN[%d]", i);
+                wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !b);
+                sprintf(s, "IDC_FILE[%d]", i);
+                wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !b);
+                sprintf(s, "IDC_EJECT[%d]", i);
+                wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !b);
+                sprintf(s, "IDC_NEW[%d]", i);
+                wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !b);
+                sprintf(s, "IDC_EDIT_SPT[%d]", i);
+                wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !b);
+                sprintf(s, "IDC_EDIT_HPC[%d]", i);
+                wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !b);
+                sprintf(s, "IDC_EDIT_CYL[%d]", i);
+                wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !b);
+                sprintf(s, "IDC_TEXT_SIZE[%d]", i);
+                wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !b);
+                for (j = 1; j < 6; ++j)
+                {
+                        sprintf(s, "IDC_HDD_LABEL[%d]", i*10+j);
+                        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !b);
+                }
+        }
 }
 
 static int hdnew_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
@@ -1387,7 +1409,6 @@ int hdconf_init(void* hdlg)
         hd[1] = hdc[1];
         hd[2] = hdc[2];
         hd[3] = hdc[3];
-        hd_changed = 0;
 
         h = wx_getdlgitem(hdlg, WX_ID("IDC_EDIT_SPT[0]"));
         sprintf(s, "%i", hdc[0].spt);
@@ -1453,17 +1474,44 @@ int hdconf_init(void* hdlg)
         sprintf(s, "%imb", (int)(((((uint64_t)hd[3].tracks*(uint64_t)hd[3].hpc)*(uint64_t)hd[3].spt)*512)/1024)/1024);
         wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)s);
 
-        new_cdrom_channel = cdrom_channel;
+        int is_mfm = hdd_controller_selected_is_mfm(hdlg);
 
         update_hdd_cdrom(hdlg);
 
-        int is_mfm = hdd_controller_selected_is_mfm(hdlg);
-        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_PANEL[2]")), !is_mfm);
-        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_PANEL[3]")), !is_mfm);
-        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_HDD[0]")), !is_mfm);
-        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_HDD[1]")), !is_mfm);
-        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_CDROM[0]")), !is_mfm);
-        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_CDROM[1]")), !is_mfm);
+        int i, j;
+        for (i = 0; i < 4; ++i)
+        {
+                sprintf(s, "IDC_HDD_LABEL[%d]", i*10);
+                wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !is_mfm);
+                sprintf(s, "IDC_HDD[%d]", i);
+                wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !is_mfm);
+                sprintf(s, "IDC_CDROM[%d]", i);
+                wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !is_mfm);
+                if (i >= 2)
+                {
+                        sprintf(s, "IDC_EDIT_FN[%d]", i);
+                        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !is_mfm);
+                        sprintf(s, "IDC_FILE[%d]", i);
+                        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !is_mfm);
+                        sprintf(s, "IDC_EJECT[%d]", i);
+                        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !is_mfm);
+                        sprintf(s, "IDC_NEW[%d]", i);
+                        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !is_mfm);
+                        sprintf(s, "IDC_EDIT_SPT[%d]", i);
+                        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !is_mfm);
+                        sprintf(s, "IDC_EDIT_HPC[%d]", i);
+                        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !is_mfm);
+                        sprintf(s, "IDC_EDIT_CYL[%d]", i);
+                        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !is_mfm);
+                        sprintf(s, "IDC_TEXT_SIZE[%d]", i);
+                        wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !is_mfm);
+                        for (j = 1; j < 6; ++j)
+                        {
+                                sprintf(s, "IDC_HDD_LABEL[%d]", i*10+j);
+                                wx_enablewindow(wx_getdlgitem(hdlg, WX_ID(s)), !is_mfm);
+                        }
+                }
+        }
 
         return TRUE;
 }
