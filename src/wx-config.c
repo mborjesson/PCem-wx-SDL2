@@ -516,6 +516,9 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
 
                         c = mpu401_available(sound_card_current);
                         wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_COMBOMIDI")), c);
+                        h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOMIDI"));
+                        device_t* midi_device = midi_device_getdevice(settings_list_to_midi[wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0)]);
+                        c = (midi_device && midi_device->config);
                         wx_enablewindow(wx_getdlgitem(hdlg, WX_ID("IDC_CONFIGUREMIDI")), c);
 
                         h = wx_getdlgitem(hdlg, WX_ID("IDC_CHECK3"));
