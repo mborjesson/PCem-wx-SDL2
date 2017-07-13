@@ -8,9 +8,18 @@
 #include <wx/notebook.h>
 
 #include "wx-dialogbox.h"
-
+#include "wx-utils.h"
 
 BEGIN_EVENT_TABLE(PCemDialogBox, wxDialog) END_EVENT_TABLE()
+
+class CommandValue: public wxObject
+{
+public:
+        CommandValue(int value) { this->value = value; }
+        int GetValue() { return this->value; }
+private:
+        int value;
+};
 
 PCemDialogBox::PCemDialogBox(wxWindow* parent, int (*callback)(void* window, int message, INT_PARAM param1, LONG_PARAM param2)) :
                 wxDialog(parent, -1, "No title")
@@ -36,6 +45,7 @@ void PCemDialogBox::OnInit()
                 Bind(wxEVT_TEXT, &PCemDialogBox::OnCommand, this);
                 Bind(wxEVT_COMBOBOX, &PCemDialogBox::OnCommand, this);
                 Bind(wxEVT_NOTEBOOK_PAGE_CHANGED, &PCemDialogBox::OnNotebookChanged, this);
+                Bind(wxEVT_LISTBOX_DCLICK, &PCemDialogBox::OnCommand, this, wxID_ANY, wxID_ANY, new CommandValue(WX_LBN_DBLCLK));
         }
 
         wxWindow* root = FindWindow(XRCID("ROOT_PANEL"));
@@ -65,6 +75,10 @@ void PCemDialogBox::OnNotebookChanged(wxCommandEvent& event)
 
 void PCemDialogBox::OnCommand(wxCommandEvent& event)
 {
-        processEvent(WX_COMMAND, event.GetId(), 0);
+        LONG_PARAM val = 0;
+        CommandValue* c = (CommandValue*)event.GetEventUserData();
+        if (c)
+                val = c->GetValue();
+        processEvent(WX_COMMAND, event.GetId(), val);
 }
 
