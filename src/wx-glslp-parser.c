@@ -142,7 +142,7 @@ static glslp_t* glsl_parse(const char* f)
         shader->shader_program = load_file(f);
         if (!shader->shader_program)
         {
-                pclog("Could not load shader %s\n", shader->shader_fn);
+                wx_simple_messagebox("GLSL error", "Could not load shader %s\n", shader->shader_fn);
                 glslp_free(glslp);
                 return 0;
         }
@@ -173,7 +173,7 @@ glslp_t* glslp_parse(const char* f)
 
         if (!cfg)
         {
-                pclog("Could not load glslp-file %s\n", f);
+                wx_simple_messagebox("GLSLP error", "Could not load GLSLP-file %s\n", f);
                 return 0;
         }
 
@@ -197,7 +197,7 @@ glslp_t* glslp_parse(const char* f)
                 shader->shader_program = load_file(shader->shader_fn);
                 if (!shader->shader_program)
                 {
-                        pclog("Could not load shader %s\n", shader->shader_fn);
+                        wx_simple_messagebox("GLSL error", "Could not load shader %s\n", shader->shader_fn);
                         glslp_free(glslp);
                         return 0;
                 }
