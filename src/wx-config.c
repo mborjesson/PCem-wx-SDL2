@@ -41,6 +41,7 @@ extern int pause;
 
 extern void deviceconfig_open(void* hwnd, device_t *device);
 extern int hdconf_init(void* hdlg);
+extern int hdconf_update(void* hdlg);
 
 static int mouse_valid(int type, int model)
 {
@@ -977,7 +978,7 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                         }
                         else if (wParam == WX_ID("IDC_COMBOHDD"))
                         {
-                                hdconf_init(hdlg);
+                                hdconf_update(hdlg);
                         }
                         //
                         //      case IDC_COMBOJOY:
@@ -1476,6 +1477,14 @@ int hdconf_init(void* hdlg)
         h = wx_getdlgitem(hdlg, WX_ID("IDC_TEXT_SIZE[3]"));
         sprintf(s, "%imb", (int)(((((uint64_t)hd[3].tracks*(uint64_t)hd[3].hpc)*(uint64_t)hd[3].spt)*512)/1024)/1024);
         wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM)s);
+
+        return hdconf_update(hdlg);
+}
+
+int hdconf_update(void* hdlg)
+{
+        char s[260];
+        void* h;
 
         int is_mfm = hdd_controller_selected_is_mfm(hdlg);
 
@@ -1983,7 +1992,7 @@ int config_dialog_proc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lPa
                 else if (wParam == WX_ID("IDC_NOTEBOOK"))
                 {
                         if (lParam == 3)
-                                hdconf_init(hdlg);
+                                hdconf_update(hdlg);
                 }
                 break;
         }
