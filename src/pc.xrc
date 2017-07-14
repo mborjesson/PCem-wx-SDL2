@@ -491,12 +491,11 @@
 											</object>
 										</object>
 										<object class="sizeritem">
-											<option>0</option>
+											<option>1</option>
 											<flag>wxALL</flag>
 											<border>5</border>
 											<object class="wxComboBox" name="IDC_COMBO3">
 												<style>wxCB_DROPDOWN|wxCB_READONLY</style>
-												<size>220,-1</size>
 												<value></value>
 												<content />
 											</object>
