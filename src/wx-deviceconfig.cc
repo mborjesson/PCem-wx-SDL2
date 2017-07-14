@@ -250,7 +250,7 @@ void deviceconfig_open(void* hwnd, device_t *device)
                 {
                 case CONFIG_BINARY:
                         sizer->Add(0, 0, 1, wxEXPAND, 5);
-                        sizer->Add(new wxCheckBox(&dialog, id++, config->description), 5, wxALL);
+                        sizer->Add(new wxCheckBox(&dialog, id++, config->description), 0, wxALL, 5);
                         break;
 
                 case CONFIG_SELECTION:
