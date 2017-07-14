@@ -9,6 +9,7 @@
 
 #ifdef _WIN32
 #define BITMAP WINDOWS_BITMAP
+#undef UNICODE
 #include <windows.h>
 #include <windowsx.h>
 #undef BITMAP
@@ -137,13 +138,8 @@ UINT16 convert_scan_code(UINT16 scan_code)
 
 void get_registry_key_map()
 {
-#ifdef UNICODE
-    wchar_t *keyName = L"SYSTEM\\CurrentControlSet\\Control\\Keyboard Layout";
-    wchar_t *valueName = L"Scancode Map";
-#else
-    char *keyName = "SYSTEM\\CurrentControlSet\\Control\\Keyboard Layout";
-    char *valueName = "Scancode Map";
-#endif
+        char *keyName = "SYSTEM\\CurrentControlSet\\Control\\Keyboard Layout";
+        char *valueName = "Scancode Map";
         char buf[32768];
         DWORD bufSize;
         HKEY hKey;

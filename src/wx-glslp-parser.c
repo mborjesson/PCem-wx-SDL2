@@ -140,6 +140,12 @@ static glslp_t* glsl_parse(const char* f)
         struct shader* shader = &glslp->shaders[0];
         strcpy(shader->shader_fn, f);
         shader->shader_program = load_file(f);
+        if (!shader->shader_program)
+        {
+                wx_simple_messagebox("GLSL error", "Could not load shader %s\n", shader->shader_fn);
+                glslp_free(glslp);
+                return 0;
+        }
         strip_parameters(shader->shader_program);
         strip_defines(shader->shader_program);
         shader->scale_x = shader->scale_y = 1.0f;
@@ -165,6 +171,11 @@ glslp_t* glslp_parse(const char* f)
 
         void* cfg = wx_config_load(f);
 
+        if (!cfg)
+        {
+                wx_simple_messagebox("GLSLP error", "Could not load GLSLP-file %s\n", f);
+                return 0;
+        }
 
         glslp_t* glslp = malloc(sizeof(glslp_t));
         memset(glslp, 0, sizeof(glslp_t));
@@ -184,6 +195,12 @@ glslp_t* glslp_parse(const char* f)
                 *get_filename(s) = 0;
                 snprintf(shader->shader_fn, sizeof(shader->shader_fn)-1, "%s%s", s, t);
                 shader->shader_program = load_file(shader->shader_fn);
+                if (!shader->shader_program)
+                {
+                        wx_simple_messagebox("GLSL error", "Could not load shader %s\n", shader->shader_fn);
+                        glslp_free(glslp);
+                        return 0;
+                }
                 strip_parameters(shader->shader_program);
                 strip_defines(shader->shader_program);
 

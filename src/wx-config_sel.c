@@ -1,7 +1,6 @@
 #include "ibm.h"
 #include "config.h"
 #include "wx-utils.h"
-#include "wx-sdl2.h"
 #include "paths.h"
 
 extern void config_open(void* hwnd);
@@ -76,6 +75,33 @@ static void config_list_update(void* hdlg)
         wx_enablewindow(wx_getdlgitem(hdlg, wxID_OK), num);
 }
 
+static int run(void* hdlg)
+{
+        char s[512];
+
+        int ret = wx_dlgdirselectex(hdlg, (LONG_PARAM)s, 512, WX_ID("IDC_LIST"));
+
+        pclog("wx_dlgdirselectex returned %i %s\n", ret, s);
+        if (s[0])
+        {
+                char cfg[512];
+
+                strcpy(cfg, configs_path);
+                put_backslash(cfg);
+                strcat(cfg, s);
+                strcat(cfg, "cfg");
+//                                        sprintf(cfg, "%s\\configs\\%scfg", config_path, s);
+                pclog("Config name %s\n", cfg);
+
+                strcpy(config_file_default, cfg);
+
+                wx_enddialog(hdlg, 1);
+//                                        pause = 0;
+                return TRUE;
+        }
+        return FALSE;
+}
+
 static int config_selection_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
 {
         //void* h;
@@ -94,31 +120,7 @@ static int config_selection_dlgproc(void* hdlg, int message, INT_PARAM wParam, L
                 case WX_COMMAND:
                 {
                         if (wParam == wxID_OK)
-                        {
-                                char s[512];
-
-                                int ret = wx_dlgdirselectex(hdlg, (LONG_PARAM)s, 512, WX_ID("IDC_LIST"));
-
-                                pclog("wx_dlgdirselectex returned %i %s\n", ret, s);
-                                if (s[0])
-                                {
-                                        char cfg[512];
-
-                                        strcpy(cfg, configs_path);
-                                        put_backslash(cfg);
-                                        strcat(cfg, s);
-                                        strcat(cfg, "cfg");
-//                                        sprintf(cfg, "%s\\configs\\%scfg", config_path, s);
-                                        pclog("Config name %s\n", cfg);
-
-                                        strcpy(config_file_default, cfg);
-
-                                        wx_enddialog(hdlg, 1);
-//                                        pause = 0;
-                                        return TRUE;
-                                }
-                                return FALSE;
-                        }
+                                return run(hdlg);
                         else if (wParam == wxID_CANCEL)
                         {
                                 wx_enddialog(hdlg, 0);
@@ -132,16 +134,18 @@ static int config_selection_dlgproc(void* hdlg, int message, INT_PARAM wParam, L
 //                                if (!getsfile(hdlg, "Configuration (*.cfg)|*.cfg|All files (*.*)|*.*", "", s, "cfg"))
                                 if (wx_textentrydialog(hdlg, "Enter name:", "New config", 0, 1, 64, (LONG_PARAM)name))
                                 {
-                                        strcpy(openfilestring, configs_path);
-                                        put_backslash(openfilestring);
-                                        strcat(openfilestring, name);
-                                        strcat(openfilestring, ".cfg");
+                                        char cfg[512];
 
-                                        pclog("Config %s\n", openfilestring);
+                                        strcpy(cfg, configs_path);
+                                        put_backslash(cfg);
+                                        strcat(cfg, name);
+                                        strcat(cfg, ".cfg");
+
+                                        pclog("Config %s\n", cfg);
 
                                         config_open(hdlg);
 
-                                        saveconfig(openfilestring);
+                                        saveconfig(cfg);
 
                                         config_list_update(hdlg);
                                         select_config(hdlg, name);
@@ -259,6 +263,11 @@ static int config_selection_dlgproc(void* hdlg, int message, INT_PARAM wParam, L
                                                 config_list_update(hdlg);
                                         }
                                 }
+                        }
+                        else if (wParam == WX_ID("IDC_LIST"))
+                        {
+                                if (lParam == WX_LBN_DBLCLK)
+                                        run(hdlg);
                         }
                 }
                 break;

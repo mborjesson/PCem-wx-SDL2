@@ -393,6 +393,7 @@
 	<ids-range name="IDC_EDIT_HPC" start="800" />
 	<ids-range name="IDC_EDIT_CYL" start="900" />
 	<ids-range name="IDC_TEXT_SIZE" start="1000" />
+	<ids-range name="IDC_HDD_LABEL" start="1100" />
 
 	<object class="wxDialog" name="ConfigureDlg">
 		<style>wxDEFAULT_DIALOG_STYLE</style>
@@ -1031,7 +1032,7 @@
 														<option>0</option>
 														<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 														<border>5</border>
-														<object class="wxStaticText">
+														<object class="wxStaticText" name="IDC_HDD_LABEL[0]">
 															<size>75,-1</size>
 															<label>Type:</label>
 															<wrap>-1</wrap>
@@ -1094,7 +1095,7 @@
 														<option>0</option>
 														<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 														<border>5</border>
-														<object class="wxStaticText">
+														<object class="wxStaticText" name="IDC_HDD_LABEL[1]">
 															<label>File:</label>
 															<wrap>-1</wrap>
 														</object>
@@ -1140,7 +1141,7 @@
 																<option>0</option>
 																<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 																<border>5</border>
-																<object class="wxStaticText">
+																<object class="wxStaticText" name="IDC_HDD_LABEL[2]">
 																	<label>Sectors:</label>
 																	<wrap>-1</wrap>
 																</object>
@@ -1157,7 +1158,7 @@
 																<option>0</option>
 																<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 																<border>5</border>
-																<object class="wxStaticText">
+																<object class="wxStaticText" name="IDC_HDD_LABEL[3]">
 																	<label>Heads:</label>
 																	<wrap>-1</wrap>
 																</object>
@@ -1174,7 +1175,7 @@
 																<option>0</option>
 																<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 																<border>5</border>
-																<object class="wxStaticText">
+																<object class="wxStaticText" name="IDC_HDD_LABEL[4]">
 																	<label>Cylinder:</label>
 																	<wrap>-1</wrap>
 																</object>
@@ -1191,7 +1192,7 @@
 																<option>0</option>
 																<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 																<border>5</border>
-																<object class="wxStaticText">
+																<object class="wxStaticText" name="IDC_HDD_LABEL[5]">
 																	<label>Size:</label>
 																	<wrap>-1</wrap>
 																</object>
@@ -1231,7 +1232,7 @@
 														<option>0</option>
 														<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 														<border>5</border>
-														<object class="wxStaticText">
+														<object class="wxStaticText" name="IDC_HDD_LABEL[10]">
 															<size>75,-1</size>
 															<label>Type:</label>
 															<wrap>-1</wrap>
@@ -1294,7 +1295,7 @@
 														<option>0</option>
 														<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 														<border>5</border>
-														<object class="wxStaticText">
+														<object class="wxStaticText" name="IDC_HDD_LABEL[11]">
 															<label>File:</label>
 															<wrap>-1</wrap>
 														</object>
@@ -1340,7 +1341,7 @@
 																<option>0</option>
 																<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 																<border>5</border>
-																<object class="wxStaticText">
+																<object class="wxStaticText" name="IDC_HDD_LABEL[12]">
 																	<label>Sectors:</label>
 																	<wrap>-1</wrap>
 																</object>
@@ -1357,7 +1358,7 @@
 																<option>0</option>
 																<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 																<border>5</border>
-																<object class="wxStaticText">
+																<object class="wxStaticText" name="IDC_HDD_LABEL[13]">
 																	<label>Heads:</label>
 																	<wrap>-1</wrap>
 																</object>
@@ -1374,7 +1375,7 @@
 																<option>0</option>
 																<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 																<border>5</border>
-																<object class="wxStaticText">
+																<object class="wxStaticText" name="IDC_HDD_LABEL[14]">
 																	<label>Cylinder:</label>
 																	<wrap>-1</wrap>
 																</object>
@@ -1391,7 +1392,7 @@
 																<option>0</option>
 																<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 																<border>5</border>
-																<object class="wxStaticText">
+																<object class="wxStaticText" name="IDC_HDD_LABEL[15]">
 																	<label>Size:</label>
 																	<wrap>-1</wrap>
 																</object>
@@ -1431,7 +1432,7 @@
 														<option>0</option>
 														<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 														<border>5</border>
-														<object class="wxStaticText">
+														<object class="wxStaticText" name="IDC_HDD_LABEL[20]">
 															<size>75,-1</size>
 															<label>Type:</label>
 															<wrap>-1</wrap>
@@ -1494,7 +1495,7 @@
 														<option>0</option>
 														<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 														<border>5</border>
-														<object class="wxStaticText">
+														<object class="wxStaticText" name="IDC_HDD_LABEL[21]">
 															<label>File:</label>
 															<wrap>-1</wrap>
 														</object>
@@ -1540,7 +1541,7 @@
 																<option>0</option>
 																<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 																<border>5</border>
-																<object class="wxStaticText">
+																<object class="wxStaticText" name="IDC_HDD_LABEL[22]">
 																	<label>Sectors:</label>
 																	<wrap>-1</wrap>
 																</object>
@@ -1557,7 +1558,7 @@
 																<option>0</option>
 																<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 																<border>5</border>
-																<object class="wxStaticText">
+																<object class="wxStaticText" name="IDC_HDD_LABEL[23]">
 																	<label>Heads:</label>
 																	<wrap>-1</wrap>
 																</object>
@@ -1574,7 +1575,7 @@
 																<option>0</option>
 																<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 																<border>5</border>
-																<object class="wxStaticText">
+																<object class="wxStaticText" name="IDC_HDD_LABEL[24]">
 																	<label>Cylinder:</label>
 																	<wrap>-1</wrap>
 																</object>
@@ -1591,7 +1592,7 @@
 																<option>0</option>
 																<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 																<border>5</border>
-																<object class="wxStaticText">
+																<object class="wxStaticText" name="IDC_HDD_LABEL[25]">
 																	<label>Size:</label>
 																	<wrap>-1</wrap>
 																</object>
@@ -1631,7 +1632,7 @@
 														<option>0</option>
 														<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 														<border>5</border>
-														<object class="wxStaticText">
+														<object class="wxStaticText" name="IDC_HDD_LABEL[30]">
 															<size>75,-1</size>
 															<label>Type:</label>
 															<wrap>-1</wrap>
@@ -1694,7 +1695,7 @@
 														<option>0</option>
 														<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 														<border>5</border>
-														<object class="wxStaticText">
+														<object class="wxStaticText" name="IDC_HDD_LABEL[31]">
 															<label>File:</label>
 															<wrap>-1</wrap>
 														</object>
@@ -1740,7 +1741,7 @@
 																<option>0</option>
 																<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 																<border>5</border>
-																<object class="wxStaticText">
+																<object class="wxStaticText" name="IDC_HDD_LABEL[32]">
 																	<label>Sectors:</label>
 																	<wrap>-1</wrap>
 																</object>
@@ -1757,7 +1758,7 @@
 																<option>0</option>
 																<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 																<border>5</border>
-																<object class="wxStaticText">
+																<object class="wxStaticText" name="IDC_HDD_LABEL[33]">
 																	<label>Heads:</label>
 																	<wrap>-1</wrap>
 																</object>
@@ -1774,7 +1775,7 @@
 																<option>0</option>
 																<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 																<border>5</border>
-																<object class="wxStaticText">
+																<object class="wxStaticText" name="IDC_HDD_LABEL[34]">
 																	<label>Cylinder:</label>
 																	<wrap>-1</wrap>
 																</object>
@@ -1791,7 +1792,7 @@
 																<option>0</option>
 																<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 																<border>5</border>
-																<object class="wxStaticText">
+																<object class="wxStaticText" name="IDC_HDD_LABEL[35]">
 																	<label>Size:</label>
 																	<wrap>-1</wrap>
 																</object>
@@ -2428,6 +2429,7 @@
 	</object>
 
 	<object class="wxDialog" name="ShaderManagerDlg">
+		<style>wxDEFAULT_DIALOG_STYLE|wxSTAY_ON_TOP</style>
 		<title>PCem Shader Manager</title>
 		<centered>1</centered>
 		<object class="wxPanel" name="ROOT_PANEL">
@@ -2531,6 +2533,7 @@
 	</object>
 
 	<object class="wxDialog" name="ConfirmRememberDlg">
+		<style>wxDEFAULT_DIALOG_STYLE|wxSTAY_ON_TOP</style>
 		<title>PCem</title>
 		<centered>1</centered>
 		<object class="wxPanel" name="ROOT_PANEL">

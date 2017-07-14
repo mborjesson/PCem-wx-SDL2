@@ -1,7 +1,9 @@
 #include <SDL2/SDL.h>
 #define BITMAP WINDOWS_BITMAP
 #include <SDL2/SDL_opengl.h>
+#if SDL_VERSION_ATLEAST(2, 0, 4)
 #include <SDL2/SDL_opengl_glext.h>
+#endif
 #undef BITMAP
 #include "wx-sdl2-glw.h"
 #include <stdint.h>
@@ -461,11 +463,11 @@ static int load_texture(const char* f, struct shader_texture* tex)
 
         GLubyte* data = malloc(width*height*bpp);
 
-        int Y;
-        for (int y = 0; y < height; ++y)
+        int x, y, Y;
+        for (y = 0; y < height; ++y)
         {
                 Y = height-y-1;
-                for (int x = 0; x < width; x++)
+                for (x = 0; x < width; x++)
                 {
                         data[(y*width+x)*bpp+0] = rgb[(Y*width+x)*3+0];
                         data[(y*width+x)*bpp+1] = rgb[(Y*width+x)*3+1];

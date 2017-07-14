@@ -137,6 +137,7 @@ extern void (*wx_idle_func)(void* window, void* event);
 #define WX_LB_INSERTSTRING 64
 #define WX_LB_RESETCONTENT 65
 #define WX_LB_SETCURSEL 66
+#define WX_LBN_DBLCLK 67
 
 #define WX_MB_OK wxOK
 #define WX_MB_OKCANCEL wxOK|wxCANCEL
