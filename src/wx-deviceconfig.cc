@@ -221,6 +221,7 @@ int deviceconfig_dlgproc(void* hdlg, int message, INT_PARAM wParam,
 
 void deviceconfig_open(void* hwnd, device_t *device)
 {
+        char s[257];
         config_device = device;
 
         PCemDialogBox dialog((wxWindow*) hwnd, deviceconfig_dlgproc);
@@ -230,11 +231,16 @@ void deviceconfig_open(void* hwnd, device_t *device)
 
         dialog.SetTitle("Device Configuration");
 
-        wxBoxSizer* root = new wxBoxSizer(wxVERTICAL);
+        wxFlexGridSizer* root = new wxFlexGridSizer(0, 1, 0, 0);
+        root->SetFlexibleDirection(wxBOTH);
+        root->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
         dialog.SetSizer(root);
 
-        wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-        root->Add(sizer, 0, wxALL, 5);
+        wxFlexGridSizer* sizer = new wxFlexGridSizer(0, 2, 0, 0);
+        sizer->SetFlexibleDirection(wxBOTH);
+        sizer->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
+        sizer->AddGrowableCol(1);
+        root->Add(sizer, 1, wxEXPAND, 5);
 
         int id = IDC_CONFIG_BASE;
 
@@ -243,16 +249,20 @@ void deviceconfig_open(void* hwnd, device_t *device)
                 switch (config->type)
                 {
                 case CONFIG_BINARY:
-                        sizer->Add(new wxCheckBox(&dialog, id++, config->description), 0, wxALL);
+                        sizer->Add(0, 0, 1, wxEXPAND, 5);
+                        sizer->Add(new wxCheckBox(&dialog, id++, config->description), 5, wxALL);
                         break;
 
                 case CONFIG_SELECTION:
                 case CONFIG_MIDI:
                 {
-                        sizer->Add(new wxStaticText(&dialog, id++, config->description), 0, wxALL);
+                        sprintf(s, "%s:", config->description);
+                        sizer->Add(new wxStaticText(&dialog, id++, s), 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
+                        wxBoxSizer* comboSizer = new wxBoxSizer(wxHORIZONTAL);
+                        sizer->Add(comboSizer, 1, wxEXPAND, 5);
                         wxComboBox* cb = new wxComboBox(&dialog, id++);
                         cb->SetEditable(false);
-                        sizer->Add(cb, 0, wxALL);
+                        comboSizer->Add(cb, 1, wxALL, 5);
                         break;
                 }
                 }
@@ -261,11 +271,11 @@ void deviceconfig_open(void* hwnd, device_t *device)
         }
 
         wxBoxSizer* okCancelSizer = new wxBoxSizer(wxHORIZONTAL);
+        root->Add(okCancelSizer, 1, wxEXPAND, 5);
 
-        okCancelSizer->Add(new wxButton(&dialog, wxID_OK));
-        okCancelSizer->Add(new wxButton(&dialog, wxID_CANCEL));
-
-        sizer->Add(okCancelSizer);
+        okCancelSizer->Add(0, 0, 1, wxEXPAND, 5);
+        okCancelSizer->Add(new wxButton(&dialog, wxID_OK), 0, wxALL, 5);
+        okCancelSizer->Add(new wxButton(&dialog, wxID_CANCEL), 0, wxALL, 5);
 
         dialog.Fit();
         dialog.OnInit();
