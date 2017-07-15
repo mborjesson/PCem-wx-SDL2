@@ -320,13 +320,13 @@ int wx_sendmessage(void* window, int type, INT_PARAM param1, LONG_PARAM param2)
         case WX_UDM_SETPOS:
                 if (((wxWindow*) window)->GetClassInfo()->IsKindOf(CLASSINFO(wxSpinCtrlDouble)))
                         ((wxSpinCtrlDouble*) window)->SetValue(param2);
-                else if (((wxWindow*) window)->GetClassInfo()->IsKindOf(CLASSINFO(wxTextCtrl)))
+                else if (((wxWindow*) window)->GetClassInfo()->IsKindOf(CLASSINFO(wxSpinCtrl)))
                         ((wxSpinCtrl*) window)->SetValue(param2);
                 break;
         case WX_UDM_GETPOS:
                 if (((wxWindow*) window)->GetClassInfo()->IsKindOf(CLASSINFO(wxSpinCtrlDouble)))
                         return ((wxSpinCtrlDouble*) window)->GetValue();
-                else if (((wxWindow*) window)->GetClassInfo()->IsKindOf(CLASSINFO(wxTextCtrl)))
+                else if (((wxWindow*) window)->GetClassInfo()->IsKindOf(CLASSINFO(wxSpinCtrl)))
                         return ((wxSpinCtrl*) window)->GetValue();
                 return 0;
         case WX_UDM_SETRANGE:
