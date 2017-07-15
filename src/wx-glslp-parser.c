@@ -190,7 +190,12 @@ glslp_t* glslp_parse(const char* f)
 
 
                 snprintf(s, sizeof(s)-1, "shader%d", i);
-                wx_config_get_string(cfg, s, t, sizeof(t), 0);
+                if (!wx_config_get_string(cfg, s, t, sizeof(t), 0))
+                {
+                        /* shader doesn't exist, lets break here */
+                        glslp->num_shaders = i;
+                        break;
+                }
                 strcpy(s, f);
                 *get_filename(s) = 0;
                 snprintf(shader->shader_fn, sizeof(shader->shader_fn)-1, "%s%s", s, t);

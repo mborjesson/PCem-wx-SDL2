@@ -4,6 +4,7 @@
 	<object class="wxBitmap" name="BITMAP_HARDDISK">icons/16x16/drive.png</object>
 	<object class="wxBitmap" name="BITMAP_FLOPPY">icons/16x16/diskette.png</object>
 	<object class="wxBitmap" name="BITMAP_CDROM">icons/16x16/cd.png</object>
+	<object class="wxBitmap" name="BITMAP_FOLDER">icons/16x16/folder.png</object>
 	<object class="wxToolBar" name="tool_bar">
 		<style>wxTB_FLAT|wxTB_NODIVIDER</style>
 		<object class="tool" name="TOOLBAR_RUN">
