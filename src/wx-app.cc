@@ -116,7 +116,7 @@ void Frame::ShowConfigSelection()
 void Frame::OnCallbackEvent(CallbackEvent& event)
 {
         WX_CALLBACK callback = event.GetCallback();
-        callback();
+        callback(event.GetData());
 }
 
 void Frame::OnStopEmulationEvent(wxCommandEvent& event)

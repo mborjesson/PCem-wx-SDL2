@@ -338,7 +338,7 @@ void wx_initmenu()
 
 }
 
-void wx_setupmenu()
+int wx_setupmenu(void* data)
 {
         int c;
         update_cdrom_menu(menu);
@@ -386,12 +386,13 @@ void wx_setupmenu()
         sprintf(menuitem, "IDM_VID_GL3_SIMULATED_REFRESH_RATE[%g]", gl3_simulated_refresh_rate);
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
 
+        return 1;
 }
 
 void sdl_onconfigloaded()
 {
         if (ghwnd)
-                wx_callback(ghwnd, wx_setupmenu);
+                wx_callback(ghwnd, wx_setupmenu, 0);
 }
 
 extern void wx_loadconfig();
@@ -465,7 +466,7 @@ int wx_start(void* hwnd)
         readflash = 0;
 
         wx_initmenu();
-        wx_setupmenu();
+        wx_setupmenu(0);
 
         d = romset;
         for (c = 0; c < ROM_MAX; c++)

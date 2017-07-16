@@ -8,7 +8,7 @@
 #define INT_PARAM wxInt32
 #endif
 
-typedef void (*WX_CALLBACK)();
+typedef int (*WX_CALLBACK)(void* data);
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,8 +42,9 @@ extern "C" {
         void wx_showwindow(void* window, int show);
         int wx_iswindowvisible(void* window);
         void* wx_getnativewindow(void* window);
-        void wx_callback(void* window, WX_CALLBACK callback);
+        void wx_callback(void* window, WX_CALLBACK callback, void* data);
         void wx_togglewindow(void* window);
+        int wx_progressdialogpulse(void* window, const char* title, const char* message, WX_CALLBACK callback, void* data);
 
         void wx_enddialog(void* window, int ret_code);
 
