@@ -2096,7 +2096,7 @@
 							<border>5</border>
 							<object class="wxButton" name="wxID_OK">
 								<label>OK</label>
-								<default>0</default>
+								<default>1</default>
 							</object>
 						</object>
 						<object class="sizeritem">
@@ -2285,7 +2285,7 @@
 							<border>5</border>
 							<object class="wxButton" name="wxID_OK">
 								<label>OK</label>
-								<default>0</default>
+								<default>1</default>
 							</object>
 						</object>
 						<object class="sizeritem">
@@ -2516,6 +2516,7 @@
 									<border>0</border>
 									<object class="wxButton" name="wxID_OK">
 										<label>OK</label>
+										<default>1</default>
 									</object>
 								</object>
 								<object class="sizeritem">
@@ -2584,6 +2585,7 @@
 							<border>5</border>
 							<object class="wxButton" name="wxID_OK">
 								<label>_OK</label>
+								<default>1</default>
 							</object>
 						</object>
 						<object class="button">

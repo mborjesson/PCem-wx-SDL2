@@ -693,17 +693,7 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                 break;
                 case WX_COMMAND:
                 {
-                        if (wParam == wxID_OK)
-                        {
-                                config_dlgsave(hdlg);
-                        }
-                        if (wParam == wxID_OK || wParam == wxID_CANCEL)
-                        {
-                                wx_enddialog(hdlg, 0);
-                                pause = 0;
-                                return TRUE;
-                        }
-                        else if (wParam == WX_ID("IDC_COMBO1"))
+                        if (wParam == WX_ID("IDC_COMBO1"))
                         {
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBO1"));
                                 temp_model = listtomodel[wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0)];
@@ -1156,6 +1146,20 @@ static void update_hdd_cdrom(void* hdlg)
         }
 }
 
+static int create_drive(void* data)
+{
+        int c;
+        uint8_t buf[512];
+        FILE* f = (FILE*)data;
+        memset(buf, 0, 512);
+        for (c = 0; c < (hd_new_cyl * hd_new_hpc * hd_new_spt); c++)
+            fwrite(buf, 512, 1, f);
+
+        fclose(f);
+
+        return 1;
+}
+
 static int hdnew_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
 {
         char s[260];
@@ -1203,7 +1207,7 @@ static int hdnew_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM l
                         wx_sendmessage(h, WX_WM_GETTEXT, 511, (LONG_PARAM)hd_new_name);
                         if (!hd_new_name[0])
                         {
-                                wx_messagebox(NULL,"Please enter a valid filename","PCem error",WX_MB_OK);
+                                wx_messagebox(hdlg,"Please enter a valid filename","PCem error",WX_MB_OK);
                                 return TRUE;
                         }
                         h = wx_getdlgitem(hdlg, WX_ID("IDC_EDIT1"));
@@ -1218,32 +1222,29 @@ static int hdnew_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM l
 
                         if (hd_new_spt > 63)
                         {
-                                wx_messagebox(NULL, "Drive has too many sectors (maximum is 63)", "PCem error", WX_MB_OK);
+                                wx_messagebox(hdlg, "Drive has too many sectors (maximum is 63)", "PCem error", WX_MB_OK);
                                 return TRUE;
                         }
                         if (hd_new_hpc > 16)
                         {
-                                wx_messagebox(NULL, "Drive has too many heads (maximum is 16)", "PCem error", WX_MB_OK);
+                                wx_messagebox(hdlg, "Drive has too many heads (maximum is 16)", "PCem error", WX_MB_OK);
                                 return TRUE;
                         }
                         if (hd_new_cyl > 16383)
                         {
-                                wx_messagebox(NULL, "Drive has too many cylinders (maximum is 16383)", "PCem error", WX_MB_OK);
+                                wx_messagebox(hdlg, "Drive has too many cylinders (maximum is 16383)", "PCem error", WX_MB_OK);
                                 return TRUE;
                         }
 
                         f = fopen64(hd_new_name, "wb");
                         if (!f)
                         {
-                                wx_messagebox(NULL, "Can't open file for write", "PCem error", WX_MB_OK);
+                                wx_messagebox(hdlg, "Can't open file for write", "PCem error", WX_MB_OK);
                                 return TRUE;
                         }
-                        memset(buf, 0, 512);
-                        for (c = 0; c < (hd_new_cyl * hd_new_hpc * hd_new_spt); c++)
-                            fwrite(buf, 512, 1, f);
-                        fclose(f);
+                        wx_progressdialogpulse(hdlg, "PCem", "Creating drive, please wait...", create_drive, f);
 
-                        wx_messagebox(NULL, "Remember to partition and format the new drive", "PCem", WX_MB_OK);
+                        wx_messagebox(hdlg, "Drive created, remember to partition and format the new drive.", "PCem", WX_MB_OK);
 
                         wx_enddialog(hdlg, 1);
                         return TRUE;
@@ -1363,17 +1364,17 @@ static int hdsize_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM 
 
                         if (hd_new_spt > 63)
                         {
-                                wx_messagebox(NULL,"Drive has too many sectors (maximum is 63)","PCem error",WX_MB_OK);
+                                wx_messagebox(hdlg,"Drive has too many sectors (maximum is 63)","PCem error",WX_MB_OK);
                                 return TRUE;
                         }
                         if (hd_new_hpc > 16)
                         {
-                                wx_messagebox(NULL,"Drive has too many heads (maximum is 16)","PCem error",WX_MB_OK);
+                                wx_messagebox(hdlg,"Drive has too many heads (maximum is 16)","PCem error",WX_MB_OK);
                                 return TRUE;
                         }
                         if (hd_new_cyl > 16383)
                         {
-                                wx_messagebox(NULL,"Drive has too many cylinders (maximum is 16383)","PCem error",WX_MB_OK);
+                                wx_messagebox(hdlg,"Drive has too many cylinders (maximum is 16383)","PCem error",WX_MB_OK);
                                 return TRUE;
                         }
 
@@ -1622,7 +1623,7 @@ int hdconf_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 f = fopen64(openfilestring, "rb");
                                 if (!f)
                                 {
-                                        wx_messagebox(NULL,"Can't open file for read","PCem error",WX_MB_OK);
+                                        wx_messagebox(hdlg,"Can't open file for read","PCem error",WX_MB_OK);
                                         return TRUE;
                                 }
                                 fseeko64(f, -1, SEEK_END);
@@ -1685,7 +1686,7 @@ int hdconf_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 f = fopen64(openfilestring, "rb");
                                 if (!f)
                                 {
-                                        wx_messagebox(NULL,"Can't open file for read","PCem error",WX_MB_OK);
+                                        wx_messagebox(hdlg,"Can't open file for read","PCem error",WX_MB_OK);
                                         return TRUE;
                                 }
                                 fseeko64(f, -1, SEEK_END);
@@ -1747,7 +1748,7 @@ int hdconf_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 f = fopen64(openfilestring, "rb");
                                 if (!f)
                                 {
-                                        wx_messagebox(NULL,"Can't open file for read","PCem error",WX_MB_OK);
+                                        wx_messagebox(hdlg,"Can't open file for read","PCem error",WX_MB_OK);
                                         return TRUE;
                                 }
                                 fseeko64(f, -1, SEEK_END);
@@ -1809,7 +1810,7 @@ int hdconf_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 f = fopen64(openfilestring, "rb");
                                 if (!f)
                                 {
-                                        wx_messagebox(NULL,"Can't open file for read","PCem error",WX_MB_OK);
+                                        wx_messagebox(hdlg,"Can't open file for read","PCem error",WX_MB_OK);
                                         return TRUE;
                                 }
                                 fseeko64(f, -1, SEEK_END);
@@ -1980,7 +1981,7 @@ int config_dialog_proc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lPa
                 {
                         config_dlgsave(hdlg);
                         pause = 0;
-                        wx_enddialog(hdlg, 0);
+                        wx_enddialog(hdlg, 1);
                         return TRUE;
                 }
                 else if (wParam == wxID_CANCEL)
@@ -2003,7 +2004,7 @@ int config_dialog_proc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lPa
 }
 
 
-void config_open(void* hwnd)
+int config_open(void* hwnd)
 {
-        wx_dialogbox(hwnd, "ConfigureDlg", config_dialog_proc);
+        return wx_dialogbox(hwnd, "ConfigureDlg", config_dialog_proc);
 }

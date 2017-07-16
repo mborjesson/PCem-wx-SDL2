@@ -810,64 +810,85 @@ void mpu401_standalone_close(void *p)
 static device_config_t mpu401_standalone_config[] =
 {
         {
-                "base", "MPU-401 Address", CONFIG_INT, "", 0x330,
+                .name = "base",
+                .description = "MPU-401 Address",
+                .type = CONFIG_SELECTION,
+                .selection =
                 {
                         {
-                                "0x300", 0x300
+                                .description = "0x300",
+                                .value = 0x300
                         },
                         {
-                                "0x330", 0x330
+                                .description = "0x330",
+                                .value = 0x330
                         },
                         {
                                 ""
                         }
-                }
+                },
+                .default_int = 0x330
         },
         {
-                "irq", "MPU-401 IRQ", CONFIG_SELECTION, "", 9,
+                .name = "irq",
+                .description = "MPU-401 IRQ",
+                .type = CONFIG_SELECTION,
+                .selection =
                 {
                         {
-                                "IRQ 9", 9
+                                .description = "IRQ 3",
+                                .value = 3
                         },
                         {
-                                "IRQ 3", 3
+                                .description = "IRQ 4",
+                                .value = 4
                         },
                         {
-                                "IRQ 4", 4
+                                .description = "IRQ 5",
+                                .value = 5
                         },
                         {
-                                "IRQ 5", 5
+                                .description = "IRQ 7",
+                                .value = 7
                         },
                         {
-                                "IRQ 7", 7
+                                .description = "IRQ 9",
+                                .value = 9
                         },
                         {
-                                "IRQ 10", 10
+                                .description = "IRQ 10",
+                                .value = 10
                         },
                         {
                                 ""
                         }
-                }
+                },
+                .default_int = 9
         },
         {
-                "mode", "Mode", CONFIG_SELECTION, "", 1,
+                .name = "mode",
+                .description = "Mode",
+                .type = CONFIG_SELECTION,
+                .selection =
                 {
                         {
-                                "UART", M_UART
+                                .description = "UART",
+                                .value = M_UART
                         },
                         {
-                                "Intelligent", M_INTELLIGENT
+                                .description = "Intelligent",
+                                .value = M_INTELLIGENT
                         },
                         {
                                 ""
                         }
-                }
+                },
+                .default_int = M_INTELLIGENT
         },
         {
-                "", "", -1
+                .type = -1
         }
 };
-
 device_t mpu401_device =
 {
         "MPU-401 (Standalone)",

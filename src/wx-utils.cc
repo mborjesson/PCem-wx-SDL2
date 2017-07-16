@@ -10,11 +10,17 @@
 #include <wx/stdpaths.h>
 #include <wx/fileconf.h>
 #include <wx/wfstream.h>
+#include <wx/progdlg.h>
 
 #include "wx-dialogbox.h"
 #include "wx-app.h"
 #include "wx-common.h"
 #include "wx-status.h"
+
+extern "C"
+{
+#include "thread.h"
+}
 
 int confirm()
 {
@@ -77,7 +83,7 @@ int wx_filedialog(void* window, const char* title, const char* path,
                 const char* extensions, const char* extension, int open, char* file)
 {
         wxFileDialog dlg((wxWindow*) window, title, "", path, extensions,
-                        open ? wxFD_OPEN : wxFD_SAVE);
+                        open ? (wxFD_OPEN | wxFD_FILE_MUST_EXIST) : (wxFD_SAVE | wxFD_OVERWRITE_PROMPT));
         if (dlg.ShowModal() == wxID_OK)
         {
                 wxString p = dlg.GetPath();
@@ -221,9 +227,9 @@ void wx_togglewindow(void* window)
         wx_showwindow(window, -1);
 }
 
-void wx_callback(void* window, WX_CALLBACK callback)
+void wx_callback(void* window, WX_CALLBACK callback, void* data)
 {
-        CallbackEvent* event = new CallbackEvent(callback);
+        CallbackEvent* event = new CallbackEvent(callback, data);
         wxQueueEvent((wxWindow*)window, event);
 }
 
@@ -661,3 +667,37 @@ void wx_config_free(void* config)
         delete (wxFileConfig*)config;
 }
 
+typedef struct progress_data_t {
+        WX_CALLBACK callback;
+        void* data;
+        int active;
+        int result;
+} progress_data_t;
+
+static void progress_callback(void* data)
+{
+        progress_data_t* d = (progress_data_t*) data;
+        d->result = d->callback(d->data);
+        d->active = 0;
+}
+
+int wx_progressdialogpulse(void* window, const char* title, const char* message, WX_CALLBACK callback, void* data)
+{
+        struct progress_data_t pdata;
+        pdata.callback = callback;
+        pdata.data = data;
+        pdata.active = 1;
+        pdata.result = 0;
+
+        thread_t* t = thread_create(progress_callback, &pdata);
+
+        wxProgressDialog dlg(title, message, 100, (wxWindow*)window, wxPD_APP_MODAL | wxPD_SMOOTH | wxPD_AUTO_HIDE);
+        while (pdata.active)
+        {
+                dlg.Pulse();
+                wxMilliSleep(50);
+        }
+        thread_kill(t);
+
+        return pdata.result;
+}

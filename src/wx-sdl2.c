@@ -338,7 +338,7 @@ void wx_initmenu()
 
 }
 
-void wx_setupmenu()
+int wx_setupmenu(void* data)
 {
         int c;
         update_cdrom_menu(menu);
@@ -386,12 +386,13 @@ void wx_setupmenu()
         sprintf(menuitem, "IDM_VID_GL3_SIMULATED_REFRESH_RATE[%g]", gl3_simulated_refresh_rate);
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
 
+        return 1;
 }
 
 void sdl_onconfigloaded()
 {
         if (ghwnd)
-                wx_callback(ghwnd, wx_setupmenu);
+                wx_callback(ghwnd, wx_setupmenu, 0);
 }
 
 extern void wx_loadconfig();
@@ -465,7 +466,7 @@ int wx_start(void* hwnd)
         readflash = 0;
 
         wx_initmenu();
-        wx_setupmenu();
+        wx_setupmenu(0);
 
         d = romset;
         for (c = 0; c < ROM_MAX; c++)
@@ -489,47 +490,8 @@ int wx_start(void* hwnd)
         }
 
         romset = d;
-        c = loadbios();
-
-        if (!c)
-        {
-                if (romset != -1)
-                        wx_messagebox(hwnd,
-                                        "Configured romset not available.\nDefaulting to available romset.",
-                                        "PCem error", WX_MB_OK);
-                for (c = 0; c < ROM_MAX; c++)
-                {
-                        if (romspresent[c])
-                        {
-                                romset = c;
-                                model = model_getmodel(romset);
-                                saveconfig(NULL);
-                                resetpchard();
-                                break;
-                        }
-                }
-        }
-
         for (c = 0; c < GFX_MAX; c++)
                 gfx_present[c] = video_card_available(video_old_to_new(c));
-
-        if (!video_card_available(video_old_to_new(gfxcard)))
-        {
-                if (romset != -1)
-                        wx_messagebox(hwnd,
-                                        "Configured video BIOS not available.\nDefaulting to available romset.",
-                                        "PCem error", WX_MB_OK);
-                for (c = GFX_MAX - 1; c >= 0; c--)
-                {
-                        if (gfx_present[c])
-                        {
-                                gfxcard = c;
-                                saveconfig(NULL);
-                                resetpchard();
-                                break;
-                        }
-                }
-        }
 
         return TRUE;
 }
@@ -549,6 +511,7 @@ int start_emulation(void* params)
 {
         if (resume_emulation())
                 return TRUE;
+        int c;
         pclog("Starting emulation...\n");
         loadconfig(NULL);
 
@@ -558,6 +521,40 @@ int start_emulation(void* params)
         ghMutex = SDL_CreateMutex();
         mainMutex = SDL_CreateMutex();
         mainCond = SDL_CreateCond();
+
+        if (!loadbios())
+        {
+                if (romset != -1)
+                        wx_messagebox(ghwnd,
+                                        "Configured romset not available.\nDefaulting to available romset.",
+                                        "PCem error", WX_MB_OK);
+                for (c = 0; c < ROM_MAX; c++)
+                {
+                        if (romspresent[c])
+                        {
+                                romset = c;
+                                model = model_getmodel(romset);
+                                break;
+                        }
+                }
+        }
+
+        if (!video_card_available(video_old_to_new(gfxcard)))
+        {
+                if (romset != -1)
+                        wx_messagebox(ghwnd,
+                                        "Configured video BIOS not available.\nDefaulting to available romset.",
+                                        "PCem error", WX_MB_OK);
+                for (c = GFX_MAX - 1; c >= 0; c--)
+                {
+                        if (gfx_present[c])
+                        {
+                                gfxcard = c;
+                                break;
+                        }
+                }
+        }
+
 
         loadbios();
         resetpchard();

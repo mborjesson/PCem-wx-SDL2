@@ -57,21 +57,25 @@ private:
 class CallbackEvent: public wxCommandEvent
 {
 public:
-        CallbackEvent(WX_CALLBACK callback) : wxCommandEvent(WX_CALLBACK_EVENT)
+        CallbackEvent(WX_CALLBACK callback, void* data) : wxCommandEvent(WX_CALLBACK_EVENT)
         {
                 this->callback = callback;
+                this->data = data;
         }
         CallbackEvent(const CallbackEvent& event) : wxCommandEvent(event)
         {
                 this->callback = event.GetCallback();
+                this->data = event.GetData();
         }
 
         wxEvent* Clone() const { return new CallbackEvent(*this); }
 
         WX_CALLBACK GetCallback() const { return callback; }
+        void* GetData() const { return data; }
 
 private:
         WX_CALLBACK callback;
+        void* data;
 
 
 };
