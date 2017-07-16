@@ -35,8 +35,44 @@ PCemDialogBox::PCemDialogBox(wxWindow* parent, const char* name, int (*callback)
         this->commandActive = false;
 }
 
+static void AdjustBitmapButtons(wxWindow* window)
+{
+        int i;
+        wxWindowList list = window->GetChildren();
+        for (i = 0; i < list.GetCount(); ++i)
+        {
+                wxWindow* w = list.Item(i)->GetData();
+                if (w->IsKindOf(CLASSINFO(wxBitmapButton)))
+                {
+                        wxBitmapButton* b = (wxBitmapButton*) w;
+                        b->SetMinSize(wxSize(b->GetSize().x+2, b->GetSize().y+2));
+                }
+                AdjustBitmapButtons(w);
+        }
+}
+
+static void ComboBoxFixedSize(wxWindow* window)
+{
+        int i;
+        wxWindowList list = window->GetChildren();
+        for (i = 0; i < list.GetCount(); ++i)
+        {
+                wxWindow* w = list.Item(i)->GetData();
+                if (w->IsKindOf(CLASSINFO(wxComboBox)))
+                {
+                        wxComboBox* cb = (wxComboBox*) w;
+                        cb->SetMinSize(cb->GetSize());
+                        cb->SetMaxSize(cb->GetSize());
+                }
+                ComboBoxFixedSize(w);
+        }
+}
+
 void PCemDialogBox::OnInit()
 {
+#ifdef __APPLE__
+        AdjustBitmapButtons(this);
+#endif
         if (callback)
         {
                 callback(this, WX_INITDIALOG, 0, 0);
