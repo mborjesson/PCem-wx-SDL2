@@ -78,6 +78,10 @@ extern "C" {
         int wx_file_exists(char* path);
         int wx_dir_exists(char* path);
 
+        void wx_date_format(char* s, const char* format);
+
+        int wx_image_save(const char* path, const char* name, const char* format, unsigned char* rgba, int width, int height, int alpha);
+
         void* wx_image_load(const char* path);
         void wx_image_rescale(void* image, int width, int height);
         void wx_image_get_size(void* image, int* width, int* height);
@@ -143,5 +147,9 @@ extern void (*wx_idle_func)(void* window, void* event);
 #define WX_MB_OK wxOK
 #define WX_MB_OKCANCEL wxOK|wxCANCEL
 #define WX_IDOK wxOK
+
+#define IMAGE_JPG "jpg"
+#define IMAGE_PNG "png"
+#define IMAGE_BMP "bmp"
 
 extern int has_been_inited;

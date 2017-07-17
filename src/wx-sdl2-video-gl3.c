@@ -20,6 +20,9 @@
 
 extern char* get_filename(char*);
 
+extern int take_screenshot;
+extern void screenshot_taken(unsigned char* rgb, int width, int height);
+
 #define SCALE_SOURCE 0
 #define SCALE_VIEWPORT 1
 #define SCALE_ABSOLUTE 2
@@ -1411,6 +1414,38 @@ void gl3_present(SDL_Window* window, SDL_Rect video_rect, SDL_Rect window_rect, 
                 data.orig_pass = orig;
 
                 render_pass(&data);
+        }
+
+        if (take_screenshot)
+        {
+                take_screenshot = 0;
+
+                int width = window_rect.w;
+                int height = window_rect.h;
+
+                SDL_GetWindowSize(window, &width, &height);
+
+                unsigned char* rgba = (unsigned char*)malloc(width*height*4);
+
+                glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, rgba);
+
+                int x, y;
+                unsigned char* rgb = (unsigned char*)malloc(width*height*3);
+
+                for (x = 0; x < width; ++x)
+                {
+                        for (y = 0; y < height; ++y)
+                        {
+                                rgb[(y*width+x)*3+0] = rgba[((height-y-1)*width+x)*4+0];
+                                rgb[(y*width+x)*3+1] = rgba[((height-y-1)*width+x)*4+1];
+                                rgb[(y*width+x)*3+2] = rgba[((height-y-1)*width+x)*4+2];
+                        }
+                }
+
+                screenshot_taken(rgb, width, height);
+
+                free(rgb);
+                free(rgba);
         }
 
         // DEBUG: render FBO

@@ -538,6 +538,11 @@ int wx_setup(char* path)
                 if (!nvr.DirExists() && !nvr.Mkdir())
                         return FALSE;
 
+                wxFileName screenshots(p);
+                screenshots.AppendDir("screenshots");
+                if (!screenshots.DirExists() && !screenshots.Mkdir())
+                        return FALSE;
+
                 wxFileName logs(p);
                 logs.AppendDir("logs");
                 if (!logs.DirExists() && !logs.Mkdir())
@@ -557,6 +562,66 @@ int wx_dir_exists(char* path)
 {
         wxFileName p(path);
         return p.DirExists();
+}
+
+int wx_image_save(const char* path, const char* name, const char* format, unsigned char* rgba, int width, int height, int alpha)
+{
+        int x, y;
+        wxLogNull logNull;
+        wxImage image(width, height);
+        if (alpha)
+        {
+                unsigned char* rgb = (unsigned char*)malloc(width*height*3);
+                unsigned char* a = (unsigned char*)malloc(width*height);
+                for (x = 0; x < width; ++x)
+                {
+                        for (y = 0; y < height; ++y)
+                        {
+                                rgb[(y*width+x)*3+0] = rgba[(y*width+x)*4+0];
+                                rgb[(y*width+x)*3+1] = rgba[(y*width+x)*4+1];
+                                rgb[(y*width+x)*3+2] = rgba[(y*width+x)*4+2];
+                                a[y*width+x] = rgba[(y*width+x)*4+3];
+                        }
+                }
+                image.SetData(rgb);
+                image.SetAlpha(a);
+        }
+        else
+                image.SetData(rgba, true);
+
+        wxImageHandler* h;
+        wxString ext;
+
+        if (!strcmp(format, IMAGE_BMP))
+        {
+                h = new wxBMPHandler();
+                ext = "bmp";
+        }
+        else if (!strcmp(format, IMAGE_JPG))
+        {
+                h = new wxJPEGHandler();
+                ext = "jpg";
+        }
+        else
+        {
+                h = new wxPNGHandler();
+                ext = "png";
+        }
+
+        int res = 0;
+        if (h)
+        {
+                wxString p(path);
+                if (!p.EndsWith("/"))
+                        p = p.Append("/");
+                p = p.Append(name).Append(".").Append(ext);
+
+                wxFileOutputStream stream(p);
+                res = h->SaveFile(&image, stream, false);
+                delete h;
+        }
+
+        return res;
 }
 
 void* wx_image_load(const char* path)
@@ -693,4 +758,10 @@ int wx_progressdialogpulse(void* window, const char* title, const char* message,
         thread_kill(t);
 
         return pdata.result;
+}
+
+void wx_date_format(char* s, const char* format)
+{
+        wxString res = wxDateTime::Now().Format(format);
+        strcpy(s, res.mb_str());
 }

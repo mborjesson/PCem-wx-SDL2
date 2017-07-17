@@ -13,6 +13,8 @@ static SDL_Renderer* renderer = NULL;
 extern int video_scale_mode;
 extern int video_vsync;
 extern int video_focus_dim;
+extern int take_screenshot;
+extern void screenshot_taken(unsigned char* rgb, int width, int height);
 
 int sdl_video_renderer_init(SDL_Window* window, sdl_render_driver requested_render_driver, BITMAP* screen)
 {
@@ -84,6 +86,54 @@ void sdl_video_renderer_present(SDL_Window* window, SDL_Rect texture_rect, SDL_R
                 SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
         }
         SDL_RenderPresent(renderer);
+
+        if (take_screenshot)
+        {
+                take_screenshot = 0;
+
+                int width = window_rect.w;
+                int height = window_rect.h;
+
+                SDL_GetWindowSize(window, &width, &height);
+
+                /* seems to work without rendering to texture first */
+//                SDL_Texture* tex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET, width, height);
+//
+//                SDL_SetRenderTarget(renderer, tex);
+//                SDL_RenderClear(renderer);
+//                SDL_RenderCopy(renderer, texture, &texture_rect, &window_rect);
+//                SDL_RenderPresent(renderer);
+
+                unsigned char* rgba = (unsigned char*)malloc(width*height*4);
+                int res = SDL_RenderReadPixels(renderer, NULL, SDL_PIXELFORMAT_ABGR8888, rgba, width*4);
+
+//                SDL_SetRenderTarget(renderer, NULL);
+//                SDL_DestroyTexture(tex);
+
+                if (!res)
+                {
+                        int x, y;
+                        unsigned char* rgb = (unsigned char*)malloc(width*height*3);
+
+                        for (x = 0; x < width; ++x)
+                        {
+                                for (y = 0; y < height; ++y)
+                                {
+                                        rgb[(y*width+x)*3+0] = rgba[(y*width+x)*4+0];
+                                        rgb[(y*width+x)*3+1] = rgba[(y*width+x)*4+1];
+                                        rgb[(y*width+x)*3+2] = rgba[(y*width+x)*4+2];
+                                }
+                        }
+
+                        screenshot_taken(rgb, width, height);
+
+                        free(rgb);
+                }
+                else
+                        screenshot_taken(0, 0, 0);
+
+                free(rgba);
+        }
 }
 
 sdl_renderer_t* sdl2_renderer_create()

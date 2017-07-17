@@ -102,6 +102,8 @@ extern float gl3_input_scale;
 extern int gl3_input_stretch;
 extern char gl3_shader_file[20][512];
 
+char screenshot_format[10];
+
 void warning(const char *format, ...)
 {
         char buf[1024];
@@ -225,6 +227,21 @@ void set_window_title(const char *s)
         sdl_set_window_title(s);
 }
 
+int take_screenshot = 0;
+
+void screenshot_taken(unsigned char* rgb, int width, int height)
+{
+        char name[512];
+        char date[128];
+        strcpy(name, "Screenshot from ");
+        wx_date_format(date, "%Y-%m-%d %H-%M-%S");
+        strcat(name, date);
+        if (wx_image_save(screenshots_path, name, screenshot_format, rgb, width, height, 0))
+                pclog("Screenshot saved\n");
+        else
+                pclog("Screenshot was not saved\n");
+}
+
 uint64_t timer_read()
 {
         return SDL_GetPerformanceCounter();
@@ -241,6 +258,8 @@ void sdl_loadconfig()
         vid_resize = config_get_int(CFG_MACHINE, NULL, "vid_resize", 0);
         video_fullscreen_scale = config_get_int(CFG_MACHINE, NULL, "video_fullscreen_scale", 0);
         video_fullscreen_first = config_get_int(CFG_MACHINE, NULL, "video_fullscreen_first", 1);
+
+        strcpy(screenshot_format, config_get_string(CFG_MACHINE, "SDL2", "screenshot_format", "png"));
 
         video_fullscreen = config_get_int(CFG_MACHINE, "SDL2", "fullscreen", video_fullscreen);
         video_fullscreen_mode = config_get_int(CFG_MACHINE, "SDL2", "fullscreen_mode", video_fullscreen_mode);
@@ -393,6 +412,16 @@ void sdl_onconfigloaded()
 {
         if (ghwnd)
                 wx_callback(ghwnd, wx_setupmenu, 0);
+
+        /* create directories */
+        if (!wx_dir_exists(configs_path))
+                wx_create_directory(configs_path);
+        if (!wx_dir_exists(nvr_path))
+                wx_create_directory(nvr_path);
+        if (!wx_dir_exists(logs_path))
+                wx_create_directory(logs_path);
+        if (!wx_dir_exists(screenshots_path))
+                wx_create_directory(screenshots_path);
 }
 
 extern void wx_loadconfig();
@@ -415,6 +444,8 @@ int pc_main(int argc, char** argv)
         set_default_nvr_path(s);
         append_filename(s, pcem_path, "configs/", 511);
         set_default_configs_path(s);
+        append_filename(s, pcem_path, "screenshots/", 511);
+        set_default_screenshots_path(s);
         append_filename(s, pcem_path, "logs/", 511);
         set_default_logs_path(s);
 #endif
@@ -756,6 +787,10 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                 wx_checkmenuitem(hmenu, wParam, vid_resize);
                 window_dosetresize = 1;
                 saveconfig(NULL);
+        }
+        else if (ID_IS("IDM_VID_SCREENSHOT"))
+        {
+                take_screenshot = 1;
         }
         else if (ID_IS("IDM_VID_REMEMBER"))
         {
