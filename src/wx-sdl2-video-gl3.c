@@ -716,12 +716,9 @@ int gl3_init(SDL_Window* window, sdl_render_driver requested_render_driver, BITM
         SDL_GL_SetSwapInterval(video_vsync ? 1 : 0);
 
         pclog("OpenGL information: [%s] %s (%s)\n", glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
-        int version[] = { 0, 0 };
-        if (SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &version[0]) != 0)
-                pclog("SDL_Error: %s\n", SDL_GetError());
-        if (SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &version[1]) != 0)
-                pclog("SDL_Error: %s\n", SDL_GetError());
-        if (version[0] < 3 || version[1] < 0)
+        int version = -1;
+        glGetIntegerv(GL_MAJOR_VERSION, &version);
+        if (version < 3)
         {
                 pclog("OpenGL 3.0 is not available.");
                 return SDL_FALSE;
@@ -1502,14 +1499,12 @@ int gl3_renderer_available(struct sdl_render_driver* driver)
                         SDL_GLContext context = SDL_GL_CreateContext(window);
                         if (context)
                         {
-                                int version[] = { 0, 0 };
-                                if (SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &version[0]) != 0)
-                                        pclog("SDL Error: %s\n", SDL_GetError());
-                                if (SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &version[1]) != 0)
-                                        pclog("SDL Error: %s\n", SDL_GetError());
+                                int version = -1;
+                                glGetIntegerv(GL_MAJOR_VERSION, &version);
+
                                 SDL_GL_DeleteContext(context);
 
-                                available = !(version[0] < 3 || version[1] < 0);
+                                available = version >= 3;
                         }
                         SDL_DestroyWindow(window);
                 }
