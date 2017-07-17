@@ -2,7 +2,7 @@ VPATH = . dosbox resid-fp munt munt/sha1 munt/c_interface
 CPP  = g++.exe
 CC   = gcc.exe
 WINDRES = windres.exe
-CFLAGS = -O3 -march=i686 -fomit-frame-pointer -msse2 -mstackrealign -Wall -Werror -fno-strict-aliasing
+CFLAGS = -O3 -march=i686 -fomit-frame-pointer -msse2 -mstackrealign -Werror -fno-strict-aliasing -IC:\Users\Hikari\dev\deps\include\d3d9
 CXXFLAGS = $(CFLAGS)
 OBJ = 386.o 386_dynarec.o 386_dynarec_ops.o 808x.o acer386sx.o ali1429.o amstrad.o cdrom-ioctl.o cdrom-image.o \
 	codegen.o codegen_ops.o codegen_timing_486.o codegen_timing_686.o codegen_timing_pentium.o codegen_timing_winchip.o codegen_x86.o compaq.o config.o cpu.o dac.o \
@@ -28,6 +28,12 @@ MUNTOBJ = Analog.o BReverbModel.o File.o FileStream.o LA32Ramp.o LA32FloatWaveGe
 
 
 LIBS = -mwindows -lwinmm -lopenal32 -lddraw -ldinput -ldxguid -ld3d9 -lstdc++
+
+ifeq ($(FLUIDSYNTH),1)
+	CFLAGS += -DPCEM_USE_FLUIDSYNTH
+	OBJ += midi_fluidsynth.o
+	LIBS += -lfluidsynth
+endif
 
 PCem.exe: $(OBJ) $(DBOBJ) $(SIDOBJ) $(MUNTOBJ)
 	$(CC) $(OBJ) $(DBOBJ) $(SIDOBJ) $(MUNTOBJ) -o "PCem.exe" $(LIBS)
