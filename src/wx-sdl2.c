@@ -804,7 +804,7 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                 window_dosetresize = 1;
                 saveconfig(NULL);
         }
-        else if (ID_IS("IDM_VID_SCREENSHOT"))
+        else if (ID_IS("IDM_SCREENSHOT"))
         {
                 take_screenshot = 1;
         }

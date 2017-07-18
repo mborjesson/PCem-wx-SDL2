@@ -129,10 +129,6 @@
 		</object>
 		<object class="wxMenu">
 			<label>Video</label>
-			<object class="wxMenuItem" name="IDM_VID_SCREENSHOT">
-				<label>Screenshot\tCtrl+Alt+PageUp</label>
-			</object>
-			<object class="separator" />
 			<object class="wxMenuItem" name="IDM_VID_RESIZE">
 				<label>Resizable window</label>
 				<checkable>1</checkable>
@@ -380,6 +376,10 @@
 		</object>
 		<object class="wxMenu">
 			<label>Misc</label>
+			<object class="wxMenuItem" name="IDM_SCREENSHOT">
+				<label>Take _screenshot\tCtrl+Alt+PageUp</label>
+			</object>
+			<object class="separator" />
 			<object class="wxMenuItem" name="IDM_STATUS">
 				<label>_Machine</label>
 			</object>
