@@ -27,7 +27,7 @@ extern void screenshot_taken(unsigned char* rgb, int width, int height);
 #define SCALE_VIEWPORT 1
 #define SCALE_ABSOLUTE 2
 
-float gl3_simulated_refresh_rate = 30;
+float gl3_shader_refresh_rate = 0;
 float gl3_input_scale = 1.0f;
 int gl3_input_stretch = FULLSCR_SCALE_FULL;
 char gl3_shader_file[MAX_USER_SHADERS][512];
@@ -51,7 +51,7 @@ static GLfloat matrix[] = {
 
 extern int video_scale_mode;
 extern int video_vsync;
-extern int video_focus_dim;
+extern int video_refresh_rate;
 
 const char* vertex_shader_default_tex_src =
         "#version 130\n"
@@ -737,7 +737,7 @@ static void read_shader_config()
                 struct glsl_shader* shader = &active_shader->shaders[i];
                 char* name = shader->name;
                 sprintf(s, "GL3 Shaders - %s", name);
-                shader->simulated_refresh_rate = config_get_float(CFG_MACHINE, s, "simulated_refresh_rate", 0);
+//                shader->shader_refresh_rate = config_get_float(CFG_MACHINE, s, "shader_refresh_rate", -1);
                 for (j = 0; j < shader->num_parameters; ++j)
                 {
                         struct shader_parameter* param = &shader->parameters[j];
@@ -1293,21 +1293,18 @@ void gl3_present(SDL_Window* window, SDL_Rect video_rect, SDL_Rect window_rect, 
                 struct glsl_shader* shader = &active_shader->shaders[s];
                 int last_shader = s == active_shader->num_shaders-1;
 
-                float refresh_rate = shader->simulated_refresh_rate;
-                if (refresh_rate <= 0)
-                        refresh_rate = gl3_simulated_refresh_rate;
+//                float refresh_rate = shader->shader_refresh_rate;
+//                if (refresh_rate < 0)
+//                        refresh_rate = gl3_shader_refresh_rate;
+                float refresh_rate = gl3_shader_refresh_rate;
+                if (refresh_rate == 0)
+                        refresh_rate = video_refresh_rate;
                 int frame_count = ticks/(1000.0f/refresh_rate);
 
                 /* loop through each pass */
                 for (i = 0; i < shader->num_passes; ++i)
                 {
                         struct shader_pass* pass = &shader->passes[i];
-//                        struct shader_pass* prev_pass = 0;
-//
-//                        if (i == 0)
-//                                prev_pass = &active_shader->scene;
-//                        else
-//                                prev_pass = &shader->passes[i-1];
 
                         memcpy(pass->state.input_size, input->state.output_size, 2*sizeof(GLfloat));
                         memcpy(pass->state.input_texture_size, input->state.output_texture_size, 2*sizeof(GLfloat));

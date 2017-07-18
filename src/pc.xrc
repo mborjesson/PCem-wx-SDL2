@@ -31,7 +31,7 @@
 	<ids-range name="IDM_SND_BUF" start="2000" />
 	<ids-range name="IDM_VID_GL3_INPUT_STRETCH" start="3000" />
 	<ids-range name="IDM_VID_GL3_INPUT_SCALE" start="3100" />
-	<ids-range name="IDM_VID_GL3_SIMULATED_REFRESH_RATE" start="3200" />
+	<ids-range name="IDM_VID_GL3_SHADER_REFRESH_RATE" start="3200" />
 	<object class="wxMenuBar" name="status_menu">
 		<object class="wxMenu">
 			<label>_Options</label>
@@ -316,32 +316,36 @@
 					</object>
 				</object>
 				<object class="wxMenu">
-					<label>Simulated refresh rate</label>
-					<object class="wxMenuItem" name="IDM_VID_GL3_SIMULATED_REFRESH_RATE[10]">
+					<label>Shader refresh rate</label>
+					<object class="wxMenuItem" name="IDM_VID_GL3_SHADER_REFRESH_RATE[0]">
+						<label>Same as emulated display</label>
+						<radio>1</radio>
+					</object>
+					<object class="wxMenuItem" name="IDM_VID_GL3_SHADER_REFRESH_RATE[10]">
 						<label>10 hz</label>
 						<radio>1</radio>
 					</object>
-					<object class="wxMenuItem" name="IDM_VID_GL3_SIMULATED_REFRESH_RATE[25]">
+					<object class="wxMenuItem" name="IDM_VID_GL3_SHADER_REFRESH_RATE[25]">
 						<label>25 hz</label>
 						<radio>1</radio>
 					</object>
-					<object class="wxMenuItem" name="IDM_VID_GL3_SIMULATED_REFRESH_RATE[30]">
+					<object class="wxMenuItem" name="IDM_VID_GL3_SHADER_REFRESH_RATE[30]">
 						<label>30 hz</label>
 						<radio>1</radio>
 					</object>
-					<object class="wxMenuItem" name="IDM_VID_GL3_SIMULATED_REFRESH_RATE[50]">
+					<object class="wxMenuItem" name="IDM_VID_GL3_SHADER_REFRESH_RATE[50]">
 						<label>50 hz</label>
 						<radio>1</radio>
 					</object>
-					<object class="wxMenuItem" name="IDM_VID_GL3_SIMULATED_REFRESH_RATE[60]">
+					<object class="wxMenuItem" name="IDM_VID_GL3_SHADER_REFRESH_RATE[60]">
 						<label>60 hz</label>
 						<radio>1</radio>
 					</object>
-					<object class="wxMenuItem" name="IDM_VID_GL3_SIMULATED_REFRESH_RATE[72]">
+					<object class="wxMenuItem" name="IDM_VID_GL3_SHADER_REFRESH_RATE[72]">
 						<label>72 hz</label>
 						<radio>1</radio>
 					</object>
-					<object class="wxMenuItem" name="IDM_VID_GL3_SIMULATED_REFRESH_RATE[85]">
+					<object class="wxMenuItem" name="IDM_VID_GL3_SHADER_REFRESH_RATE[85]">
 						<label>85 hz</label>
 						<radio>1</radio>
 					</object>

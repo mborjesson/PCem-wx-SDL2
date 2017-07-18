@@ -97,7 +97,7 @@ extern int shader_manager_open(void* hwnd);
 
 extern void sdl_set_window_title(const char* title);
 
-extern float gl3_simulated_refresh_rate;
+extern float gl3_shader_refresh_rate;
 extern float gl3_input_scale;
 extern int gl3_input_stretch;
 extern char gl3_shader_file[20][512];
@@ -287,7 +287,7 @@ void sdl_loadconfig()
 
         gl3_input_scale = config_get_float(CFG_MACHINE, "GL3", "input_scale", gl3_input_scale);
         gl3_input_stretch = config_get_int(CFG_MACHINE, "GL3", "input_stretch", gl3_input_stretch);
-        gl3_simulated_refresh_rate = config_get_float(CFG_MACHINE, "GL3", "simulated_refresh_rate", gl3_simulated_refresh_rate);
+        gl3_shader_refresh_rate = config_get_float(CFG_MACHINE, "GL3", "shader_refresh_rate", gl3_shader_refresh_rate);
 
         memset(&gl3_shader_file, 0, sizeof(gl3_shader_file));
         int num_shaders = config_get_int(CFG_MACHINE, "GL3 Shaders", "shaders", 0);
@@ -317,7 +317,7 @@ void sdl_saveconfig()
 
         config_set_float(CFG_MACHINE, "GL3", "input_scale", gl3_input_scale);
         config_set_int(CFG_MACHINE, "GL3", "input_stretch", gl3_input_stretch);
-        config_set_float(CFG_MACHINE, "GL3", "simulated_refresh_rate", gl3_simulated_refresh_rate);
+        config_set_float(CFG_MACHINE, "GL3", "shader_refresh_rate", gl3_shader_refresh_rate);
 
         char s[20];
         int i;
@@ -418,7 +418,7 @@ int wx_setupmenu(void* data)
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
         sprintf(menuitem, "IDM_VID_GL3_INPUT_SCALE[%d]", (int)((gl3_input_scale-0.5)*2));
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
-        sprintf(menuitem, "IDM_VID_GL3_SIMULATED_REFRESH_RATE[%g]", gl3_simulated_refresh_rate);
+        sprintf(menuitem, "IDM_VID_GL3_SHADER_REFRESH_RATE[%g]", gl3_shader_refresh_rate);
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
 
         return 1;
@@ -898,9 +898,9 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                 wx_checkmenuitem(menu, wParam, WX_MB_CHECKED);
                 saveconfig(NULL);
         }
-        else if (ID_RANGE("IDM_VID_GL3_SIMULATED_REFRESH_RATE[start]", "IDM_VID_GL3_SIMULATED_REFRESH_RATE[end]"))
+        else if (ID_RANGE("IDM_VID_GL3_SHADER_REFRESH_RATE[start]", "IDM_VID_GL3_SHADER_REFRESH_RATE[end]"))
         {
-                gl3_simulated_refresh_rate = wParam - wx_xrcid("IDM_VID_GL3_SIMULATED_REFRESH_RATE[start]");
+                gl3_shader_refresh_rate = wParam - wx_xrcid("IDM_VID_GL3_SHADER_REFRESH_RATE[start]");
                 wx_checkmenuitem(menu, wParam, WX_MB_CHECKED);
                 saveconfig(NULL);
         }

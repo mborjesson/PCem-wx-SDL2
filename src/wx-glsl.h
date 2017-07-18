@@ -137,7 +137,7 @@ struct glsl_shader {
         int last_prev_update;
         int has_prev;
 
-        float simulated_refresh_rate;
+        float shader_refresh_rate;
 };
 
 typedef struct glsl_t {
