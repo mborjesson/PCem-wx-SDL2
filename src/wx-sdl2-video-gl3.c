@@ -53,7 +53,7 @@ extern int video_scale_mode;
 extern int video_vsync;
 extern int video_focus_dim;
 
-const char* vertex_shader_default_src =
+const char* vertex_shader_default_tex_src =
         "#version 130\n"
         "\n"
         "in vec4 VertexCoord;\n"
@@ -67,7 +67,7 @@ const char* vertex_shader_default_src =
         "       texCoord = TexCoord;\n"
         "}\n";
 
-const char* fragment_shader_default_src =
+const char* fragment_shader_default_tex_src =
         "#version 130\n"
         "\n"
         "in vec2 texCoord;\n"
@@ -78,6 +78,32 @@ const char* fragment_shader_default_src =
         "void main()\n"
         "{\n"
         "       color = texture(Texture, texCoord);\n"
+        "}\n";
+
+const char* vertex_shader_default_color_src =
+        "#version 130\n"
+        "\n"
+        "in vec4 VertexCoord;\n"
+        "in vec4 Color;\n"
+        "\n"
+        "out vec4 color;\n"
+        "\n"
+        "void main()\n"
+        "{\n"
+        "       gl_Position = VertexCoord;\n"
+        "       color = Color;\n"
+        "}\n";
+
+const char* fragment_shader_default_color_src =
+        "#version 130\n"
+        "\n"
+        "in vec4 color;\n"
+        "\n"
+        "out vec4 outColor;"
+        "\n"
+        "void main()\n"
+        "{\n"
+        "       outColor = color;\n"
         "}\n";
 
 static int next_pow2(unsigned int n)
@@ -349,6 +375,8 @@ static void delete_glsl(glsl_t* glsl)
         for (i = 0; i < glsl->num_shaders; ++i)
                 delete_shader(&glsl->shaders[i]);
         delete_pass(&glsl->scene);
+        delete_pass(&glsl->fs_color);
+        delete_pass(&glsl->final_pass);
 #ifdef SDL2_SHADER_DEBUG
         delete_pass(&glsl->debug);
 #endif
@@ -414,11 +442,11 @@ static void recreate_fbo(struct shader_fbo* fbo, int width, int height)
         }
 }
 
-static int create_default_shader(struct shader_pass* pass)
+static int create_default_shader_tex(struct shader_pass* pass)
 {
         if (
-                        !compile_shader(GL_VERTEX_SHADER, 0, vertex_shader_default_src, &pass->program.vertex_shader) ||
-                        !compile_shader(GL_FRAGMENT_SHADER, 0, fragment_shader_default_src, &pass->program.fragment_shader) ||
+                        !compile_shader(GL_VERTEX_SHADER, 0, vertex_shader_default_tex_src, &pass->program.vertex_shader) ||
+                        !compile_shader(GL_FRAGMENT_SHADER, 0, fragment_shader_default_tex_src, &pass->program.fragment_shader) ||
                         !create_program(&pass->program))
                 return 0;
         glw->glGenVertexArrays(1, &pass->vertex_array);
@@ -436,14 +464,38 @@ static int create_default_shader(struct shader_pass* pass)
         return 1;
 }
 
-/* create the deafult scene shader */
+static int create_default_shader_color(struct shader_pass* pass)
+{
+        if (
+                        !compile_shader(GL_VERTEX_SHADER, 0, vertex_shader_default_color_src, &pass->program.vertex_shader) ||
+                        !compile_shader(GL_FRAGMENT_SHADER, 0, fragment_shader_default_color_src, &pass->program.fragment_shader) ||
+                        !create_program(&pass->program))
+                return 0;
+        glw->glGenVertexArrays(1, &pass->vertex_array);
+
+        struct shader_uniforms* u = &pass->uniforms;
+        int p = pass->program.id;
+        memset(u, -1, sizeof(struct shader_uniforms));
+        u->vertex_coord = get_attrib(p, "VertexCoord");
+        u->color = get_attrib(p, "Color");
+        pass->scale.mode[0] = pass->scale.mode[1] = SCALE_SOURCE;
+        pass->scale.value[0] = pass->scale.value[1] = 1.0f;
+        pass->fbo.id = -1;
+        pass->active = 1;
+        return 1;
+}
+
+/* create the default scene shader */
 static void create_scene_shader()
 {
-        int i;
         struct shader scene_shader_conf;
         memset(&scene_shader_conf, 0, sizeof(struct shader));
-        create_default_shader(&active_shader->scene);
+        create_default_shader_tex(&active_shader->scene);
         setup_fbo(&scene_shader_conf, &active_shader->scene.fbo);
+
+        memset(&scene_shader_conf, 0, sizeof(struct shader));
+        create_default_shader_color(&active_shader->fs_color);
+        setup_fbo(&scene_shader_conf, &active_shader->fs_color.fbo);
 }
 
 static int load_texture(const char* f, struct shader_texture* tex)
@@ -865,7 +917,7 @@ int gl3_init(SDL_Window* window, sdl_render_driver requested_render_driver, BITM
                 if (shader->has_prev)
                 {
                         struct shader_pass* prev_pass = &shader->prev_scene;
-                        create_default_shader(prev_pass);
+                        create_default_shader_tex(prev_pass);
 
                         struct shader_vbo* vbo = &prev_pass->vbo;
 
@@ -901,7 +953,7 @@ int gl3_init(SDL_Window* window, sdl_render_driver requested_render_driver, BITM
         if (active_shader->num_shaders == 0 || active_shader->shaders[active_shader->num_shaders-1].passes[active_shader->shaders[active_shader->num_shaders-1].num_passes-1].fbo.id >= 0)
         {
                 struct shader_pass* final_pass = &active_shader->final_pass;
-                create_default_shader(final_pass);
+                create_default_shader_tex(final_pass);
 
                 glw->glBindVertexArray(final_pass->vertex_array);
 
@@ -918,7 +970,25 @@ int gl3_init(SDL_Window* window, sdl_render_driver requested_render_driver, BITM
                 glw->glVertexAttribPointer(final_pass->uniforms.tex_coord, 2, GL_FLOAT, GL_TRUE, 2*sizeof(GLfloat), (GLvoid*)0);
         }
 
+        {
+                struct shader_pass* color_pass = &active_shader->fs_color;
+                create_default_shader_color(color_pass);
 
+                glw->glBindVertexArray(color_pass->vertex_array);
+
+                struct shader_vbo* vbo = &color_pass->vbo;
+
+                glw->glGenBuffers(1, &vbo->vertex_coord);
+                glw->glBindBuffer(GL_ARRAY_BUFFER, vbo->vertex_coord);
+                glw->glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
+                glw->glVertexAttribPointer(color_pass->uniforms.vertex_coord, 2, GL_FLOAT, GL_FALSE, 2*sizeof(GLfloat), (GLvoid*)0);
+
+                glw->glGenBuffers(1, &vbo->color);
+                glw->glBindBuffer(GL_ARRAY_BUFFER, vbo->color);
+                glw->glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_DYNAMIC_DRAW);
+                glw->glVertexAttribPointer(color_pass->uniforms.color, 4, GL_FLOAT, GL_TRUE, 4*sizeof(GLfloat), (GLvoid*)0);
+
+        }
 #ifdef SDL2_SHADER_DEBUG
         struct shader_pass* debug_pass = &active_shader->debug;
         create_default_shader(debug_pass);
@@ -1000,10 +1070,13 @@ static void render_pass(struct render_data* data)
 
         glw->glUseProgram(p);
 
-        glw->glActiveTexture(GL_TEXTURE0 + texture_unit);
-        glBindTexture(GL_TEXTURE_2D, data->texture);
-        glw->glUniform1i(u->texture, texture_unit);
-        texture_unit++;
+        if (data->texture)
+        {
+                glw->glActiveTexture(GL_TEXTURE0 + texture_unit);
+                glBindTexture(GL_TEXTURE_2D, data->texture);
+                glw->glUniform1i(u->texture, texture_unit);
+                texture_unit++;
+        }
 
         if (u->color >= 0)              glw->glEnableVertexAttribArray(u->color);
 
@@ -1413,7 +1486,43 @@ void gl3_present(SDL_Window* window, SDL_Rect video_rect, SDL_Rect window_rect, 
                 render_pass(&data);
         }
 
-        if (take_screenshot)
+        if (!take_screenshot)
+        {
+                if (flash.enabled)
+                {
+                        struct shader_pass* pass = &active_shader->fs_color;
+                        GLfloat r = (flash.color[0]&0xff)/(float)0xff;
+                        GLfloat g = (flash.color[1]&0xff)/(float)0xff;
+                        GLfloat b = (flash.color[2]&0xff)/(float)0xff;
+                        GLfloat a = (flash.color[3]&0xff)/(float)0xff;
+
+                        GLfloat colors[] = {
+                                r, g, b, a,
+                                r, g, b, a,
+                                r, g, b, a,
+                                r, g, b, a
+                        };
+
+                        glw->glBindVertexArray(pass->vertex_array);
+
+                        glw->glBindBuffer(GL_ARRAY_BUFFER, pass->vbo.color);
+                        glw->glBufferSubData(GL_ARRAY_BUFFER, 0, 16*sizeof(GLfloat), colors);
+                        glw->glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+                        memset(&data, 0, sizeof(struct render_data));
+                        data.pass = -3;
+                        data.shader_pass = pass;
+                        data.texture = 0;
+                        data.output_size = orig_output_size;
+                        data.orig_pass = orig;
+
+                        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                        glEnable(GL_BLEND);
+                        render_pass(&data);
+                        glDisable(GL_BLEND);
+                }
+        }
+        else
         {
                 take_screenshot = 0;
 
@@ -1424,6 +1533,7 @@ void gl3_present(SDL_Window* window, SDL_Rect video_rect, SDL_Rect window_rect, 
 
                 unsigned char* rgba = (unsigned char*)malloc(width*height*4);
 
+                glFinish();
                 glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, rgba);
 
                 int x, y;
@@ -1464,6 +1574,7 @@ void gl3_present(SDL_Window* window, SDL_Rect video_rect, SDL_Rect window_rect, 
         glDisable(GL_FRAMEBUFFER_SRGB);
 
         SDL_GL_SwapWindow(window);
+
 }
 
 sdl_renderer_t* gl3_renderer_create()

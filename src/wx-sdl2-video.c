@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include "wx-sdl2.h"
 #include "video.h"
 #include "wx-sdl2-video.h"
@@ -299,9 +300,31 @@ int sdl_renderer_update(SDL_Window* window)
 
 void sdl_renderer_present(SDL_Window* window)
 {
+        if (flash.enabled)
+        {
+                int elapsed = SDL_GetTicks() - flash.start;
+                float a = flash.func(elapsed / (float)flash.time) * (flash.alpha&0xff);
+                flash.color[3] = (char)a;
+                if (elapsed >= flash.time)
+                        flash.enabled = 0;
+        }
+
         SDL_Rect wr;
         SDL_GetWindowSize(window, &wr.w, &wr.h);
         sdl_scale(video_fullscreen_scale, wr, &wr, texture_rect.w, texture_rect.h);
         renderer->present(window, texture_rect, wr, screen);
 
+}
+
+void color_flash(FLASH_FUNC func, int time_ms, char r, char g, char b, char a)
+{
+        flash.func = func;
+        flash.color[0] = r;
+        flash.color[1] = g;
+        flash.color[2] = b;
+        flash.color[3] = 0;
+        flash.alpha = a;
+        flash.start = SDL_GetTicks();
+        flash.time = time_ms;
+        flash.enabled = 1;
 }

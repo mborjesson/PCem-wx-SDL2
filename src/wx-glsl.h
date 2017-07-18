@@ -145,6 +145,7 @@ typedef struct glsl_t {
         struct glsl_shader shaders[MAX_USER_SHADERS];
         struct shader_pass scene;
         struct shader_pass final_pass;
+        struct shader_pass fs_color;
 #ifdef SDL2_SHADER_DEBUG
         struct shader_pass debug;
 #endif

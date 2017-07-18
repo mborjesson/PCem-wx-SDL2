@@ -229,6 +229,16 @@ void set_window_title(const char *s)
 
 int take_screenshot = 0;
 
+float flash_func(float x)
+{
+        return 1 - pow(x, 4);
+}
+
+float flash_failed_func(float x)
+{
+        return fabs(sin(x*3.1415926*2));
+}
+
 void screenshot_taken(unsigned char* rgb, int width, int height)
 {
         char name[512];
@@ -237,9 +247,15 @@ void screenshot_taken(unsigned char* rgb, int width, int height)
         wx_date_format(date, "%Y-%m-%d %H-%M-%S");
         strcat(name, date);
         if (wx_image_save(screenshots_path, name, screenshot_format, rgb, width, height, 0))
+        {
                 pclog("Screenshot saved\n");
+                color_flash(flash_func, 500, 0xff, 0xff, 0xff, 0xff);
+        }
         else
+        {
                 pclog("Screenshot was not saved\n");
+                color_flash(flash_failed_func, 500, 0xff, 0, 0, 0xff);
+        }
 }
 
 uint64_t timer_read()
