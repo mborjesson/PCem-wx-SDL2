@@ -51,6 +51,7 @@ static GLfloat matrix[] = {
 
 extern int video_scale_mode;
 extern int video_vsync;
+extern int video_focus_dim;
 extern int video_refresh_rate;
 
 const char* vertex_shader_default_tex_src =
@@ -1485,6 +1486,39 @@ void gl3_present(SDL_Window* window, SDL_Rect video_rect, SDL_Rect window_rect, 
 
         if (!take_screenshot)
         {
+                if (video_focus_dim && !(SDL_GetWindowFlags(window)&SDL_WINDOW_INPUT_FOCUS))
+                {
+                        struct shader_pass* pass = &active_shader->fs_color;
+                        GLfloat r = 0;
+                        GLfloat g = 0;
+                        GLfloat b = 0;
+                        GLfloat a = 0x80/(float)0xff;
+
+                        GLfloat colors[] = {
+                                r, g, b, a,
+                                r, g, b, a,
+                                r, g, b, a,
+                                r, g, b, a
+                        };
+
+                        glw->glBindVertexArray(pass->vertex_array);
+
+                        glw->glBindBuffer(GL_ARRAY_BUFFER, pass->vbo.color);
+                        glw->glBufferSubData(GL_ARRAY_BUFFER, 0, 16*sizeof(GLfloat), colors);
+                        glw->glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+                        memset(&data, 0, sizeof(struct render_data));
+                        data.pass = -3;
+                        data.shader_pass = pass;
+                        data.texture = 0;
+                        data.output_size = orig_output_size;
+                        data.orig_pass = orig;
+
+                        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                        glEnable(GL_BLEND);
+                        render_pass(&data);
+                        glDisable(GL_BLEND);
+                }
                 if (flash.enabled)
                 {
                         struct shader_pass* pass = &active_shader->fs_color;

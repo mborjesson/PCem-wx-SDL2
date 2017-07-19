@@ -428,7 +428,7 @@ int wx_setupmenu(void* data)
         sprintf(menuitem, "IDM_VID_RENDER_DRIVER[%d]", requested_render_driver.id);
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
 
-        wx_enablemenuitem(menu, WX_ID("IDM_VID_SDL2"), requested_render_driver.id != RENDERER_GL3);
+//        wx_enablemenuitem(menu, WX_ID("IDM_VID_SDL2"), requested_render_driver.id != RENDERER_GL3);
         wx_enablemenuitem(menu, WX_ID("IDM_VID_GL3"), requested_render_driver.id == RENDERER_GL3);
 
         sprintf(menuitem, "IDM_VID_GL3_INPUT_STRETCH[%d]", gl3_input_stretch);
@@ -837,6 +837,7 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                 else if (format == 3)
                         strcpy(screenshot_format, IMAGE_JPG);
                 saveconfig(NULL);
+                wx_checkmenuitem(hmenu, wParam, WX_MB_CHECKED);
         }
         else if (ID_IS("IDM_SCREENSHOT_FLASH"))
         {
@@ -902,7 +903,7 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                 window_doreset = 1;
 
                 /* update enabled menu-items */
-                wx_enablemenuitem(menu, WX_ID("IDM_VID_SDL2"), requested_render_driver.id != RENDERER_GL3);
+//                wx_enablemenuitem(menu, WX_ID("IDM_VID_SDL2"), requested_render_driver.id != RENDERER_GL3);
                 wx_enablemenuitem(menu, WX_ID("IDM_VID_GL3"), requested_render_driver.id == RENDERER_GL3);
 
                 wx_checkmenuitem(hmenu, wParam, WX_MB_CHECKED);

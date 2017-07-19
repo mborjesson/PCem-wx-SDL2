@@ -38,7 +38,7 @@ static sdl_render_driver sdl_render_drivers[] = {
                 { RENDERER_OPENGLES2, "opengles2", "OpenGL ES 2", 0, sdl2_renderer_create, sdl2_renderer_close, sdl2_renderer_available },
                 { RENDERER_OPENGLES, "opengles", "OpenGL ES", 0, sdl2_renderer_create, sdl2_renderer_close, sdl2_renderer_available },
                 { RENDERER_SOFTWARE, "software", "Software", 0, sdl2_renderer_create, sdl2_renderer_close, sdl2_renderer_available },
-                { RENDERER_GL3, "gl3", "OpenGL 3.0 (Experimental)", SDL_WINDOW_OPENGL, gl3_renderer_create, gl3_renderer_close, gl3_renderer_available }
+                { RENDERER_GL3, "gl3", "OpenGL 3.0", SDL_WINDOW_OPENGL, gl3_renderer_create, gl3_renderer_close, gl3_renderer_available }
 };
 
 sdl_render_driver requested_render_driver;

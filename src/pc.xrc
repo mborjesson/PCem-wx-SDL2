@@ -173,7 +173,7 @@
 					<radio>1</radio>
 				</object>
 				<object class="wxMenuItem" name="IDM_VID_RENDER_DRIVER[6]">
-					<label>OpenGL 3.0 (Experimental)</label>
+					<label>OpenGL 3.0</label>
 					<radio>1</radio>
 				</object>
 				<object class="wxMenuItem" name="IDM_VID_RENDER_DRIVER[5]">
@@ -183,6 +183,10 @@
 			</object>
 			<object class="wxMenuItem" name="IDM_VID_VSYNC">
 				<label>_VSync</label>
+				<checkable>1</checkable>
+			</object>
+			<object class="wxMenuItem" name="IDM_VID_LOST_FOCUS_DIM">
+				<label>_Dim display on lost focus</label>
 				<checkable>1</checkable>
 			</object>
 			<object class="separator"/>
@@ -252,14 +256,6 @@
 				</object>
 			</object>
 			<object class="separator"/>
-			<object class="wxMenu" name="IDM_VID_SDL2">
-				<label>SDL2 renderer</label>
-				<object class="wxMenuItem" name="IDM_VID_LOST_FOCUS_DIM">
-					<label>_Dim display on lost focus</label>
-					<checkable>1</checkable>
-				</object>
-				
-			</object>
 			<object class="wxMenu" name="IDM_VID_GL3">
 				<label>OpenGL 3.0 renderer</label>
 				<object class="wxMenu">
