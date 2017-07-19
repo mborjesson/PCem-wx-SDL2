@@ -97,10 +97,14 @@ extern int shader_manager_open(void* hwnd);
 
 extern void sdl_set_window_title(const char* title);
 
-extern float gl3_simulated_refresh_rate;
+extern float gl3_shader_refresh_rate;
 extern float gl3_input_scale;
 extern int gl3_input_stretch;
 extern char gl3_shader_file[20][512];
+
+char screenshot_format[10];
+int screenshot_flash = 1;
+int take_screenshot = 0;
 
 void warning(const char *format, ...)
 {
@@ -225,6 +229,37 @@ void set_window_title(const char *s)
         sdl_set_window_title(s);
 }
 
+float flash_func(float x)
+{
+        return 1 - pow(x, 4);
+}
+
+float flash_failed_func(float x)
+{
+        return fabs(sin(x*3.1415926*2));
+}
+
+void screenshot_taken(unsigned char* rgb, int width, int height)
+{
+        char name[512];
+        char date[128];
+        strcpy(name, "Screenshot from ");
+        wx_date_format(date, "%Y-%m-%d %H-%M-%S");
+        strcat(name, date);
+        if (wx_image_save(screenshots_path, name, screenshot_format, rgb, width, height, 0))
+        {
+                pclog("Screenshot saved\n");
+                if (screenshot_flash)
+                        color_flash(flash_func, 500, 0xff, 0xff, 0xff, 0xff);
+        }
+        else
+        {
+                pclog("Screenshot was not saved\n");
+                if (screenshot_flash)
+                        color_flash(flash_failed_func, 500, 0xff, 0, 0, 0xff);
+        }
+}
+
 uint64_t timer_read()
 {
         return SDL_GetPerformanceCounter();
@@ -242,6 +277,9 @@ void sdl_loadconfig()
         video_fullscreen_scale = config_get_int(CFG_MACHINE, NULL, "video_fullscreen_scale", 0);
         video_fullscreen_first = config_get_int(CFG_MACHINE, NULL, "video_fullscreen_first", 1);
 
+        strcpy(screenshot_format, config_get_string(CFG_MACHINE, "SDL2", "screenshot_format", IMAGE_PNG));
+        screenshot_flash = config_get_int(CFG_MACHINE, "SDL2", "screenshot_flash", 1);
+
         video_fullscreen = config_get_int(CFG_MACHINE, "SDL2", "fullscreen", video_fullscreen);
         video_fullscreen_mode = config_get_int(CFG_MACHINE, "SDL2", "fullscreen_mode", video_fullscreen_mode);
         video_scale = config_get_int(CFG_MACHINE, "SDL2", "scale", video_scale);
@@ -252,7 +290,7 @@ void sdl_loadconfig()
 
         gl3_input_scale = config_get_float(CFG_MACHINE, "GL3", "input_scale", gl3_input_scale);
         gl3_input_stretch = config_get_int(CFG_MACHINE, "GL3", "input_stretch", gl3_input_stretch);
-        gl3_simulated_refresh_rate = config_get_float(CFG_MACHINE, "GL3", "simulated_refresh_rate", gl3_simulated_refresh_rate);
+        gl3_shader_refresh_rate = config_get_float(CFG_MACHINE, "GL3", "shader_refresh_rate", gl3_shader_refresh_rate);
 
         memset(&gl3_shader_file, 0, sizeof(gl3_shader_file));
         int num_shaders = config_get_int(CFG_MACHINE, "GL3 Shaders", "shaders", 0);
@@ -272,6 +310,9 @@ void sdl_saveconfig()
         config_set_int(CFG_MACHINE, NULL, "video_fullscreen_scale", video_fullscreen_scale);
         config_set_int(CFG_MACHINE, NULL, "video_fullscreen_first", video_fullscreen_first);
 
+        config_set_string(CFG_MACHINE, "SDL2", "screenshot_format", screenshot_format);
+        config_set_int(CFG_MACHINE, "SDL2", "screenshot_flash", screenshot_flash);
+
         config_set_int(CFG_MACHINE, "SDL2", "fullscreen", video_fullscreen);
         config_set_int(CFG_MACHINE, "SDL2", "fullscreen_mode", video_fullscreen_mode);
         config_set_int(CFG_MACHINE, "SDL2", "scale", video_scale);
@@ -282,7 +323,7 @@ void sdl_saveconfig()
 
         config_set_float(CFG_MACHINE, "GL3", "input_scale", gl3_input_scale);
         config_set_int(CFG_MACHINE, "GL3", "input_stretch", gl3_input_stretch);
-        config_set_float(CFG_MACHINE, "GL3", "simulated_refresh_rate", gl3_simulated_refresh_rate);
+        config_set_float(CFG_MACHINE, "GL3", "shader_refresh_rate", gl3_shader_refresh_rate);
 
         char s[20];
         int i;
@@ -366,6 +407,17 @@ int wx_setupmenu(void* data)
         wx_checkmenuitem(menu, WX_ID("IDM_VID_VSYNC"), video_vsync);
         wx_checkmenuitem(menu, WX_ID("IDM_VID_LOST_FOCUS_DIM"), video_focus_dim);
 
+        int format = 0;
+        if (!strcmp(screenshot_format, IMAGE_TIFF))
+                format = 1;
+        else if (!strcmp(screenshot_format, IMAGE_BMP))
+                format = 2;
+        else if (!strcmp(screenshot_format, IMAGE_JPG))
+                format = 3;
+        sprintf(menuitem, "IDM_SCREENSHOT_FORMAT[%d]", format);
+        wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
+        wx_checkmenuitem(menu, WX_ID("IDM_SCREENSHOT_FLASH"), screenshot_flash);
+
         int num_renderers;
         sdl_render_driver* drivers = sdl_get_render_drivers(&num_renderers);
         for (c = 1; c < num_renderers; ++c)
@@ -376,14 +428,14 @@ int wx_setupmenu(void* data)
         sprintf(menuitem, "IDM_VID_RENDER_DRIVER[%d]", requested_render_driver.id);
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
 
-        wx_enablemenuitem(menu, WX_ID("IDM_VID_SDL2"), requested_render_driver.id != RENDERER_GL3);
+//        wx_enablemenuitem(menu, WX_ID("IDM_VID_SDL2"), requested_render_driver.id != RENDERER_GL3);
         wx_enablemenuitem(menu, WX_ID("IDM_VID_GL3"), requested_render_driver.id == RENDERER_GL3);
 
         sprintf(menuitem, "IDM_VID_GL3_INPUT_STRETCH[%d]", gl3_input_stretch);
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
         sprintf(menuitem, "IDM_VID_GL3_INPUT_SCALE[%d]", (int)((gl3_input_scale-0.5)*2));
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
-        sprintf(menuitem, "IDM_VID_GL3_SIMULATED_REFRESH_RATE[%g]", gl3_simulated_refresh_rate);
+        sprintf(menuitem, "IDM_VID_GL3_SHADER_REFRESH_RATE[%g]", gl3_shader_refresh_rate);
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
 
         return 1;
@@ -393,6 +445,16 @@ void sdl_onconfigloaded()
 {
         if (ghwnd)
                 wx_callback(ghwnd, wx_setupmenu, 0);
+
+        /* create directories */
+        if (!wx_dir_exists(configs_path))
+                wx_create_directory(configs_path);
+        if (!wx_dir_exists(nvr_path))
+                wx_create_directory(nvr_path);
+        if (!wx_dir_exists(logs_path))
+                wx_create_directory(logs_path);
+        if (!wx_dir_exists(screenshots_path))
+                wx_create_directory(screenshots_path);
 }
 
 extern void wx_loadconfig();
@@ -415,6 +477,8 @@ int pc_main(int argc, char** argv)
         set_default_nvr_path(s);
         append_filename(s, pcem_path, "configs/", 511);
         set_default_configs_path(s);
+        append_filename(s, pcem_path, "screenshots/", 511);
+        set_default_screenshots_path(s);
         append_filename(s, pcem_path, "logs/", 511);
         set_default_logs_path(s);
 #endif
@@ -757,6 +821,30 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                 window_dosetresize = 1;
                 saveconfig(NULL);
         }
+        else if (ID_IS("IDM_SCREENSHOT"))
+        {
+                take_screenshot = 1;
+        }
+        else if (ID_RANGE("IDM_SCREENSHOT_FORMAT[start]", "IDM_SCREENSHOT_FORMAT[end]"))
+        {
+                int format = wParam - wx_xrcid("IDM_SCREENSHOT_FORMAT[start]");
+                if (format == 0)
+                        strcpy(screenshot_format, IMAGE_PNG);
+                else if (format == 1)
+                        strcpy(screenshot_format, IMAGE_TIFF);
+                else if (format == 2)
+                        strcpy(screenshot_format, IMAGE_BMP);
+                else if (format == 3)
+                        strcpy(screenshot_format, IMAGE_JPG);
+                saveconfig(NULL);
+                wx_checkmenuitem(hmenu, wParam, WX_MB_CHECKED);
+        }
+        else if (ID_IS("IDM_SCREENSHOT_FLASH"))
+        {
+                screenshot_flash = !screenshot_flash;
+                wx_checkmenuitem(hmenu, wParam, screenshot_flash);
+                saveconfig(NULL);
+        }
         else if (ID_IS("IDM_VID_REMEMBER"))
         {
                 window_remember = !window_remember;
@@ -815,7 +903,7 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                 window_doreset = 1;
 
                 /* update enabled menu-items */
-                wx_enablemenuitem(menu, WX_ID("IDM_VID_SDL2"), requested_render_driver.id != RENDERER_GL3);
+//                wx_enablemenuitem(menu, WX_ID("IDM_VID_SDL2"), requested_render_driver.id != RENDERER_GL3);
                 wx_enablemenuitem(menu, WX_ID("IDM_VID_GL3"), requested_render_driver.id == RENDERER_GL3);
 
                 wx_checkmenuitem(hmenu, wParam, WX_MB_CHECKED);
@@ -847,9 +935,9 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                 wx_checkmenuitem(menu, wParam, WX_MB_CHECKED);
                 saveconfig(NULL);
         }
-        else if (ID_RANGE("IDM_VID_GL3_SIMULATED_REFRESH_RATE[start]", "IDM_VID_GL3_SIMULATED_REFRESH_RATE[end]"))
+        else if (ID_RANGE("IDM_VID_GL3_SHADER_REFRESH_RATE[start]", "IDM_VID_GL3_SHADER_REFRESH_RATE[end]"))
         {
-                gl3_simulated_refresh_rate = wParam - wx_xrcid("IDM_VID_GL3_SIMULATED_REFRESH_RATE[start]");
+                gl3_shader_refresh_rate = wParam - wx_xrcid("IDM_VID_GL3_SHADER_REFRESH_RATE[start]");
                 wx_checkmenuitem(menu, wParam, WX_MB_CHECKED);
                 saveconfig(NULL);
         }

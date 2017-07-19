@@ -24,6 +24,7 @@
         	<label>Hard reset</label>
        	</object>
     </object>
+	<ids-range name="IDM_SCREENSHOT_FORMAT" start="950" />
 	<ids-range name="IDM_VID_FS" start="1000" />
 	<ids-range name="IDM_VID_FS_MODE" start="1100" />
 	<ids-range name="IDM_VID_SCALE" start="1200" />
@@ -32,7 +33,7 @@
 	<ids-range name="IDM_SND_BUF" start="2000" />
 	<ids-range name="IDM_VID_GL3_INPUT_STRETCH" start="3000" />
 	<ids-range name="IDM_VID_GL3_INPUT_SCALE" start="3100" />
-	<ids-range name="IDM_VID_GL3_SIMULATED_REFRESH_RATE" start="3200" />
+	<ids-range name="IDM_VID_GL3_SHADER_REFRESH_RATE" start="3200" />
 	<object class="wxMenuBar" name="status_menu">
 		<object class="wxMenu">
 			<label>_Options</label>
@@ -173,7 +174,7 @@
 					<radio>1</radio>
 				</object>
 				<object class="wxMenuItem" name="IDM_VID_RENDER_DRIVER[6]">
-					<label>OpenGL 3.0 (Experimental)</label>
+					<label>OpenGL 3.0</label>
 					<radio>1</radio>
 				</object>
 				<object class="wxMenuItem" name="IDM_VID_RENDER_DRIVER[5]">
@@ -183,6 +184,10 @@
 			</object>
 			<object class="wxMenuItem" name="IDM_VID_VSYNC">
 				<label>_VSync</label>
+				<checkable>1</checkable>
+			</object>
+			<object class="wxMenuItem" name="IDM_VID_LOST_FOCUS_DIM">
+				<label>_Dim display on lost focus</label>
 				<checkable>1</checkable>
 			</object>
 			<object class="separator"/>
@@ -252,14 +257,6 @@
 				</object>
 			</object>
 			<object class="separator"/>
-			<object class="wxMenu" name="IDM_VID_SDL2">
-				<label>SDL2 renderer</label>
-				<object class="wxMenuItem" name="IDM_VID_LOST_FOCUS_DIM">
-					<label>_Dim display on lost focus</label>
-					<checkable>1</checkable>
-				</object>
-				
-			</object>
 			<object class="wxMenu" name="IDM_VID_GL3">
 				<label>OpenGL 3.0 renderer</label>
 				<object class="wxMenu">
@@ -317,32 +314,36 @@
 					</object>
 				</object>
 				<object class="wxMenu">
-					<label>Simulated refresh rate</label>
-					<object class="wxMenuItem" name="IDM_VID_GL3_SIMULATED_REFRESH_RATE[10]">
+					<label>Shader refresh rate</label>
+					<object class="wxMenuItem" name="IDM_VID_GL3_SHADER_REFRESH_RATE[0]">
+						<label>Same as emulated display</label>
+						<radio>1</radio>
+					</object>
+					<object class="wxMenuItem" name="IDM_VID_GL3_SHADER_REFRESH_RATE[10]">
 						<label>10 hz</label>
 						<radio>1</radio>
 					</object>
-					<object class="wxMenuItem" name="IDM_VID_GL3_SIMULATED_REFRESH_RATE[25]">
+					<object class="wxMenuItem" name="IDM_VID_GL3_SHADER_REFRESH_RATE[25]">
 						<label>25 hz</label>
 						<radio>1</radio>
 					</object>
-					<object class="wxMenuItem" name="IDM_VID_GL3_SIMULATED_REFRESH_RATE[30]">
+					<object class="wxMenuItem" name="IDM_VID_GL3_SHADER_REFRESH_RATE[30]">
 						<label>30 hz</label>
 						<radio>1</radio>
 					</object>
-					<object class="wxMenuItem" name="IDM_VID_GL3_SIMULATED_REFRESH_RATE[50]">
+					<object class="wxMenuItem" name="IDM_VID_GL3_SHADER_REFRESH_RATE[50]">
 						<label>50 hz</label>
 						<radio>1</radio>
 					</object>
-					<object class="wxMenuItem" name="IDM_VID_GL3_SIMULATED_REFRESH_RATE[60]">
+					<object class="wxMenuItem" name="IDM_VID_GL3_SHADER_REFRESH_RATE[60]">
 						<label>60 hz</label>
 						<radio>1</radio>
 					</object>
-					<object class="wxMenuItem" name="IDM_VID_GL3_SIMULATED_REFRESH_RATE[72]">
+					<object class="wxMenuItem" name="IDM_VID_GL3_SHADER_REFRESH_RATE[72]">
 						<label>72 hz</label>
 						<radio>1</radio>
 					</object>
-					<object class="wxMenuItem" name="IDM_VID_GL3_SIMULATED_REFRESH_RATE[85]">
+					<object class="wxMenuItem" name="IDM_VID_GL3_SHADER_REFRESH_RATE[85]">
 						<label>85 hz</label>
 						<radio>1</radio>
 					</object>
@@ -377,6 +378,35 @@
 		</object>
 		<object class="wxMenu">
 			<label>Misc</label>
+			<object class="wxMenu">
+				<label>_Screenshot</label>
+				<object class="wxMenuItem" name="IDM_SCREENSHOT">
+					<label>_Take screenshot\tCtrl+Alt+PageUp</label>
+				</object>
+				<object class="wxMenu">
+					<label>_Format</label>
+					<object class="wxMenuItem" name="IDM_SCREENSHOT_FORMAT[0]">
+						<label>PNG</label>
+						<radio>1</radio>
+					</object>
+					<object class="wxMenuItem" name="IDM_SCREENSHOT_FORMAT[1]">
+						<label>TIFF</label>
+						<radio>1</radio>
+					</object>
+					<object class="wxMenuItem" name="IDM_SCREENSHOT_FORMAT[2]">
+						<label>BMP</label>
+						<radio>1</radio>
+					</object>
+					<object class="wxMenuItem" name="IDM_SCREENSHOT_FORMAT[3]">
+						<label>JPG</label>
+						<radio>1</radio>
+					</object>
+				</object>
+				<object class="wxMenuItem" name="IDM_SCREENSHOT_FLASH">
+					<label>Flash screen</label>
+					<checkable>1</checkable>
+				</object>
+			</object>
 			<object class="wxMenuItem" name="IDM_STATUS">
 				<label>_Machine</label>
 			</object>

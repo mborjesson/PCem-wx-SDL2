@@ -7,14 +7,18 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "ibm.h"
-
-
+#include "device.h"
 #include "dma.h"
 #include "io.h"
+#include "midi.h"
 #include "pic.h"
+#include "plat-midi.h"
 #include "sound.h"
+#include "sound_mpu401.h"
 #include "sound_sb_dsp.h"
 #include "timer.h"
+
+mpu_t mpu;
 
 void pollsb(void *p);
 void sb_poll_i(void *p);
@@ -319,6 +323,23 @@ void sb_exec_command(sb_dsp_t *dsp)
                 if (dsp->sb_type < SB15) break;
                 sb_start_dma_i(dsp, 1, 1, 0, dsp->sb_data[0] + (dsp->sb_data[1] << 8));
                 break;
+                case 0x30:
+                case 0x31:
+                break;
+                case 0x34:
+                dsp->uart_midi = 1;
+                dsp->uart_irq = 0;
+                break;
+                case 0x35:
+                dsp->uart_midi = 1;
+                dsp->uart_irq = 1;
+                break;
+                case 0x36:
+                case 0x37:
+                break;
+                case 0x38:
+                dsp->onebyte_midi = 1;
+                break;
                 case 0x40: /*Set time constant*/
                 dsp->sb_timei = dsp->sb_timeo = dsp->sb_data[0];
                 dsp->sblatcho = dsp->sblatchi = TIMER_USEC * (256 - dsp->sb_data[0]);
@@ -535,6 +556,12 @@ void sb_write(uint16_t a, uint8_t v, void *priv)
                 dsp->sbreset = v;
                 return;
                 case 0xC: /*Command/data write*/
+                if (dsp->uart_midi || dsp->onebyte_midi)
+                {
+                        midi_write(v);
+                        dsp->onebyte_midi = 0;
+                        return;
+                }
                 timer_process();
                 dsp->wb_time = TIMER_USEC * 1;
                 dsp->wb_full = 1;
@@ -575,6 +602,10 @@ uint8_t sb_read(uint16_t a, void *priv)
         switch (a & 0xf)
         {
                 case 0xA: /*Read data*/
+                if (dsp->uart_midi)
+                {
+                        return MPU401_ReadData(&mpu);
+                }
                 dsp->sbreaddat = dsp->sb_read_data[dsp->sb_read_rp];
                 if (dsp->sb_read_rp != dsp->sb_read_wp)
                 {

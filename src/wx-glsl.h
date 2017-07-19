@@ -137,7 +137,7 @@ struct glsl_shader {
         int last_prev_update;
         int has_prev;
 
-        float simulated_refresh_rate;
+        float shader_refresh_rate;
 };
 
 typedef struct glsl_t {
@@ -145,6 +145,7 @@ typedef struct glsl_t {
         struct glsl_shader shaders[MAX_USER_SHADERS];
         struct shader_pass scene;
         struct shader_pass final_pass;
+        struct shader_pass fs_color;
 #ifdef SDL2_SHADER_DEBUG
         struct shader_pass debug;
 #endif

@@ -20,11 +20,14 @@
 
 extern char* get_filename(char*);
 
+extern int take_screenshot;
+extern void screenshot_taken(unsigned char* rgb, int width, int height);
+
 #define SCALE_SOURCE 0
 #define SCALE_VIEWPORT 1
 #define SCALE_ABSOLUTE 2
 
-float gl3_simulated_refresh_rate = 30;
+float gl3_shader_refresh_rate = 0;
 float gl3_input_scale = 1.0f;
 int gl3_input_stretch = FULLSCR_SCALE_FULL;
 char gl3_shader_file[MAX_USER_SHADERS][512];
@@ -49,8 +52,9 @@ static GLfloat matrix[] = {
 extern int video_scale_mode;
 extern int video_vsync;
 extern int video_focus_dim;
+extern int video_refresh_rate;
 
-const char* vertex_shader_default_src =
+const char* vertex_shader_default_tex_src =
         "#version 130\n"
         "\n"
         "in vec4 VertexCoord;\n"
@@ -64,7 +68,7 @@ const char* vertex_shader_default_src =
         "       texCoord = TexCoord;\n"
         "}\n";
 
-const char* fragment_shader_default_src =
+const char* fragment_shader_default_tex_src =
         "#version 130\n"
         "\n"
         "in vec2 texCoord;\n"
@@ -75,6 +79,32 @@ const char* fragment_shader_default_src =
         "void main()\n"
         "{\n"
         "       color = texture(Texture, texCoord);\n"
+        "}\n";
+
+const char* vertex_shader_default_color_src =
+        "#version 130\n"
+        "\n"
+        "in vec4 VertexCoord;\n"
+        "in vec4 Color;\n"
+        "\n"
+        "out vec4 color;\n"
+        "\n"
+        "void main()\n"
+        "{\n"
+        "       gl_Position = VertexCoord;\n"
+        "       color = Color;\n"
+        "}\n";
+
+const char* fragment_shader_default_color_src =
+        "#version 130\n"
+        "\n"
+        "in vec4 color;\n"
+        "\n"
+        "out vec4 outColor;"
+        "\n"
+        "void main()\n"
+        "{\n"
+        "       outColor = color;\n"
         "}\n";
 
 static int next_pow2(unsigned int n)
@@ -346,6 +376,8 @@ static void delete_glsl(glsl_t* glsl)
         for (i = 0; i < glsl->num_shaders; ++i)
                 delete_shader(&glsl->shaders[i]);
         delete_pass(&glsl->scene);
+        delete_pass(&glsl->fs_color);
+        delete_pass(&glsl->final_pass);
 #ifdef SDL2_SHADER_DEBUG
         delete_pass(&glsl->debug);
 #endif
@@ -411,11 +443,11 @@ static void recreate_fbo(struct shader_fbo* fbo, int width, int height)
         }
 }
 
-static int create_default_shader(struct shader_pass* pass)
+static int create_default_shader_tex(struct shader_pass* pass)
 {
         if (
-                        !compile_shader(GL_VERTEX_SHADER, 0, vertex_shader_default_src, &pass->program.vertex_shader) ||
-                        !compile_shader(GL_FRAGMENT_SHADER, 0, fragment_shader_default_src, &pass->program.fragment_shader) ||
+                        !compile_shader(GL_VERTEX_SHADER, 0, vertex_shader_default_tex_src, &pass->program.vertex_shader) ||
+                        !compile_shader(GL_FRAGMENT_SHADER, 0, fragment_shader_default_tex_src, &pass->program.fragment_shader) ||
                         !create_program(&pass->program))
                 return 0;
         glw->glGenVertexArrays(1, &pass->vertex_array);
@@ -433,14 +465,38 @@ static int create_default_shader(struct shader_pass* pass)
         return 1;
 }
 
-/* create the deafult scene shader */
+static int create_default_shader_color(struct shader_pass* pass)
+{
+        if (
+                        !compile_shader(GL_VERTEX_SHADER, 0, vertex_shader_default_color_src, &pass->program.vertex_shader) ||
+                        !compile_shader(GL_FRAGMENT_SHADER, 0, fragment_shader_default_color_src, &pass->program.fragment_shader) ||
+                        !create_program(&pass->program))
+                return 0;
+        glw->glGenVertexArrays(1, &pass->vertex_array);
+
+        struct shader_uniforms* u = &pass->uniforms;
+        int p = pass->program.id;
+        memset(u, -1, sizeof(struct shader_uniforms));
+        u->vertex_coord = get_attrib(p, "VertexCoord");
+        u->color = get_attrib(p, "Color");
+        pass->scale.mode[0] = pass->scale.mode[1] = SCALE_SOURCE;
+        pass->scale.value[0] = pass->scale.value[1] = 1.0f;
+        pass->fbo.id = -1;
+        pass->active = 1;
+        return 1;
+}
+
+/* create the default scene shader */
 static void create_scene_shader()
 {
-        int i;
         struct shader scene_shader_conf;
         memset(&scene_shader_conf, 0, sizeof(struct shader));
-        create_default_shader(&active_shader->scene);
+        create_default_shader_tex(&active_shader->scene);
         setup_fbo(&scene_shader_conf, &active_shader->scene.fbo);
+
+        memset(&scene_shader_conf, 0, sizeof(struct shader));
+        create_default_shader_color(&active_shader->fs_color);
+        setup_fbo(&scene_shader_conf, &active_shader->fs_color.fbo);
 }
 
 static int load_texture(const char* f, struct shader_texture* tex)
@@ -682,7 +738,7 @@ static void read_shader_config()
                 struct glsl_shader* shader = &active_shader->shaders[i];
                 char* name = shader->name;
                 sprintf(s, "GL3 Shaders - %s", name);
-                shader->simulated_refresh_rate = config_get_float(CFG_MACHINE, s, "simulated_refresh_rate", 0);
+//                shader->shader_refresh_rate = config_get_float(CFG_MACHINE, s, "shader_refresh_rate", -1);
                 for (j = 0; j < shader->num_parameters; ++j)
                 {
                         struct shader_parameter* param = &shader->parameters[j];
@@ -713,12 +769,9 @@ int gl3_init(SDL_Window* window, sdl_render_driver requested_render_driver, BITM
         SDL_GL_SetSwapInterval(video_vsync ? 1 : 0);
 
         pclog("OpenGL information: [%s] %s (%s)\n", glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
-        int version[] = { 0, 0 };
-        if (SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &version[0]) != 0)
-                pclog("SDL_Error: %s\n", SDL_GetError());
-        if (SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &version[1]) != 0)
-                pclog("SDL_Error: %s\n", SDL_GetError());
-        if (version[0] < 3 || version[1] < 0)
+        int version = -1;
+        glGetIntegerv(GL_MAJOR_VERSION, &version);
+        if (version < 3)
         {
                 pclog("OpenGL 3.0 is not available.");
                 return SDL_FALSE;
@@ -865,7 +918,7 @@ int gl3_init(SDL_Window* window, sdl_render_driver requested_render_driver, BITM
                 if (shader->has_prev)
                 {
                         struct shader_pass* prev_pass = &shader->prev_scene;
-                        create_default_shader(prev_pass);
+                        create_default_shader_tex(prev_pass);
 
                         struct shader_vbo* vbo = &prev_pass->vbo;
 
@@ -901,7 +954,7 @@ int gl3_init(SDL_Window* window, sdl_render_driver requested_render_driver, BITM
         if (active_shader->num_shaders == 0 || active_shader->shaders[active_shader->num_shaders-1].passes[active_shader->shaders[active_shader->num_shaders-1].num_passes-1].fbo.id >= 0)
         {
                 struct shader_pass* final_pass = &active_shader->final_pass;
-                create_default_shader(final_pass);
+                create_default_shader_tex(final_pass);
 
                 glw->glBindVertexArray(final_pass->vertex_array);
 
@@ -918,7 +971,25 @@ int gl3_init(SDL_Window* window, sdl_render_driver requested_render_driver, BITM
                 glw->glVertexAttribPointer(final_pass->uniforms.tex_coord, 2, GL_FLOAT, GL_TRUE, 2*sizeof(GLfloat), (GLvoid*)0);
         }
 
+        {
+                struct shader_pass* color_pass = &active_shader->fs_color;
+                create_default_shader_color(color_pass);
 
+                glw->glBindVertexArray(color_pass->vertex_array);
+
+                struct shader_vbo* vbo = &color_pass->vbo;
+
+                glw->glGenBuffers(1, &vbo->vertex_coord);
+                glw->glBindBuffer(GL_ARRAY_BUFFER, vbo->vertex_coord);
+                glw->glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
+                glw->glVertexAttribPointer(color_pass->uniforms.vertex_coord, 2, GL_FLOAT, GL_FALSE, 2*sizeof(GLfloat), (GLvoid*)0);
+
+                glw->glGenBuffers(1, &vbo->color);
+                glw->glBindBuffer(GL_ARRAY_BUFFER, vbo->color);
+                glw->glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_DYNAMIC_DRAW);
+                glw->glVertexAttribPointer(color_pass->uniforms.color, 4, GL_FLOAT, GL_TRUE, 4*sizeof(GLfloat), (GLvoid*)0);
+
+        }
 #ifdef SDL2_SHADER_DEBUG
         struct shader_pass* debug_pass = &active_shader->debug;
         create_default_shader(debug_pass);
@@ -1000,10 +1071,13 @@ static void render_pass(struct render_data* data)
 
         glw->glUseProgram(p);
 
-        glw->glActiveTexture(GL_TEXTURE0 + texture_unit);
-        glBindTexture(GL_TEXTURE_2D, data->texture);
-        glw->glUniform1i(u->texture, texture_unit);
-        texture_unit++;
+        if (data->texture)
+        {
+                glw->glActiveTexture(GL_TEXTURE0 + texture_unit);
+                glBindTexture(GL_TEXTURE_2D, data->texture);
+                glw->glUniform1i(u->texture, texture_unit);
+                texture_unit++;
+        }
 
         if (u->color >= 0)              glw->glEnableVertexAttribArray(u->color);
 
@@ -1220,21 +1294,18 @@ void gl3_present(SDL_Window* window, SDL_Rect video_rect, SDL_Rect window_rect, 
                 struct glsl_shader* shader = &active_shader->shaders[s];
                 int last_shader = s == active_shader->num_shaders-1;
 
-                float refresh_rate = shader->simulated_refresh_rate;
-                if (refresh_rate <= 0)
-                        refresh_rate = gl3_simulated_refresh_rate;
+//                float refresh_rate = shader->shader_refresh_rate;
+//                if (refresh_rate < 0)
+//                        refresh_rate = gl3_shader_refresh_rate;
+                float refresh_rate = gl3_shader_refresh_rate;
+                if (refresh_rate == 0)
+                        refresh_rate = video_refresh_rate;
                 int frame_count = ticks/(1000.0f/refresh_rate);
 
                 /* loop through each pass */
                 for (i = 0; i < shader->num_passes; ++i)
                 {
                         struct shader_pass* pass = &shader->passes[i];
-//                        struct shader_pass* prev_pass = 0;
-//
-//                        if (i == 0)
-//                                prev_pass = &active_shader->scene;
-//                        else
-//                                prev_pass = &shader->passes[i-1];
 
                         memcpy(pass->state.input_size, input->state.output_size, 2*sizeof(GLfloat));
                         memcpy(pass->state.input_texture_size, input->state.output_texture_size, 2*sizeof(GLfloat));
@@ -1413,6 +1484,108 @@ void gl3_present(SDL_Window* window, SDL_Rect video_rect, SDL_Rect window_rect, 
                 render_pass(&data);
         }
 
+        if (!take_screenshot)
+        {
+                if (video_focus_dim && !(SDL_GetWindowFlags(window)&SDL_WINDOW_INPUT_FOCUS))
+                {
+                        struct shader_pass* pass = &active_shader->fs_color;
+                        GLfloat r = 0;
+                        GLfloat g = 0;
+                        GLfloat b = 0;
+                        GLfloat a = 0x80/(float)0xff;
+
+                        GLfloat colors[] = {
+                                r, g, b, a,
+                                r, g, b, a,
+                                r, g, b, a,
+                                r, g, b, a
+                        };
+
+                        glw->glBindVertexArray(pass->vertex_array);
+
+                        glw->glBindBuffer(GL_ARRAY_BUFFER, pass->vbo.color);
+                        glw->glBufferSubData(GL_ARRAY_BUFFER, 0, 16*sizeof(GLfloat), colors);
+                        glw->glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+                        memset(&data, 0, sizeof(struct render_data));
+                        data.pass = -3;
+                        data.shader_pass = pass;
+                        data.texture = 0;
+                        data.output_size = orig_output_size;
+                        data.orig_pass = orig;
+
+                        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                        glEnable(GL_BLEND);
+                        render_pass(&data);
+                        glDisable(GL_BLEND);
+                }
+                if (flash.enabled)
+                {
+                        struct shader_pass* pass = &active_shader->fs_color;
+                        GLfloat r = (flash.color[0]&0xff)/(float)0xff;
+                        GLfloat g = (flash.color[1]&0xff)/(float)0xff;
+                        GLfloat b = (flash.color[2]&0xff)/(float)0xff;
+                        GLfloat a = (flash.color[3]&0xff)/(float)0xff;
+
+                        GLfloat colors[] = {
+                                r, g, b, a,
+                                r, g, b, a,
+                                r, g, b, a,
+                                r, g, b, a
+                        };
+
+                        glw->glBindVertexArray(pass->vertex_array);
+
+                        glw->glBindBuffer(GL_ARRAY_BUFFER, pass->vbo.color);
+                        glw->glBufferSubData(GL_ARRAY_BUFFER, 0, 16*sizeof(GLfloat), colors);
+                        glw->glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+                        memset(&data, 0, sizeof(struct render_data));
+                        data.pass = -3;
+                        data.shader_pass = pass;
+                        data.texture = 0;
+                        data.output_size = orig_output_size;
+                        data.orig_pass = orig;
+
+                        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                        glEnable(GL_BLEND);
+                        render_pass(&data);
+                        glDisable(GL_BLEND);
+                }
+        }
+        else
+        {
+                take_screenshot = 0;
+
+                int width = window_rect.w;
+                int height = window_rect.h;
+
+                SDL_GetWindowSize(window, &width, &height);
+
+                unsigned char* rgba = (unsigned char*)malloc(width*height*4);
+
+                glFinish();
+                glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, rgba);
+
+                int x, y;
+                unsigned char* rgb = (unsigned char*)malloc(width*height*3);
+
+                for (x = 0; x < width; ++x)
+                {
+                        for (y = 0; y < height; ++y)
+                        {
+                                rgb[(y*width+x)*3+0] = rgba[((height-y-1)*width+x)*4+0];
+                                rgb[(y*width+x)*3+1] = rgba[((height-y-1)*width+x)*4+1];
+                                rgb[(y*width+x)*3+2] = rgba[((height-y-1)*width+x)*4+2];
+                        }
+                }
+
+                screenshot_taken(rgb, width, height);
+
+                free(rgb);
+                free(rgba);
+        }
+
         // DEBUG: render FBO
 #ifdef SDL2_SHADER_DEBUG
 //        GLint texture = scene_texture.id;
@@ -1432,6 +1605,7 @@ void gl3_present(SDL_Window* window, SDL_Rect video_rect, SDL_Rect window_rect, 
         glDisable(GL_FRAMEBUFFER_SRGB);
 
         SDL_GL_SwapWindow(window);
+
 }
 
 sdl_renderer_t* gl3_renderer_create()
@@ -1467,14 +1641,12 @@ int gl3_renderer_available(struct sdl_render_driver* driver)
                         SDL_GLContext context = SDL_GL_CreateContext(window);
                         if (context)
                         {
-                                int version[] = { 0, 0 };
-                                if (SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &version[0]) != 0)
-                                        pclog("SDL Error: %s\n", SDL_GetError());
-                                if (SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &version[1]) != 0)
-                                        pclog("SDL Error: %s\n", SDL_GetError());
+                                int version = -1;
+                                glGetIntegerv(GL_MAJOR_VERSION, &version);
+
                                 SDL_GL_DeleteContext(context);
 
-                                available = !(version[0] < 3 || version[1] < 0);
+                                available = version >= 3;
                         }
                         SDL_DestroyWindow(window);
                 }

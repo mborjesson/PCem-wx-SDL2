@@ -30,6 +30,7 @@ int mousecapture = 0;
 
 extern int pause;
 extern int video_scale;
+extern int take_screenshot;
 
 void* ghwnd;
 void* menu;
@@ -45,6 +46,7 @@ void renderer_start();
 void renderer_stop(int timeout);
 
 int trigger_fullscreen = 0;
+int trigger_screenshot = 0;
 int trigger_togglewindow = 0;
 int trigger_inputrelease = 0;
 
@@ -532,6 +534,15 @@ int render()
         {
                 trigger_fullscreen = 0;
                 toggle_fullscreen();
+        }
+        else if (rawinputkey[sdl_scancode(SDL_SCANCODE_PAGEUP)] &&
+                        (rawinputkey[sdl_scancode(SDL_SCANCODE_LCTRL)] || rawinputkey[sdl_scancode(SDL_SCANCODE_RCTRL)]) &&
+                        (rawinputkey[sdl_scancode(SDL_SCANCODE_LALT)] || rawinputkey[sdl_scancode(SDL_SCANCODE_RALT)]))
+                trigger_screenshot = 1;
+        else if (trigger_screenshot)
+        {
+                trigger_screenshot = 0;
+                take_screenshot = 1;
         }
         else if (event.key.keysym.scancode == SDL_SCANCODE_END &&
                         (rawinputkey[sdl_scancode(SDL_SCANCODE_LCTRL)] || rawinputkey[sdl_scancode(SDL_SCANCODE_RCTRL)]))

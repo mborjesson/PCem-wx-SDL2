@@ -26,6 +26,19 @@ typedef struct sdl_render_driver {
         int (*renderer_available)(struct sdl_render_driver* driver);
 } sdl_render_driver;
 
+typedef float (*FLASH_FUNC)(float v);
+
+typedef struct flash_t {
+        int enabled;
+        int time;
+        char color[4];
+        int start;
+        char alpha;
+        FLASH_FUNC func;
+} flash_t;
+
+flash_t flash;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -42,6 +55,8 @@ sdl_render_driver* sdl_get_render_drivers(int* num_renderers);
 sdl_render_driver sdl_get_render_driver_by_id(int id, int def);
 sdl_render_driver sdl_get_render_driver_by_name(const char* name, int def);
 sdl_render_driver* sdl_get_render_driver_by_name_ptr(const char* name);
+
+void color_flash(FLASH_FUNC func, int time_ms, char r, char g, char b, char a);
 
 #ifdef __cplusplus
 }
