@@ -151,5 +151,6 @@ extern void (*wx_idle_func)(void* window, void* event);
 #define IMAGE_JPG "jpg"
 #define IMAGE_PNG "png"
 #define IMAGE_BMP "bmp"
+#define IMAGE_TIFF "tiff"
 
 extern int has_been_inited;

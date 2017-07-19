@@ -23,6 +23,7 @@
         	<label>Hard reset</label>
        	</object>
     </object>
+	<ids-range name="IDM_SCREENSHOT_FORMAT" start="950" />
 	<ids-range name="IDM_VID_FS" start="1000" />
 	<ids-range name="IDM_VID_FS_MODE" start="1100" />
 	<ids-range name="IDM_VID_SCALE" start="1200" />
@@ -380,10 +381,35 @@
 		</object>
 		<object class="wxMenu">
 			<label>Misc</label>
-			<object class="wxMenuItem" name="IDM_SCREENSHOT">
-				<label>Take _screenshot\tCtrl+Alt+PageUp</label>
+			<object class="wxMenu">
+				<label>_Screenshot</label>
+				<object class="wxMenuItem" name="IDM_SCREENSHOT">
+					<label>_Take screenshot\tCtrl+Alt+PageUp</label>
+				</object>
+				<object class="wxMenu">
+					<label>_Format</label>
+					<object class="wxMenuItem" name="IDM_SCREENSHOT_FORMAT[0]">
+						<label>PNG</label>
+						<radio>1</radio>
+					</object>
+					<object class="wxMenuItem" name="IDM_SCREENSHOT_FORMAT[1]">
+						<label>TIFF</label>
+						<radio>1</radio>
+					</object>
+					<object class="wxMenuItem" name="IDM_SCREENSHOT_FORMAT[2]">
+						<label>BMP</label>
+						<radio>1</radio>
+					</object>
+					<object class="wxMenuItem" name="IDM_SCREENSHOT_FORMAT[3]">
+						<label>JPG</label>
+						<radio>1</radio>
+					</object>
+				</object>
+				<object class="wxMenuItem" name="IDM_SCREENSHOT_FLASH">
+					<label>Flash screen</label>
+					<checkable>1</checkable>
+				</object>
 			</object>
-			<object class="separator" />
 			<object class="wxMenuItem" name="IDM_STATUS">
 				<label>_Machine</label>
 			</object>

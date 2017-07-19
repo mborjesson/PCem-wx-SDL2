@@ -103,6 +103,8 @@ extern int gl3_input_stretch;
 extern char gl3_shader_file[20][512];
 
 char screenshot_format[10];
+int screenshot_flash = 1;
+int take_screenshot = 0;
 
 void warning(const char *format, ...)
 {
@@ -227,8 +229,6 @@ void set_window_title(const char *s)
         sdl_set_window_title(s);
 }
 
-int take_screenshot = 0;
-
 float flash_func(float x)
 {
         return 1 - pow(x, 4);
@@ -249,12 +249,14 @@ void screenshot_taken(unsigned char* rgb, int width, int height)
         if (wx_image_save(screenshots_path, name, screenshot_format, rgb, width, height, 0))
         {
                 pclog("Screenshot saved\n");
-                color_flash(flash_func, 500, 0xff, 0xff, 0xff, 0xff);
+                if (screenshot_flash)
+                        color_flash(flash_func, 500, 0xff, 0xff, 0xff, 0xff);
         }
         else
         {
                 pclog("Screenshot was not saved\n");
-                color_flash(flash_failed_func, 500, 0xff, 0, 0, 0xff);
+                if (screenshot_flash)
+                        color_flash(flash_failed_func, 500, 0xff, 0, 0, 0xff);
         }
 }
 
@@ -275,7 +277,8 @@ void sdl_loadconfig()
         video_fullscreen_scale = config_get_int(CFG_MACHINE, NULL, "video_fullscreen_scale", 0);
         video_fullscreen_first = config_get_int(CFG_MACHINE, NULL, "video_fullscreen_first", 1);
 
-        strcpy(screenshot_format, config_get_string(CFG_MACHINE, "SDL2", "screenshot_format", "png"));
+        strcpy(screenshot_format, config_get_string(CFG_MACHINE, "SDL2", "screenshot_format", IMAGE_PNG));
+        screenshot_flash = config_get_int(CFG_MACHINE, "SDL2", "screenshot_flash", 1);
 
         video_fullscreen = config_get_int(CFG_MACHINE, "SDL2", "fullscreen", video_fullscreen);
         video_fullscreen_mode = config_get_int(CFG_MACHINE, "SDL2", "fullscreen_mode", video_fullscreen_mode);
@@ -306,6 +309,9 @@ void sdl_saveconfig()
         config_set_int(CFG_MACHINE, NULL, "vid_resize", vid_resize);
         config_set_int(CFG_MACHINE, NULL, "video_fullscreen_scale", video_fullscreen_scale);
         config_set_int(CFG_MACHINE, NULL, "video_fullscreen_first", video_fullscreen_first);
+
+        config_set_string(CFG_MACHINE, "SDL2", "screenshot_format", screenshot_format);
+        config_set_int(CFG_MACHINE, "SDL2", "screenshot_flash", screenshot_flash);
 
         config_set_int(CFG_MACHINE, "SDL2", "fullscreen", video_fullscreen);
         config_set_int(CFG_MACHINE, "SDL2", "fullscreen_mode", video_fullscreen_mode);
@@ -400,6 +406,17 @@ int wx_setupmenu(void* data)
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
         wx_checkmenuitem(menu, WX_ID("IDM_VID_VSYNC"), video_vsync);
         wx_checkmenuitem(menu, WX_ID("IDM_VID_LOST_FOCUS_DIM"), video_focus_dim);
+
+        int format = 0;
+        if (!strcmp(screenshot_format, IMAGE_TIFF))
+                format = 1;
+        else if (!strcmp(screenshot_format, IMAGE_BMP))
+                format = 2;
+        else if (!strcmp(screenshot_format, IMAGE_JPG))
+                format = 3;
+        sprintf(menuitem, "IDM_SCREENSHOT_FORMAT[%d]", format);
+        wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
+        wx_checkmenuitem(menu, WX_ID("IDM_SCREENSHOT_FLASH"), screenshot_flash);
 
         int num_renderers;
         sdl_render_driver* drivers = sdl_get_render_drivers(&num_renderers);
@@ -807,6 +824,25 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
         else if (ID_IS("IDM_SCREENSHOT"))
         {
                 take_screenshot = 1;
+        }
+        else if (ID_RANGE("IDM_SCREENSHOT_FORMAT[start]", "IDM_SCREENSHOT_FORMAT[end]"))
+        {
+                int format = wParam - wx_xrcid("IDM_SCREENSHOT_FORMAT[start]");
+                if (format == 0)
+                        strcpy(screenshot_format, IMAGE_PNG);
+                else if (format == 1)
+                        strcpy(screenshot_format, IMAGE_TIFF);
+                else if (format == 2)
+                        strcpy(screenshot_format, IMAGE_BMP);
+                else if (format == 3)
+                        strcpy(screenshot_format, IMAGE_JPG);
+                saveconfig(NULL);
+        }
+        else if (ID_IS("IDM_SCREENSHOT_FLASH"))
+        {
+                screenshot_flash = !screenshot_flash;
+                wx_checkmenuitem(hmenu, wParam, screenshot_flash);
+                saveconfig(NULL);
         }
         else if (ID_IS("IDM_VID_REMEMBER"))
         {

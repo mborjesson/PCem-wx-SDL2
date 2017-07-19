@@ -592,7 +592,12 @@ int wx_image_save(const char* path, const char* name, const char* format, unsign
         wxImageHandler* h;
         wxString ext;
 
-        if (!strcmp(format, IMAGE_BMP))
+        if (!strcmp(format, IMAGE_TIFF))
+        {
+                h = new wxTIFFHandler();
+                ext = "tif";
+        }
+        else if (!strcmp(format, IMAGE_BMP))
         {
                 h = new wxBMPHandler();
                 ext = "bmp";
