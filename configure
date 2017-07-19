@@ -4495,7 +4495,7 @@ rm -f core conftest.err conftest.$ac_objext \
 
    fi
 else
-   SDL_VERSION=2.0.0
+   SDL_VERSION=2.0.1
 
 
 

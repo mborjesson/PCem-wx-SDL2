@@ -70,7 +70,7 @@ if test "$enable_wx" != "yes"; then
       AM_PATH_ALLEGRO(, , AC_MSG_ERROR(building PCem requires Allegro to be installed))
    fi
 else
-   SDL_VERSION=2.0.0
+   SDL_VERSION=2.0.1
    AM_PATH_SDL2($SDL_VERSION,
       :,
       AC_MSG_ERROR([*** SDL version $SDL_VERSION not found!])
