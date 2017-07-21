@@ -308,7 +308,6 @@ void xt_laserxt_init()
 void at_init()
 {
         AT = 1;
-        mem_a20_key = mem_a20_alt = 0;
         common_init();
         mem_add_bios();
         pit_set_out_func(&pit, 1, pit_refresh_timer_at);
@@ -317,6 +316,7 @@ void at_init()
         nvr_init();
         pic2_init();
         device_add(&gameport_device);
+        nmi_mask = 0;
 }
 
 void ibm_at_init()
