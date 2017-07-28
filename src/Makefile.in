@@ -122,14 +122,15 @@ am__pcem_SOURCES_DIST = 386.c 386_dynarec.c 386_dynarec_ops.c 808x.c \
 	acer386sx.c ali1429.c amstrad.c cdrom-ioctl-linux.c \
 	cdrom-image.cc cdrom-null.c codegen.c codegen_ops.c \
 	codegen_timing_486.c codegen_timing_686.c \
-	codegen_timing_pentium.c codegen_timing_winchip.c compaq.c \
-	config.c cpu.c dac.c dells200.c device.c disc.c disc_fdi.c \
-	disc_img.c disc_sector.c dma.c esdi_at.c fdc.c fdc37c665.c \
-	fdd.c fdi2raw.c gameport.c hdd.c hdd_esdi.c hdd_file.c \
-	headland.c i430lx.c i430fx.c i430vx.c ide.c intel.c \
-	intel_flash.c io.c jim.c joystick_ch_flightstick_pro.c \
-	joystick_standard.c joystick_sw_pad.c joystick_tm_fcs.c \
-	keyboard.c keyboard_amstrad.c keyboard_at.c keyboard_olim24.c \
+	codegen_timing_common.c codegen_timing_pentium.c \
+	codegen_timing_winchip.c compaq.c config.c cpu.c dac.c \
+	dells200.c device.c disc.c disc_fdi.c disc_img.c disc_sector.c \
+	dma.c esdi_at.c fdc.c fdc37c665.c fdd.c fdi2raw.c gameport.c \
+	hdd.c hdd_esdi.c hdd_file.c headland.c i430lx.c i430fx.c \
+	i430vx.c ide.c intel.c intel_flash.c io.c jim.c \
+	joystick_ch_flightstick_pro.c joystick_standard.c \
+	joystick_sw_pad.c joystick_tm_fcs.c keyboard.c \
+	keyboard_amstrad.c keyboard_at.c keyboard_olim24.c \
 	keyboard_pcjr.c keyboard_xt.c laserxt.c lpt.c mca.c mcr.c \
 	midi.c midi_mt32.c midi_system.c mem.c mfm_at.c mfm_xebec.c \
 	model.c mouse.c mouse_ps2.c mouse_serial.c neat.c nmi.c nvr.c \
@@ -223,6 +224,7 @@ am_pcem_OBJECTS = pcem-386.$(OBJEXT) pcem-386_dynarec.$(OBJEXT) \
 	pcem-codegen.$(OBJEXT) pcem-codegen_ops.$(OBJEXT) \
 	pcem-codegen_timing_486.$(OBJEXT) \
 	pcem-codegen_timing_686.$(OBJEXT) \
+	pcem-codegen_timing_common.$(OBJEXT) \
 	pcem-codegen_timing_pentium.$(OBJEXT) \
 	pcem-codegen_timing_winchip.$(OBJEXT) pcem-compaq.$(OBJEXT) \
 	pcem-config.$(OBJEXT) pcem-cpu.$(OBJEXT) pcem-dac.$(OBJEXT) \
@@ -519,14 +521,15 @@ pcem_SOURCES = 386.c 386_dynarec.c 386_dynarec_ops.c 808x.c \
 	acer386sx.c ali1429.c amstrad.c cdrom-ioctl-linux.c \
 	cdrom-image.cc cdrom-null.c codegen.c codegen_ops.c \
 	codegen_timing_486.c codegen_timing_686.c \
-	codegen_timing_pentium.c codegen_timing_winchip.c compaq.c \
-	config.c cpu.c dac.c dells200.c device.c disc.c disc_fdi.c \
-	disc_img.c disc_sector.c dma.c esdi_at.c fdc.c fdc37c665.c \
-	fdd.c fdi2raw.c gameport.c hdd.c hdd_esdi.c hdd_file.c \
-	headland.c i430lx.c i430fx.c i430vx.c ide.c intel.c \
-	intel_flash.c io.c jim.c joystick_ch_flightstick_pro.c \
-	joystick_standard.c joystick_sw_pad.c joystick_tm_fcs.c \
-	keyboard.c keyboard_amstrad.c keyboard_at.c keyboard_olim24.c \
+	codegen_timing_common.c codegen_timing_pentium.c \
+	codegen_timing_winchip.c compaq.c config.c cpu.c dac.c \
+	dells200.c device.c disc.c disc_fdi.c disc_img.c disc_sector.c \
+	dma.c esdi_at.c fdc.c fdc37c665.c fdd.c fdi2raw.c gameport.c \
+	hdd.c hdd_esdi.c hdd_file.c headland.c i430lx.c i430fx.c \
+	i430vx.c ide.c intel.c intel_flash.c io.c jim.c \
+	joystick_ch_flightstick_pro.c joystick_standard.c \
+	joystick_sw_pad.c joystick_tm_fcs.c keyboard.c \
+	keyboard_amstrad.c keyboard_at.c keyboard_olim24.c \
 	keyboard_pcjr.c keyboard_xt.c laserxt.c lpt.c mca.c mcr.c \
 	midi.c midi_mt32.c midi_system.c mem.c mfm_at.c mfm_xebec.c \
 	model.c mouse.c mouse_ps2.c mouse_serial.c neat.c nmi.c nvr.c \
@@ -705,6 +708,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-codegen_ops.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-codegen_timing_486.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-codegen_timing_686.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-codegen_timing_common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-codegen_timing_pentium.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-codegen_timing_winchip.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-codegen_x86-64.Po@am__quote@
@@ -1098,6 +1102,20 @@ pcem-codegen_timing_686.obj: codegen_timing_686.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='codegen_timing_686.c' object='pcem-codegen_timing_686.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-codegen_timing_686.obj `if test -f 'codegen_timing_686.c'; then $(CYGPATH_W) 'codegen_timing_686.c'; else $(CYGPATH_W) '$(srcdir)/codegen_timing_686.c'; fi`
+
+pcem-codegen_timing_common.o: codegen_timing_common.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-codegen_timing_common.o -MD -MP -MF $(DEPDIR)/pcem-codegen_timing_common.Tpo -c -o pcem-codegen_timing_common.o `test -f 'codegen_timing_common.c' || echo '$(srcdir)/'`codegen_timing_common.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-codegen_timing_common.Tpo $(DEPDIR)/pcem-codegen_timing_common.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='codegen_timing_common.c' object='pcem-codegen_timing_common.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-codegen_timing_common.o `test -f 'codegen_timing_common.c' || echo '$(srcdir)/'`codegen_timing_common.c
+
+pcem-codegen_timing_common.obj: codegen_timing_common.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-codegen_timing_common.obj -MD -MP -MF $(DEPDIR)/pcem-codegen_timing_common.Tpo -c -o pcem-codegen_timing_common.obj `if test -f 'codegen_timing_common.c'; then $(CYGPATH_W) 'codegen_timing_common.c'; else $(CYGPATH_W) '$(srcdir)/codegen_timing_common.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-codegen_timing_common.Tpo $(DEPDIR)/pcem-codegen_timing_common.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='codegen_timing_common.c' object='pcem-codegen_timing_common.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -c -o pcem-codegen_timing_common.obj `if test -f 'codegen_timing_common.c'; then $(CYGPATH_W) 'codegen_timing_common.c'; else $(CYGPATH_W) '$(srcdir)/codegen_timing_common.c'; fi`
 
 pcem-codegen_timing_pentium.o: codegen_timing_pentium.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CFLAGS) $(CFLAGS) -MT pcem-codegen_timing_pentium.o -MD -MP -MF $(DEPDIR)/pcem-codegen_timing_pentium.Tpo -c -o pcem-codegen_timing_pentium.o `test -f 'codegen_timing_pentium.c' || echo '$(srcdir)/'`codegen_timing_pentium.c
