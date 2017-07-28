@@ -361,8 +361,11 @@ void resetpchard()
         closeal();
 
         device_init();
+<<<<<<< HEAD
         midi_device_init();
         inital();
+=======
+>>>>>>> refs/remotes/origin/upstream
         
         timer_reset();
         sound_reset();
