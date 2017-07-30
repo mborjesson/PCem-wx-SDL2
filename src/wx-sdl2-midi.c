@@ -36,3 +36,12 @@ void plat_midi_get_dev_name(int num, char *s)
 void plat_midi_add_status_info(char *s, int max_len, struct midi_device_t* device)
 {
 }
+
+int midi_get_num_devs()
+{
+        return 0;
+}
+
+void midi_get_dev_name(int num, char *s)
+{
+}
