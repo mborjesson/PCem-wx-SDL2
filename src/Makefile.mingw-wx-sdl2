@@ -27,7 +27,7 @@ OBJ = 386.o 386_dynarec.o 386_dynarec_ops.o 808x.o acer386sx.o ali1429.o amstrad
 	wx-sdl2-video-renderer.o wx-sdl2-video-gl3.o wx-glslp-parser.o wx-shader_man.o wx-shaderconfig.o wx.res
 DBOBJ = cdrom_image.o dbopl.o nukedopl.o vid_cga_comp.o
 SIDOBJ = convolve.o convolve-sse.o envelope.o extfilt.o filter.o pot.o sid.o voice.o wave6581__ST.o wave6581_P_T.o wave6581_PS_.o wave6581_PST.o wave8580__ST.o wave8580_P_T.o wave8580_PS_.o wave8580_PST.o wave.o
-MUNTOBJ = Analog.o BReverbModel.o File.o FileStream.o LA32Ramp.o LA32FloatWaveGenerator.o LA32WaveGenerator.o MidiStreamParser.o Part.o Partial.o PartialManager.o Poly.o ROMInfo.o Synth.o Tables.o TVA.o TVF.o TVP.o sha1.o c_interface.o
+MUNTOBJ = Analog.o BReverbModel.o File.o FileStream.o LA32Ramp.o LA32FloatWaveGenerator.o LA32WaveGenerator.o MidiStreamParser.o Part.o Partial.o PartialManager.o Poly.o ROMInfo.o SampleRateConverter_dummy.o Synth.o Tables.o TVA.o TVF.o TVP.o sha1.o c_interface.o
 
 LIBS = -Wl,--subsystem,windows -mthreads -mwindows -lwxmsw$(WXVERSION)u_xrc -lwxmsw$(WXVERSION)u_html -lwxmsw$(WXVERSION)u_adv -lwxbase$(WXVERSION)u_xml -lwxmsw$(WXVERSION)u_core -lwxbase$(WXVERSION)u -lwxtiff -lwxjpeg -lwxpng -lwxzlib -lwxregexu -lwxexpat -lkernel32 -lcomdlg32 -lwinspool -lcomctl32 -lole32 -loleaut32 -luuid -lrpcrt4 -ladvapi32 -lmingw32 -lopengl32 -lopenal32 -lstdc++ -lSDL2main -lSDL2 -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid -static-libgcc
 
