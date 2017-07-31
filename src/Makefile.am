@@ -35,7 +35,8 @@ resid-fp/wave8580_PST.cc resid-fp/wave8580_P_T.cc resid-fp/wave8580__ST.cc \
 resid-fp/wave.cc \
 munt/Analog.cpp munt/BReverbModel.cpp munt/File.cpp munt/FileStream.cpp munt/LA32Ramp.cpp munt/LA32FloatWaveGenerator.cpp \
 munt/LA32WaveGenerator.cpp munt/MidiStreamParser.cpp munt/Part.cpp munt/Partial.cpp munt/PartialManager.cpp munt/Poly.cpp \
-munt/ROMInfo.cpp munt/Synth.cpp munt/Tables.cpp munt/TVA.cpp munt/TVF.cpp munt/TVP.cpp munt/sha1/sha1.cpp munt/c_interface/c_interface.cpp
+munt/ROMInfo.cpp munt/SampleRateConverter_dummy.cpp munt/Synth.cpp munt/Tables.cpp munt/TVA.cpp munt/TVF.cpp munt/TVP.cpp \
+munt/sha1/sha1.cpp munt/c_interface/c_interface.cpp
 
 if USE_WX
 pcem_CFLAGS = $(shell wx-config --cxxflags) $(shell sdl2-config --cflags)

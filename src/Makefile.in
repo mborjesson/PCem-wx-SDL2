@@ -167,19 +167,20 @@ am__pcem_SOURCES_DIST = 386.c 386_dynarec.c 386_dynarec_ops.c 808x.c \
 	munt/LA32FloatWaveGenerator.cpp munt/LA32WaveGenerator.cpp \
 	munt/MidiStreamParser.cpp munt/Part.cpp munt/Partial.cpp \
 	munt/PartialManager.cpp munt/Poly.cpp munt/ROMInfo.cpp \
-	munt/Synth.cpp munt/Tables.cpp munt/TVA.cpp munt/TVF.cpp \
-	munt/TVP.cpp munt/sha1/sha1.cpp \
-	munt/c_interface/c_interface.cpp wx-main.cc wx-config_sel.c \
-	wx-dialogbox.cc wx-utils.cc wx-app.cc wx-sdl2-joystick.c \
-	wx-sdl2-mouse.c wx-sdl2-keyboard.c wx-sdl2-video.c \
-	wx-sdl2-midi.c wx-sdl2.c wx-config.c wx-deviceconfig.cc \
-	wx-status.cc wx-sdl2-status.c wx-resources.cpp wx-thread.c \
-	wx-common.c wx-sdl2-display.c wx-sdl2-video-renderer.c \
-	wx-sdl2-video-gl3.c wx-glslp-parser.c wx-shader_man.c \
-	wx-shaderconfig.cc allegro-gui.c allegro-gui-config-sel.c \
-	allegro-gui-configure.c allegro-gui-deviceconfig.c \
-	allegro-gui-hdconf.c allegro-joystick.c allegro-keyboard.c \
-	allegro-main.c allegro-midi.c allegro-mouse.c allegro-video.c \
+	munt/SampleRateConverter_dummy.cpp munt/Synth.cpp \
+	munt/Tables.cpp munt/TVA.cpp munt/TVF.cpp munt/TVP.cpp \
+	munt/sha1/sha1.cpp munt/c_interface/c_interface.cpp wx-main.cc \
+	wx-config_sel.c wx-dialogbox.cc wx-utils.cc wx-app.cc \
+	wx-sdl2-joystick.c wx-sdl2-mouse.c wx-sdl2-keyboard.c \
+	wx-sdl2-video.c wx-sdl2-midi.c wx-sdl2.c wx-config.c \
+	wx-deviceconfig.cc wx-status.cc wx-sdl2-status.c \
+	wx-resources.cpp wx-thread.c wx-common.c wx-sdl2-display.c \
+	wx-sdl2-video-renderer.c wx-sdl2-video-gl3.c wx-glslp-parser.c \
+	wx-shader_man.c wx-shaderconfig.cc allegro-gui.c \
+	allegro-gui-config-sel.c allegro-gui-configure.c \
+	allegro-gui-deviceconfig.c allegro-gui-hdconf.c \
+	allegro-joystick.c allegro-keyboard.c allegro-main.c \
+	allegro-midi.c allegro-mouse.c allegro-video.c \
 	thread-pthread.c codegen_x86.c codegen_x86-64.c
 @USE_WX_TRUE@am__objects_1 = pcem-wx-main.$(OBJEXT) \
 @USE_WX_TRUE@	pcem-wx-config_sel.$(OBJEXT) \
@@ -313,8 +314,9 @@ am_pcem_OBJECTS = pcem-386.$(OBJEXT) pcem-386_dynarec.$(OBJEXT) \
 	pcem-MidiStreamParser.$(OBJEXT) pcem-Part.$(OBJEXT) \
 	pcem-Partial.$(OBJEXT) pcem-PartialManager.$(OBJEXT) \
 	pcem-Poly.$(OBJEXT) pcem-ROMInfo.$(OBJEXT) \
-	pcem-Synth.$(OBJEXT) pcem-Tables.$(OBJEXT) pcem-TVA.$(OBJEXT) \
-	pcem-TVF.$(OBJEXT) pcem-TVP.$(OBJEXT) pcem-sha1.$(OBJEXT) \
+	pcem-SampleRateConverter_dummy.$(OBJEXT) pcem-Synth.$(OBJEXT) \
+	pcem-Tables.$(OBJEXT) pcem-TVA.$(OBJEXT) pcem-TVF.$(OBJEXT) \
+	pcem-TVP.$(OBJEXT) pcem-sha1.$(OBJEXT) \
 	pcem-c_interface.$(OBJEXT) $(am__objects_1) $(am__objects_2) \
 	$(am__objects_3) $(am__objects_4)
 pcem_OBJECTS = $(am_pcem_OBJECTS)
@@ -566,10 +568,11 @@ pcem_SOURCES = 386.c 386_dynarec.c 386_dynarec_ops.c 808x.c \
 	munt/LA32FloatWaveGenerator.cpp munt/LA32WaveGenerator.cpp \
 	munt/MidiStreamParser.cpp munt/Part.cpp munt/Partial.cpp \
 	munt/PartialManager.cpp munt/Poly.cpp munt/ROMInfo.cpp \
-	munt/Synth.cpp munt/Tables.cpp munt/TVA.cpp munt/TVF.cpp \
-	munt/TVP.cpp munt/sha1/sha1.cpp \
-	munt/c_interface/c_interface.cpp $(am__append_1) \
-	$(am__append_2) $(am__append_3) $(am__append_5)
+	munt/SampleRateConverter_dummy.cpp munt/Synth.cpp \
+	munt/Tables.cpp munt/TVA.cpp munt/TVF.cpp munt/TVP.cpp \
+	munt/sha1/sha1.cpp munt/c_interface/c_interface.cpp \
+	$(am__append_1) $(am__append_2) $(am__append_3) \
+	$(am__append_5)
 @USE_WX_FALSE@pcem_CFLAGS = $(allegro_CFLAGS) -DPCEM_ALLEGRO \
 @USE_WX_FALSE@	$(am__append_4)
 @USE_WX_TRUE@pcem_CFLAGS = $(shell wx-config --cxxflags) $(shell \
@@ -680,6 +683,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-PartialManager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-Poly.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-ROMInfo.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-SampleRateConverter_dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-Synth.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-TVA.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcem-TVF.Po@am__quote@
@@ -4126,6 +4130,20 @@ pcem-ROMInfo.obj: munt/ROMInfo.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/ROMInfo.cpp' object='pcem-ROMInfo.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-ROMInfo.obj `if test -f 'munt/ROMInfo.cpp'; then $(CYGPATH_W) 'munt/ROMInfo.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/ROMInfo.cpp'; fi`
+
+pcem-SampleRateConverter_dummy.o: munt/SampleRateConverter_dummy.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-SampleRateConverter_dummy.o -MD -MP -MF $(DEPDIR)/pcem-SampleRateConverter_dummy.Tpo -c -o pcem-SampleRateConverter_dummy.o `test -f 'munt/SampleRateConverter_dummy.cpp' || echo '$(srcdir)/'`munt/SampleRateConverter_dummy.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-SampleRateConverter_dummy.Tpo $(DEPDIR)/pcem-SampleRateConverter_dummy.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/SampleRateConverter_dummy.cpp' object='pcem-SampleRateConverter_dummy.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-SampleRateConverter_dummy.o `test -f 'munt/SampleRateConverter_dummy.cpp' || echo '$(srcdir)/'`munt/SampleRateConverter_dummy.cpp
+
+pcem-SampleRateConverter_dummy.obj: munt/SampleRateConverter_dummy.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-SampleRateConverter_dummy.obj -MD -MP -MF $(DEPDIR)/pcem-SampleRateConverter_dummy.Tpo -c -o pcem-SampleRateConverter_dummy.obj `if test -f 'munt/SampleRateConverter_dummy.cpp'; then $(CYGPATH_W) 'munt/SampleRateConverter_dummy.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/SampleRateConverter_dummy.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pcem-SampleRateConverter_dummy.Tpo $(DEPDIR)/pcem-SampleRateConverter_dummy.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='munt/SampleRateConverter_dummy.cpp' object='pcem-SampleRateConverter_dummy.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -c -o pcem-SampleRateConverter_dummy.obj `if test -f 'munt/SampleRateConverter_dummy.cpp'; then $(CYGPATH_W) 'munt/SampleRateConverter_dummy.cpp'; else $(CYGPATH_W) '$(srcdir)/munt/SampleRateConverter_dummy.cpp'; fi`
 
 pcem-Synth.o: munt/Synth.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pcem_CXXFLAGS) $(CXXFLAGS) -MT pcem-Synth.o -MD -MP -MF $(DEPDIR)/pcem-Synth.Tpo -c -o pcem-Synth.o `test -f 'munt/Synth.cpp' || echo '$(srcdir)/'`munt/Synth.cpp
