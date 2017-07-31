@@ -180,6 +180,7 @@ static void* mt32emu_init(char* control_rom, char* pcm_rom)
         mt32emu_set_reverb_enabled(context, device_get_config_int("reverb"));
         mt32emu_set_reverb_output_gain(context, device_get_config_int("reverb_output_gain")/100.0f);
         mt32emu_set_reversed_stereo_enabled(context, device_get_config_int("reversed_stereo"));
+        mt32emu_set_nice_amp_ramp_enabled(context, device_get_config_int("nice_ramp"));
 
         pclog("mt32 output gain: %f\n", mt32emu_get_output_gain(context));
         pclog("mt32 reverb output gain: %f\n", mt32emu_get_reverb_output_gain(context));
@@ -367,6 +368,12 @@ static device_config_t mt32_config[] =
                 .description = "Reversed stereo",
                 .type = CONFIG_BINARY,
                 .default_int = 0
+        },
+        {
+                .name = "nice_ramp",
+                .description = "Nice ramp",
+                .type = CONFIG_BINARY,
+                .default_int = 1
         },
         {
                 .name = "status_show_instruments",
