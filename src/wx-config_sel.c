@@ -3,7 +3,7 @@
 #include "wx-utils.h"
 #include "paths.h"
 
-int active_config = -1;
+static int active_config = -1;
 
 extern int config_open(void* hwnd);
 

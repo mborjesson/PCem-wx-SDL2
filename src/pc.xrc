@@ -147,7 +147,7 @@
 				</object>
 				<object class="separator"/>
 				<object class="wxMenuItem" name="IDM_VID_RESOLUTION_CUSTOM">
-					<label>Set custom resolution</label>
+					<label>Set custom resolution...</label>
 				</object>
 			</object>
 			<object class="wxMenuItem" name="IDM_VID_REMEMBER">
@@ -2648,7 +2648,7 @@
 	
 	<object class="wxDialog" name="CustomResolutionDlg">
 		<style>wxDEFAULT_DIALOG_STYLE|wxSTAY_ON_TOP</style>
-		<title>PCem</title>
+		<title>Custom resolution</title>
 		<centered>1</centered>
 		<object class="wxPanel" name="ROOT_PANEL">
 			<object class="wxBoxSizer">

@@ -576,6 +576,7 @@ void resetpchard();
 void speedchanged();
 
 void saveconfig(char *fn);
+void saveconfig_global_only();
 
 void delay_ms(unsigned int ms);
 unsigned int get_ticks();
