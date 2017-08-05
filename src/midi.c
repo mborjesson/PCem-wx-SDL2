@@ -9,6 +9,9 @@
 #include "plat-midi.h"
 #include "midi_system.h"
 #include "midi_mt32.h"
+#ifdef PCEM_USE_FLUIDSYNTH
+#include "midi_fluidsynth.h"
+#endif
 
 int midi_device_current = 0;
 static int midi_device_last = 0;
@@ -26,6 +29,9 @@ static MIDI_DEVICE devices[] =
         {SYSTEM_MIDI_NAME,              SYSTEM_MIDI_INTERNAL_NAME,      &system_midi_device},
         {"Roland MT-32 Emulation",      "mt32",                         &mt32_device},
         {"Roland CM-32L Emulation",     "cm32l",                        &cm32l_device},
+#ifdef PCEM_USE_FLUIDSYNTH
+        {"FluidSynth",                  "fluidsynth",                   &fluidsynth_device},
+#endif
         {"", "", NULL}
 };
 

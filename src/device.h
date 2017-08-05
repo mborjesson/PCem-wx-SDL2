@@ -3,12 +3,27 @@
 #define CONFIG_BINARY 2
 #define CONFIG_SELECTION 3
 #define CONFIG_MIDI 4
+#define CONFIG_FILE 5
+#define CONFIG_SPINNER 6
 
 typedef struct device_config_selection_t
 {
         char description[256];
         int value;
 } device_config_selection_t;
+
+typedef struct device_config_file_filter_t
+{
+        char description[256];
+        char extensions[25][25];
+} device_config_file_filter_t;
+
+typedef struct device_config_spinner_t
+{
+        int min;
+        int max;
+        int step;
+} device_config_spinner_t;
 
 typedef struct device_config_t
 {
@@ -17,7 +32,9 @@ typedef struct device_config_t
         int type;
         char default_string[256];
         int default_int;
+        device_config_file_filter_t file_filter[16];
         device_config_selection_t selection[16];
+        device_config_spinner_t spinner;
 } device_config_t;
 
 typedef struct device_t

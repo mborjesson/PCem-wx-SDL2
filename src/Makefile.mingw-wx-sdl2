@@ -31,6 +31,12 @@ MUNTOBJ = Analog.o BReverbModel.o File.o FileStream.o LA32Ramp.o LA32FloatWaveGe
 
 LIBS = -Wl,--subsystem,windows -mthreads -mwindows -lwxmsw$(WXVERSION)u_xrc -lwxmsw$(WXVERSION)u_html -lwxmsw$(WXVERSION)u_adv -lwxbase$(WXVERSION)u_xml -lwxmsw$(WXVERSION)u_core -lwxbase$(WXVERSION)u -lwxtiff -lwxjpeg -lwxpng -lwxzlib -lwxregexu -lwxexpat -lkernel32 -lcomdlg32 -lwinspool -lcomctl32 -lole32 -loleaut32 -luuid -lrpcrt4 -ladvapi32 -lmingw32 -lopengl32 -lopenal32 -lstdc++ -lSDL2main -lSDL2 -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid -static-libgcc
 
+ifeq ($(FLUIDSYNTH),1)
+	CFLAGS += -DPCEM_USE_FLUIDSYNTH
+	OBJ += midi_fluidsynth.o
+	LIBS += -lfluidsynth
+endif
+
 PCem-wx-SDL2.exe: $(OBJ) $(DBOBJ) $(SIDOBJ) $(MUNTOBJ)
 	$(CC) $(OBJ) $(DBOBJ) $(SIDOBJ) $(MUNTOBJ) -o "PCem-wx-SDL2.exe" $(LIBS)
 	strip -s PCem-wx-SDL2.exe

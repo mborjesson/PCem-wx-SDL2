@@ -30,6 +30,12 @@ MUNTOBJ = Analog.o BReverbModel.o File.o FileStream.o LA32Ramp.o LA32FloatWaveGe
 
 LIBS = -lopenal -lstdc++ -lpthread -lm $(shell wx-config --libs) $(shell sdl2-config --libs) -lGL
 
+ifeq ($(FLUIDSYNTH),1)
+	CFLAGS += -DPCEM_USE_FLUIDSYNTH
+	OBJ += midi_fluidsynth.o
+	LIBS += -lfluidsynth
+endif
+
 PCem64-wx-SDL2: $(OBJ) $(DBOBJ) $(SIDOBJ) $(MUNTOBJ) $(MUNTHELPEROBJ)
 	$(CC) $(OBJ) $(DBOBJ) $(SIDOBJ) $(MUNTOBJ) $(MUNTHELPEROBJ) -o "PCem64-wx-SDL2" $(LIBS)
 
