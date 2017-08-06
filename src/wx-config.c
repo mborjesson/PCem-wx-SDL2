@@ -11,6 +11,7 @@
 #include "model.h"
 #include "mouse.h"
 #include "mem.h"
+#include "nethandler.h"
 #include "nvr.h"
 #include "sound.h"
 #include "video.h"
@@ -25,7 +26,9 @@ static int romstolist[ROM_MAX], listtomodel[ROM_MAX], romstomodel[ROM_MAX],
 static int settings_sound_to_list[20], settings_list_to_sound[20];
 static int settings_midi_to_list[20], settings_list_to_midi[20];
 static int settings_mouse_to_list[20], settings_list_to_mouse[20];
+#ifdef USE_NETWORKING
 static int settings_network_to_list[20], settings_list_to_network[20];
+#endif
 static char *hdd_names[16];
 
 int has_been_inited = 0;
@@ -238,21 +241,62 @@ static void recalc_hdd_list(void* hdlg, int model, int use_selected_hdd)
         }
 }
 
+#ifdef USE_NETWORKING
+static void recalc_net_list(void *hdlg, int model)
+{
+        void *h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBO_NETCARD"));
+        int c = 0, d = 0;
+        int set_zero = 0;
+
+        wx_sendmessage(h, WX_CB_RESETCONTENT, 0, 0);
+
+        while (1)
+        {
+                char *s = network_card_getname(c);
+
+                if (!s[0])
+                        break;
+
+                settings_network_to_list[c] = d;
+                        
+                if (network_card_available(c))
+                {
+                        device_t *network_dev = network_card_getdevice(c);
+
+                        if (!network_dev || (network_dev->flags & DEVICE_MCA) == (models[model].flags & MODEL_MCA))
+                        {
+                                wx_sendmessage(h, WX_CB_ADDSTRING, 0, (LONG_PARAM)s);
+                                settings_list_to_network[d] = c;
+                                d++;
+                        }
+                        else if (c == network_card_current)
+                                set_zero = 1;
+                }
+
+                c++;
+        }
+        if (set_zero)
+                wx_sendmessage(h, WX_CB_SETCURSEL, 0, 0);
+        else
+                wx_sendmessage(h, WX_CB_SETCURSEL, settings_network_to_list[network_card_current], 0);
+}
+#endif
+
 int config_dlgsave(void* hdlg)
 {
         char temp_str[256];
         void* h;
-        int c, d;
-        int rom, gfx, fpu;
+        int c;
+        int gfx, fpu;
         int temp_cpu, temp_cpu_m, temp_model;
         int temp_GAMEBLASTER, temp_GUS, temp_SSI2001, temp_voodoo, temp_sound_card_current, temp_midi_device_current;
         int temp_dynarec;
-        int cpu_flags;
         int temp_fda_type, temp_fdb_type;
-        int temp_joystick_type;
-        int cpu_type;
         int temp_mouse_type;
-        int hdd_changed;
+#ifdef USE_NETWORKING
+        int temp_network_card;
+#endif
+        int hdd_changed = 0;
         char s[260];
         PcemHDC hd[4];
 
@@ -320,6 +364,10 @@ int config_dlgsave(void* hdlg)
         if (hdd_names[c])
                 hdd_changed = strncmp(hdd_names[c], hdd_controller_name, sizeof(hdd_controller_name)-1);
 
+#ifdef USE_NETWORKING
+        h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBO_NETCARD"));
+        temp_network_card = settings_list_to_network[wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0)];
+#endif                        
 
         if (temp_model != model || gfx != gfxcard || mem != mem_size ||
             fpu != hasfpu || temp_GAMEBLASTER != GAMEBLASTER || temp_GUS != GUS ||
@@ -327,7 +375,11 @@ int config_dlgsave(void* hdlg)
             temp_midi_device_current != midi_device_current ||
             temp_voodoo != voodoo_enabled || temp_dynarec != cpu_use_dynarec ||
             temp_fda_type != fdd_get_type(0) || temp_fdb_type != fdd_get_type(1) ||
-            temp_mouse_type != mouse_type || hdd_changed || hd_changed || cdrom_channel != new_cdrom_channel)
+            temp_mouse_type != mouse_type || hdd_changed || hd_changed || cdrom_channel != new_cdrom_channel
+#ifdef USE_NETWORKING
+                            || temp_network_card != network_card_current
+#endif
+            )
         {
                 if (!has_been_inited || confirm())
                 {
@@ -346,6 +398,9 @@ int config_dlgsave(void* hdlg)
                         voodoo_enabled = temp_voodoo;
                         cpu_use_dynarec = temp_dynarec;
                         mouse_type = temp_mouse_type;
+#ifdef USE_NETWORKING
+                        network_card_current = temp_network_card;
+#endif
 
                         fdd_set_type(0, temp_fda_type);
                         fdd_set_type(1, temp_fdb_type);
@@ -449,16 +504,16 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
         char temp_str[256];
         void* h;
         int c, d;
-        int rom, gfx, mem, fpu;
+        int gfx, mem;
         int temp_cpu, temp_cpu_m, temp_model;
-        int temp_GAMEBLASTER, temp_GUS, temp_SSI2001, temp_voodoo, temp_sound_card_current, temp_midi_device_current;
+        int temp_sound_card_current, temp_midi_device_current;
         int temp_dynarec;
         int cpu_flags;
-        int temp_fda_type, temp_fdb_type;
-        int temp_joystick_type;
         int cpu_type;
         int temp_mouse_type;
-        int hdd_changed;
+#ifdef USE_NETWORKING
+        int temp_network_card;
+#endif
 
         switch (message)
         {
@@ -690,6 +745,16 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
 
                         hdconf_init(hdlg);
 
+#ifdef USE_NETWORKING
+                        recalc_net_list(hdlg, romstomodel[romset]);
+
+                        h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBO_NETCARD"));
+                        if (network_card_has_config(network_card_current))
+                                wx_enablewindow(h, TRUE);
+                        else
+                                wx_enablewindow(h, FALSE);
+#endif
+
                         return TRUE;
                 }
                 break;
@@ -818,6 +883,10 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 recalc_snd_list(hdlg, temp_model);
 
                                 recalc_midi_list(hdlg, temp_model);
+
+#ifdef USE_NETWORKING
+                                recalc_net_list(hdlg, temp_model);
+#endif
                         }
                         else if (wParam == WX_ID("IDC_COMBOCPUM"))
                         {
@@ -972,6 +1041,19 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                         {
                                 hdconf_update(hdlg);
                         }
+#ifdef USE_NETWORKING
+                        else if (wParam == WX_ID("IDC_COMBO_NETCARD"))
+                        {
+                                h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBO_NETCARD"));
+                                temp_network_card = settings_list_to_network[wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0)];
+                                
+                                h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBO_NETCARD"));
+                                if (network_card_has_config(temp_network_card))
+                                        wx_enablewindow(h, TRUE);
+                                else
+                                        wx_enablewindow(h, FALSE);
+                        }
+#endif
                         //
                         //      case IDC_COMBOJOY:
                         //      if (HIWORD(wParam) == CBN_SELCHANGE) {
@@ -1020,6 +1102,7 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                         return 0;
                 }
         }
+        return 0;
 }
 
 static struct
@@ -1104,9 +1187,6 @@ static void check_hd_type(void* hdlg, off64_t sz)
         }
 }
 
-#define ID_IS(s) wParam == wx_xrcid(s)
-#define ID_RANGE(a, b) wParam >= wx_xrcid(a) && wParam <= wx_xrcid(b)
-
 static void update_hdd_cdrom(void* hdlg)
 {
         void* h;
@@ -1169,7 +1249,6 @@ static int hdnew_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM l
         int c;
         PcemHDC hd[4];
         FILE *f;
-        uint8_t buf[512];
         int hd_type;
 
         switch (message)
@@ -1487,7 +1566,6 @@ int hdconf_init(void* hdlg)
 int hdconf_update(void* hdlg)
 {
         char s[260];
-        void* h;
 
         int is_mfm = hdd_controller_selected_is_mfm(hdlg);
 
@@ -1971,7 +2049,6 @@ int hdconf_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
 
 int config_dialog_proc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
 {
-        void* h;
         switch (message)
         {
         case WX_INITDIALOG:
