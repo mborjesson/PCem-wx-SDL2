@@ -3,7 +3,7 @@ CPP  = g++.exe
 CC   = gcc.exe
 MAKE = make.exe
 WINDRES = windres.exe
-CFLAGS = -O3 -march=i686 -fomit-frame-pointer -msse2 -mstackrealign -Wall -Werror -fno-strict-aliasing -DUSE_NETWORKING
+CFLAGS = -O3 -march=i686 -fomit-frame-pointer -msse2 -mstackrealign -Werror -fno-strict-aliasing -DUSE_NETWORKING
 OBJ = 386.o 386_dynarec.o 386_dynarec_ops.o 808x.o acer386sx.o ali1429.o amstrad.o cdrom-ioctl.o cdrom-image.o \
 	codegen.o codegen_ops.o codegen_timing_486.o codegen_timing_686.o codegen_timing_common.o codegen_timing_pentium.o codegen_timing_winchip.o codegen_x86.o compaq.o config.o cpu.o dac.o \
 	dells200.o device.o disc.o disc_fdi.o disc_img.o disc_sector.o dma.o esdi_at.o fdc.o fdc37c665.o fdd.o fdi2raw.o gameport.o hdd.o hdd_esdi.o hdd_file.o headland.o i430lx.o i430fx.o \
@@ -28,6 +28,12 @@ MUNTOBJ = Analog.o BReverbModel.o File.o FileStream.o LA32Ramp.o LA32FloatWaveGe
 NETOBJ = ne2000.o nethandler.o
 
 LIBS = -mwindows -lwinmm -lopenal32 -lddraw -ldinput -ldxguid -ld3d9 -lwsock32 -liphlpapi -lstdc++
+
+ifeq ($(FLUIDSYNTH),1)
+	CFLAGS += -DPCEM_USE_FLUIDSYNTH
+	OBJ += midi_fluidsynth.o
+	LIBS += -lfluidsynth
+endif
 
 PCem.exe: $(OBJ) $(DBOBJ) $(SIDOBJ) $(MUNTOBJ) $(NETOBJ) libslirp.a
 	$(CC) $(OBJ) $(DBOBJ) $(SIDOBJ) $(MUNTOBJ) $(NETOBJ) slirp/libslirp.a -o "PCem.exe" $(LIBS)
