@@ -8,7 +8,8 @@
 #include "midi_mt32.h"
 #include "midi.h"
 
-#define RENDER_RATE 30
+#define RENDER_RATE 100
+#define BUFFER_SEGMENTS 10
 #define MESSAGE_HIDE 10000
 
 extern void givealbuffer_midi(void *buf, uint32_t size);
@@ -122,20 +123,28 @@ void mt32_poll(midi_device_t* device)
                 data->midi_pos = 0;
                 thread_set_event(data->event);
         }
-        if (get_ticks() > data->message_shown+MESSAGE_HIDE)
+        if (data->message[0] && get_ticks() > data->message_shown+MESSAGE_HIDE)
                 data->message[0] = 0;
 }
 
 static void mt32_thread(void *param)
 {
         mt32_t* data = (mt32_t*)param;
+        int buf_pos = 0;
+        int buf_size = data->buf_size/BUFFER_SEGMENTS;
         while (1)
         {
                 thread_wait_event(data->event, -1);
-                memset(data->buffer, 0, data->buf_size);
-                mt32_stream(data->context, data->buffer, data->buf_size/4);
-                if (soundon)
-                        givealbuffer_midi(data->buffer, data->buf_size);
+                uint16_t* buf = (uint16_t*)((uint8_t*)data->buffer + buf_pos);
+                memset(buf, 0, buf_size);
+                mt32_stream(data->context, buf, buf_size/4);
+                buf_pos += buf_size;
+                if (buf_pos >= data->buf_size)
+                {
+                        if (soundon)
+                                givealbuffer_midi(data->buffer, data->buf_size);
+                        buf_pos = 0;
+                }
         }
 }
 
@@ -170,7 +179,7 @@ static void* mt32emu_init(char* control_rom, char* pcm_rom)
         }
 
         data->samplerate = mt32emu_get_actual_stereo_output_samplerate(context);
-        data->buf_size = data->samplerate/RENDER_RATE*4;
+        data->buf_size = data->samplerate/RENDER_RATE*4*BUFFER_SEGMENTS;
         data->buffer = malloc(data->buf_size);
         data->event = thread_create_event();
         data->thread_h = thread_create(mt32_thread, data);

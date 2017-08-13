@@ -10,7 +10,8 @@
 
 /* some code borrowed from scummvm */
 
-#define RENDER_RATE 30
+#define RENDER_RATE 100
+#define BUFFER_SEGMENTS 10
 
 extern void givealbuffer_midi(void *buf, uint32_t size);
 extern void pclog(const char *format, ...);
@@ -51,14 +52,22 @@ void fluidsynth_poll(midi_device_t* device)
 static void fluidsynth_thread(void *param)
 {
         fluidsynth_t* data = (fluidsynth_t*)param;
+        int buf_pos = 0;
+        int buf_size = data->buf_size/BUFFER_SEGMENTS;
         while (1)
         {
                 thread_wait_event(data->event, -1);
-                memset(data->buffer, 0, data->buf_size);
+                uint16_t* buf = (uint16_t*)((uint8_t*)data->buffer + buf_pos);
+                memset(buf, 0, buf_size);
                 if (data->synth)
-                        fluid_synth_write_s16(data->synth, data->buf_size/4, data->buffer, 0, 2, data->buffer, 1, 2);
-                if (soundon)
-                        givealbuffer_midi(data->buffer, data->buf_size);
+                        fluid_synth_write_s16(data->synth, buf_size/4, buf, 0, 2, buf, 1, 2);
+                buf_pos += buf_size;
+                if (buf_pos >= data->buf_size)
+                {
+                        if (soundon)
+                                givealbuffer_midi(data->buffer, data->buf_size);
+                        buf_pos = 0;
+                }
         }
 }
 
@@ -174,7 +183,7 @@ void* fluidsynth_init()
         double samplerate;
         fluid_settings_getnum(data->settings, "synth.sample-rate", &samplerate);
         data->samplerate = (int)samplerate;
-        data->buf_size = data->samplerate/RENDER_RATE*4;
+        data->buf_size = data->samplerate/RENDER_RATE*4*BUFFER_SEGMENTS;
         data->buffer = malloc(data->buf_size);
         data->event = thread_create_event();
         data->thread_h = thread_create(fluidsynth_thread, data);
