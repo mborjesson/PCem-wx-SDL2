@@ -12,11 +12,12 @@
 
 void video_blit_complete();
 
-static BITMAP *buffer32_vscale;
 BITMAP *screen;
+static BITMAP *screen_copy;
 SDL_Rect old_screen_rect;
 SDL_Rect screen_rect;
 SDL_Rect updated_rect;
+SDL_Rect updated_rect_copy;
 SDL_Rect window_rect;
 SDL_Rect blit_rect;
 SDL_Rect texture_rect;
@@ -53,22 +54,6 @@ void hline(BITMAP *b, int x1, int y, int x2, int col)
 
         for (; x1 < x2; x1++)
                 ((uint32_t *)b->line[y])[x1] = col;
-}
-
-void blit(BITMAP *src, BITMAP *dst, int x1, int y1, int x2, int y2, int xs, int ys)
-{
-}
-
-void stretch_blit(BITMAP *src, BITMAP *dst, int x1, int y1, int xs1, int ys1, int x2, int y2, int xs2, int ys2)
-{
-}
-
-void rectfill(BITMAP *b, int x1, int y1, int x2, int y2, uint32_t col)
-{
-}
-
-void set_palette(PALETTE p)
-{
 }
 
 void destroy_bitmap(BITMAP *b)
@@ -254,8 +239,8 @@ int sdl_video_init()
         video_blit_memtoscreen_func = sdl_blit_memtoscreen;
         requested_render_driver = sdl_get_render_driver_by_id(RENDERER_AUTO, RENDERER_AUTO);
 
-        buffer32_vscale = create_bitmap(2048, 2048);
         screen = create_bitmap(2048, 2048);
+        screen_copy = create_bitmap(2048, 2048);
 
         return SDL_TRUE;
 }
@@ -264,15 +249,15 @@ void sdl_video_close()
 {
         requested_render_driver.renderer_close(renderer);
         renderer = NULL;
-        destroy_bitmap(buffer32_vscale);
         destroy_bitmap(screen);
+        destroy_bitmap(screen_copy);
         SDL_DestroyMutex(blitMutex);
 }
 
 int sdl_renderer_init(SDL_Window* window)
 {
         renderer = requested_render_driver.renderer_create();
-        return renderer->init(window, requested_render_driver, screen);
+        return renderer->init(window, requested_render_driver, screen_copy);
 }
 
 void sdl_renderer_close()
@@ -289,12 +274,15 @@ int sdl_renderer_update(SDL_Window* window)
         if (updated)
         {
                 updated = 0;
-                renderer->update(window, updated_rect, screen);
+                memcpy(screen_copy->dat + (updated_rect.y * screen_copy->w * 4), screen->dat + (updated_rect.y * screen->w * 4), updated_rect.h * screen->w * 4);
+                memcpy(&updated_rect_copy, &updated_rect, sizeof(updated_rect));
                 texture_rect.w = blit_rect.w;
                 texture_rect.h = blit_rect.h;
                 render = 1;
         }
         SDL_UnlockMutex(blitMutex);
+        if (render)
+                renderer->update(window, updated_rect_copy, screen_copy);
         return render || renderer->always_update;
 }
 
@@ -312,7 +300,7 @@ void sdl_renderer_present(SDL_Window* window)
         SDL_Rect wr;
         SDL_GetWindowSize(window, &wr.w, &wr.h);
         sdl_scale(video_fullscreen_scale, wr, &wr, texture_rect.w, texture_rect.h);
-        renderer->present(window, texture_rect, wr, screen);
+        renderer->present(window, texture_rect, wr, screen_copy);
 
 }
 
