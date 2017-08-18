@@ -382,7 +382,7 @@ void wx_initmenu()
                 }
         }
 #elif __linux__
-        wx_appendmenu(cdrom_submenu, IDM_CDROM_REAL, "Host CD/DVD Drive (/dev/cdrom)", wxITEM_RADIO);
+        wx_appendmenu(cdrom_submenu, IDM_CDROM_REAL+1, "Host CD/DVD Drive (/dev/cdrom)", wxITEM_RADIO);
 #endif
 
 }
@@ -1152,6 +1152,9 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                         }
                 }
                 new_cdrom_drive = wParam-IDM_CDROM_REAL;
+#ifdef __linux
+                new_cdrom_drive += 1;
+#endif
                 if ((cdrom_drive == new_cdrom_drive) && cdrom_enabled)
                 {
                         /* Switching to the same drive. Do nothing. */
