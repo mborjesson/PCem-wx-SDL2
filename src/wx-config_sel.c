@@ -248,7 +248,7 @@ static int config_selection_dlgproc(void* hdlg, int message, INT_PARAM wParam, L
 
                                 return TRUE;
                         }
-                        else if (wParam == WX_ID("IDC_DUPLICATE"))
+                        else if (wParam == WX_ID("IDC_COPY"))
                         {
                                 char name[64];
                                 char old_name[64];
