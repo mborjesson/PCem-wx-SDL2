@@ -378,7 +378,7 @@ void wx_initmenu()
                 if (GetDriveTypeA(s)==DRIVE_CDROM)
                 {
                         sprintf(s, "Host CD/DVD Drive (%c:)", c);
-                        wx_appendmenu(cdrom_submenu, IDM_CDROM_REAL+(c-'A'), s, wxITEM_RADIO);
+                        wx_appendmenu(cdrom_submenu, IDM_CDROM_REAL+c, s, wxITEM_RADIO);
                 }
         }
 #elif __linux__
@@ -1151,7 +1151,7 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                                 return 0;
                         }
                 }
-                new_cdrom_drive = wParam-IDM_CDROM_REAL+1;
+                new_cdrom_drive = wParam-IDM_CDROM_REAL;
                 if ((cdrom_drive == new_cdrom_drive) && cdrom_enabled)
                 {
                         /* Switching to the same drive. Do nothing. */
