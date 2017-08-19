@@ -1152,9 +1152,6 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                         }
                 }
                 new_cdrom_drive = wParam-IDM_CDROM_REAL;
-#ifdef __linux
-                new_cdrom_drive += 1;
-#endif
                 if ((cdrom_drive == new_cdrom_drive) && cdrom_enabled)
                 {
                         /* Switching to the same drive. Do nothing. */
