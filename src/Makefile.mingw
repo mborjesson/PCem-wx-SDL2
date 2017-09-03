@@ -48,7 +48,7 @@ clean :
 	$(CC) $(CFLAGS) -c $<
 
 %.o : %.cc
-	$(CPP) $(CXXFLAGS) -c $<
+	$(CPP) $(CFLAGS) -c $<
 
 pc.res: pc.rc
 	$(WINDRES) -i pc.rc --input-format=rc -o pc.res -O coff 
