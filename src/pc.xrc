@@ -205,6 +205,10 @@
 				<label>_Dim display on lost focus</label>
 				<checkable>1</checkable>
 			</object>
+			<object class="wxMenuItem" name="IDM_VID_ALTERNATIVE_UPDATE_LOCK">
+				<label>Alternative update-lock</label>
+				<checkable>1</checkable>
+			</object>
 			<object class="separator"/>
 			<object class="wxMenu">
 				<label>Scale filtering</label>
@@ -895,6 +899,50 @@
 										<checked>0</checked>
 									</object>
 								</object>
+								<object class="spacer">
+									<option>1</option>
+									<flag>wxEXPAND</flag>
+									<border>5</border>
+									<size>0,0</size>
+								</object>
+
+								<object class="sizeritem">
+									<option>0</option>
+									<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
+									<border>5</border>
+									<object class="wxStaticText">
+										<size>80,-1</size>
+										<label>LPT Device:</label>
+										<wrap>-1</wrap>
+									</object>
+								</object>
+								<object class="sizeritem">
+									<option>1</option>
+									<flag>wxEXPAND</flag>
+									<border>5</border>
+									<object class="wxBoxSizer">
+										<orient>wxHORIZONTAL</orient>
+										<object class="sizeritem">
+											<option>0</option>
+											<flag>wxALL</flag>
+											<border>5</border>
+											<object class="wxComboBox" name="IDC_COMBOLPT1">
+												<style>wxCB_DROPDOWN|wxCB_READONLY</style>
+												<size>350,-1</size>
+												<value></value>
+												<content />
+											</object>
+										</object>
+									</object>
+								</object>
+								<object class="spacer">
+									<option>1</option>
+									<flag>wxEXPAND</flag>
+									<border>5</border>
+									<size>0,0</size>
+								</object>
+
+
 							</object>
 						</object>
 					</object>
@@ -2475,6 +2523,17 @@
 									<style>wxBU_AUTODRAW</style>
 									<tooltip>Rename</tooltip>
 									<bitmap>icons/32x32/computer_edit.png</bitmap>
+									<default>0</default>
+								</object>
+							</object>
+							<object class="sizeritem">
+								<option>0</option>
+								<flag>wxALL</flag>
+								<border>5</border>
+								<object class="wxBitmapButton" name="IDC_COPY">
+									<style>wxBU_AUTODRAW</style>
+									<tooltip>Copy</tooltip>
+									<bitmap>icons/32x32/computer_go.png</bitmap>
 									<default>0</default>
 								</object>
 							</object>

@@ -289,6 +289,7 @@ void sdl_loadconfig()
         video_scale_mode = config_get_int(CFG_MACHINE, "SDL2", "scale_mode", video_scale_mode);
         video_vsync = config_get_int(CFG_MACHINE, "SDL2", "vsync", video_vsync);
         video_focus_dim = config_get_int(CFG_MACHINE, "SDL2", "focus_dim", video_focus_dim);
+        video_alternative_update_lock = config_get_int(CFG_MACHINE, "SDL2", "alternative_update_lock", video_alternative_update_lock);
         requested_render_driver = sdl_get_render_driver_by_name(config_get_string(CFG_MACHINE, "SDL2", "render_driver", ""), RENDERER_SOFTWARE);
 
         gl3_input_scale = config_get_float(CFG_MACHINE, "GL3", "input_scale", gl3_input_scale);
@@ -325,6 +326,7 @@ void sdl_saveconfig()
         config_set_int(CFG_MACHINE, "SDL2", "scale_mode", video_scale_mode);
         config_set_int(CFG_MACHINE, "SDL2", "vsync", video_vsync);
         config_set_int(CFG_MACHINE, "SDL2", "focus_dim", video_focus_dim);
+        config_set_int(CFG_MACHINE, "SDL2", "alternative_update_lock", video_alternative_update_lock);
         config_set_string(CFG_MACHINE, "SDL2", "render_driver", (char*)requested_render_driver.sdl_id);
 
         config_set_float(CFG_MACHINE, "GL3", "input_scale", gl3_input_scale);
@@ -376,11 +378,11 @@ void wx_initmenu()
                 if (GetDriveTypeA(s)==DRIVE_CDROM)
                 {
                         sprintf(s, "Host CD/DVD Drive (%c:)", c);
-                        wx_appendmenu(cdrom_submenu, IDM_CDROM_REAL+(c-'A'), s, wxITEM_RADIO);
+                        wx_appendmenu(cdrom_submenu, IDM_CDROM_REAL+c, s, wxITEM_RADIO);
                 }
         }
 #elif __linux__
-        wx_appendmenu(cdrom_submenu, IDM_CDROM_REAL, "Host CD/DVD Drive (/dev/cdrom)", wxITEM_RADIO);
+        wx_appendmenu(cdrom_submenu, IDM_CDROM_REAL+1, "Host CD/DVD Drive (/dev/cdrom)", wxITEM_RADIO);
 #endif
 
 }
@@ -413,6 +415,7 @@ int wx_setupmenu(void* data)
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
         wx_checkmenuitem(menu, WX_ID("IDM_VID_VSYNC"), video_vsync);
         wx_checkmenuitem(menu, WX_ID("IDM_VID_LOST_FOCUS_DIM"), video_focus_dim);
+        wx_checkmenuitem(menu, WX_ID("IDM_VID_ALTERNATIVE_UPDATE_LOCK"), video_alternative_update_lock);
 
         int format = 0;
         if (!strcmp(screenshot_format, IMAGE_TIFF))
@@ -973,6 +976,13 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                 wx_checkmenuitem(menu, wParam, video_focus_dim);
                 saveconfig(NULL);
         }
+        else if (ID_IS("IDM_VID_ALTERNATIVE_UPDATE_LOCK"))
+        {
+                video_alternative_update_lock = !video_alternative_update_lock;
+                wx_checkmenuitem(menu, wParam, video_alternative_update_lock);
+                renderer_doreset = 1;
+                saveconfig(NULL);
+        }
         else if (ID_RANGE("IDM_VID_GL3_INPUT_STRETCH[start]", "IDM_VID_GL3_INPUT_STRETCH[end]"))
         {
                 gl3_input_stretch = wParam - wx_xrcid("IDM_VID_GL3_INPUT_STRETCH[start]");
@@ -1141,7 +1151,7 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
                                 return 0;
                         }
                 }
-                new_cdrom_drive = wParam-IDM_CDROM_REAL+1;
+                new_cdrom_drive = wParam-IDM_CDROM_REAL;
                 if ((cdrom_drive == new_cdrom_drive) && cdrom_enabled)
                 {
                         /* Switching to the same drive. Do nothing. */
