@@ -109,9 +109,10 @@ static BOOL CALLBACK config_selection_dlgproc(HWND hdlg, UINT message, WPARAM wP
 
                                 if (!getsfile(hdlg, "Configuration (*.CFG)\0*.CFG\0All files (*.*)\0*.*\0", s, s, "cfg"))
                                 {
+                                        strcpy(s, openfilestring);
                                         config_open(hdlg);
                                         
-                                        saveconfig(openfilestring);
+                                        saveconfig(s);
                                 }
 
                                 config_list_update(hdlg);
