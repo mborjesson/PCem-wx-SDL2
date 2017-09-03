@@ -210,10 +210,6 @@
 				<label>Alternative update-lock</label>
 				<checkable>1</checkable>
 			</object>
-			<object class="wxMenuItem" name="IDM_VID_ALTERNATIVE_UPDATE_LOCK">
-				<label>Alternative update-lock</label>
-				<checkable>1</checkable>
-			</object>
 			<object class="separator"/>
 			<object class="wxMenu">
 				<label>Scale filtering</label>
