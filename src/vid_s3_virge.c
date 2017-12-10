@@ -370,7 +370,7 @@ static void s3_virge_out(uint16_t addr, uint8_t val, void *p)
                         break;
                         case 0x32:
                         if ((svga->crtc[0x67] & 0xc) != 0xc)
-                                svga->vrammask = (val & 0x40) ? 0x3ffff : ((virge->memory_size << 20) - 1);
+                                svga->vram_display_mask = (val & 0x40) ? 0x3ffff : ((virge->memory_size << 20) - 1);
                         s3_virge_update_irqs(virge);
                         break;
                         
@@ -583,7 +583,7 @@ static void s3_virge_recalctimings(svga_t *svga)
                 {
                         svga->rowoffset = (svga->rowoffset * 3) / 4; /*Hack*/
                 }
-                svga->vrammask = (svga->crtc[0x32] & 0x40) ? 0x3ffff : ((virge->memory_size << 20) - 1);
+                svga->vram_display_mask = (svga->crtc[0x32] & 0x40) ? 0x3ffff : ((virge->memory_size << 20) - 1);
 //pclog("VGA mode   x_disp=%i dispend=%i vtotal=%i\n", svga->hdisp, svga->dispend, svga->vtotal);
         }
         else /*Streams mode*/
@@ -631,7 +631,7 @@ static void s3_virge_recalctimings(svga_t *svga)
                         svga->render = svga_render_32bpp_highres; 
                         break;
                 }
-                svga->vrammask = (virge->memory_size << 20) - 1;
+                svga->vram_display_mask = (virge->memory_size << 20) - 1;
         }
 
         if (((svga->miscout >> 2) & 3) == 3)
@@ -1923,6 +1923,7 @@ static void s3_virge_bitblt(virge_t *virge, int count, uint32_t cpu_dat)
         int x_mul;
         int cpu_dat_shift;
         uint32_t *pattern_data;
+        uint32_t src_fg_clr, src_bg_clr;
         
         switch (virge->s3d.cmd_set & CMD_SET_FORMAT_MASK)
         {
@@ -1931,12 +1932,16 @@ static void s3_virge_bitblt(virge_t *virge, int count, uint32_t cpu_dat)
                 x_mul = 1;
                 cpu_dat_shift = 8;
                 pattern_data = virge->s3d.pattern_8;
+                src_fg_clr = virge->s3d.src_fg_clr & 0xff;
+                src_bg_clr = virge->s3d.src_bg_clr & 0xff;
                 break;
                 case CMD_SET_FORMAT_16:
                 bpp = 1;
                 x_mul = 2;
                 cpu_dat_shift = 16;
                 pattern_data = virge->s3d.pattern_16;
+                src_fg_clr = virge->s3d.src_fg_clr & 0xffff;
+                src_bg_clr = virge->s3d.src_bg_clr & 0xffff;
                 break;
                 case CMD_SET_FORMAT_24:
                 default:
@@ -1944,6 +1949,8 @@ static void s3_virge_bitblt(virge_t *virge, int count, uint32_t cpu_dat)
                 x_mul = 3;
                 cpu_dat_shift = 24;
                 pattern_data = virge->s3d.pattern_32;
+                src_fg_clr = virge->s3d.src_fg_clr;
+                src_bg_clr = virge->s3d.src_bg_clr;
                 break;
         }
         if (virge->s3d.cmd_set & CMD_SET_MP)
@@ -2026,7 +2033,7 @@ static void s3_virge_bitblt(virge_t *virge, int count, uint32_t cpu_dat)
                                 case 0:
                                 case CMD_SET_MS:
                                 READ(src_addr, source);
-                                if ((virge->s3d.cmd_set & CMD_SET_TP) && source == virge->s3d.src_fg_clr)
+                                if ((virge->s3d.cmd_set & CMD_SET_TP) && source == src_fg_clr)
                                         update = 0;
                                 break;
                                 case CMD_SET_IDS:
@@ -2057,11 +2064,11 @@ static void s3_virge_bitblt(virge_t *virge, int count, uint32_t cpu_dat)
                                                 count = 0;
                                         }
                                 }
-                                if ((virge->s3d.cmd_set & CMD_SET_TP) && source == virge->s3d.src_fg_clr)
+                                if ((virge->s3d.cmd_set & CMD_SET_TP) && source == src_fg_clr)
                                         update = 0;
                                 break;
                                 case CMD_SET_IDS | CMD_SET_MS:
-                                source = (cpu_dat & (1 << 31)) ? virge->s3d.src_fg_clr : virge->s3d.src_bg_clr;
+                                source = (cpu_dat & (1 << 31)) ? src_fg_clr : src_bg_clr;
                                 if ((virge->s3d.cmd_set & CMD_SET_TP) && !(cpu_dat & (1 << 31)))
                                         update = 0;
                                 cpu_dat <<= 1;

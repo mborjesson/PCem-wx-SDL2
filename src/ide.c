@@ -20,6 +20,7 @@
         #include "arm.h"
 #else
         #include "ibm.h"
+        #include "hdd.h"
         #include "io.h"
         #include "pic.h"
         #include "timer.h"
@@ -61,6 +62,7 @@
 #define WIN_READ_DMA                    0xC8
 #define WIN_WRITE_DMA                   0xCA
 #define WIN_SETIDLE1			0xE3
+#define WIN_CHECK_POWER_MODE            0xE5
 #define WIN_IDENTIFY			0xEC /* Ask drive to identify itself */
 
 /* ATAPI Commands */
@@ -708,29 +710,31 @@ void resetide(void)
 	memset(mode_pages_in[GPMODE_CDROM_AUDIO_PAGE], 0, 256);	/* Clear the page itself. */
 
         idecallback[0]=idecallback[1]=0;
+        if (hdd_controller_current_is_ide())
+        {
 #ifdef RPCEMU_IDE
-	loadhd(&ide_drives[0], 0, "hd4.hdf");
-	if (!config.cdromenabled) {
-		loadhd(&ide_drives[1], 1, "hd5.hdf");
-	}
-	else
-           ide_drives[1].type = IDE_CDROM;
+        	loadhd(&ide_drives[0], 0, "hd4.hdf");
+        	if (!config.cdromenabled)
+        		loadhd(&ide_drives[1], 1, "hd5.hdf");
+        	else
+                        ide_drives[1].type = IDE_CDROM;
 #else
-	for (d = 0; d < 4; d++)
-	{
-	        ide_drives[d].drive = d;
-		ide_drives[d].packetstatus = 0xFF;
+        	for (d = 0; d < 4; d++)
+        	{
+        	        ide_drives[d].drive = d;
+        		ide_drives[d].packetstatus = 0xFF;
 
-		if ((cdrom_channel == d) && cdrom_enabled)
-		{
-			ide_drives[d].type = IDE_CDROM;
-		}
-		else
-		{
-			loadhd(&ide_drives[d], d, ide_fn[d]);
-		}
+        		if ((cdrom_channel == d) && cdrom_enabled)
+        		{
+        			ide_drives[d].type = IDE_CDROM;
+        		}
+        		else
+        		{
+        			loadhd(&ide_drives[d], d, ide_fn[d]);
+        		}
 			
-		ide_set_signature(&ide_drives[d]);
+        		ide_set_signature(&ide_drives[d]);
+                }
 	}
 #endif
 
@@ -1055,6 +1059,7 @@ void writeide(int ide_board, uint16_t addr, uint8_t val)
                 case WIN_SET_MULTIPLE_MODE: /*Set Multiple Mode*/
 //                output=1;
                 case WIN_SETIDLE1: /* Idle */
+                case WIN_CHECK_POWER_MODE:
                         ide->atastat = BUSY_STAT;
                         timer_process();
                         callbackide(ide_board);
@@ -1714,6 +1719,17 @@ void callbackide(int ide_board)
 //                pclog("ID callback\n");
                         ide_irq_raise(ide);
                 }
+                return;
+
+
+        case WIN_CHECK_POWER_MODE:
+		if (ide->type == IDE_NONE)
+		{
+			goto abort_cmd;
+		}
+                ide->secount = 0xff;
+                ide->atastat = READY_STAT | DSC_STAT;
+                ide_irq_raise(ide);
                 return;
 
         case WIN_PACKETCMD: /* ATAPI Packet */
@@ -2850,14 +2866,19 @@ void ide_sec_disable()
         io_removehandler(0x0376, 0x0001, ide_read_sec, NULL,           NULL,           ide_write_sec, NULL,            NULL           , NULL);
 }
 
-void ide_init()
+static void *ide_init()
 {
         ide_pri_enable();
         ide_sec_enable();
-        ide_bus_master_read_sector = ide_bus_master_write_sector = NULL;
         
         timer_add(ide_callback_pri, &idecallback[0], &idecallback[0],  NULL);
         timer_add(ide_callback_sec, &idecallback[1], &idecallback[1],  NULL);
+        
+        return (void *)-1;
+}
+
+static void ide_close(void *p)
+{
 }
 
 void ide_set_bus_master(int (*read_sector)(int channel, uint8_t *data), int (*write_sector)(int channel, uint8_t *data), void (*set_irq)(int channel))
@@ -2866,3 +2887,16 @@ void ide_set_bus_master(int (*read_sector)(int channel, uint8_t *data), int (*wr
         ide_bus_master_write_sector = write_sector;
         ide_bus_master_set_irq = set_irq;
 }
+
+device_t ide_device =
+{
+        "Standard IDE",
+        DEVICE_AT,
+        ide_init,
+        ide_close,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL
+};

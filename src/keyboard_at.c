@@ -5,6 +5,7 @@
 #include "pit.h"
 #include "sound.h"
 #include "sound_speaker.h"
+#include "t3100e.h"
 #include "timer.h"
 #include "x86.h"
 
@@ -138,6 +139,29 @@ void keyboard_at_adddata_keyboard(uint8_t val)
                 if (key_1c == 4)
                         output = 3;
         }*/
+
+	/* Test for T3100E 'Fn' key (Right Alt / Right Ctrl) */
+	if (romset == ROM_T3100E && (pcem_key[0xb8] || pcem_key[0x9d]))
+	{
+		switch (val)
+		{
+			case 0x4f: t3100e_notify_set(0x01); break; /* End */
+			case 0x50: t3100e_notify_set(0x02); break; /* Down */
+			case 0x51: t3100e_notify_set(0x03); break; /* PgDn */
+			case 0x52: t3100e_notify_set(0x04); break; /* Ins */
+			case 0x53: t3100e_notify_set(0x05); break; /* Del */
+			case 0x54: t3100e_notify_set(0x06); break; /* SysRQ */
+			case 0x45: t3100e_notify_set(0x07); break; /* NumLock */
+			case 0x46: t3100e_notify_set(0x08); break; /* ScrLock */
+			case 0x47: t3100e_notify_set(0x09); break; /* Home */
+			case 0x48: t3100e_notify_set(0x0A); break; /* Up */
+			case 0x49: t3100e_notify_set(0x0B); break; /* PgUp */
+			case 0x4A: t3100e_notify_set(0x0C); break; /* Keypad -*/
+			case 0x4B: t3100e_notify_set(0x0D); break; /* Left */
+			case 0x4C: t3100e_notify_set(0x0E); break; /* KP 5 */
+			case 0x4D: t3100e_notify_set(0x0F); break; /* Right */
+		}
+	}
         key_queue[key_queue_end] = val;
         key_queue_end = (key_queue_end + 1) & 0xf;
 //        pclog("keyboard_at : %02X added to key queue\n", val);
@@ -186,6 +210,11 @@ void keyboard_at_write(uint16_t port, uint8_t val, void *priv)
                                         mouse_scan = !(val & 0x20);
                                 }                                           
                                 break;
+
+				case 0xb6: /* T3100e - set colour/mono switch */
+				if (romset == ROM_T3100E)
+        				t3100e_mono_set(val);
+				break;
 
                                 case 0xcb: /*AMI - set keyboard mode*/
                                 break;
@@ -357,6 +386,9 @@ void keyboard_at_write(uint16_t port, uint8_t val, void *priv)
                                 key_ctrl_queue_start = key_ctrl_queue_end = 0;
                                 keyboard_at.status &= ~STAT_OFULL;
                         }
+			/* T3100e expects STAT_IFULL to be set immediately
+			 * after sending 0xAA */
+                        if(romset == ROM_T3100E) keyboard_at.status |= STAT_IFULL;
                         keyboard_at.status |= STAT_SYSFLAG;
                         keyboard_at.mem[0] |= 0x04;
                         keyboard_at_adddata(0x55);
@@ -382,8 +414,72 @@ void keyboard_at_write(uint16_t port, uint8_t val, void *priv)
                         case 0xae: /*Enable keyboard*/
                         keyboard_at.mem[0] &= ~0x10;
                         break;
+
+			case 0xb0:	/* T3100e: Turbo on */
+			if (romset == ROM_T3100E)
+				t3100e_turbo_set(1);
+			break;
+
+			case 0xb1:	/* T3100e: Turbo off */
+			if (romset == ROM_T3100E)	
+				t3100e_turbo_set(0);
+			break;	
+
+			case 0xb2:	/* T3100e: Select external display */
+			if (romset == ROM_T3100E)
+        			t3100e_display_set(0x00);
+			break;
+
+			case 0xb3:	/* T3100e: Select internal display */
+			if (romset == ROM_T3100E)
+        			t3100e_display_set(0x01);
+			break;
+
+			case 0xb4:	/* T3100e: Get configuration / status */
+			if (romset == ROM_T3100E)
+				keyboard_at_adddata(t3100e_config_get());
+			break;
+
+			case 0xb5:	/* T3100e: Get colour / mono byte */
+			if (romset == ROM_T3100E)
+				keyboard_at_adddata(t3100e_mono_get());
+			break;
+			
+			case 0xb6:	/* T3100e: Set colour / mono byte */
+			if (romset == ROM_T3100E)
+                        	keyboard_at.want60 = 1;
+			break;
+
+			/* T3100e commands not implemented:
+			 * 0xB7: Emulate PS/2 keyboard
+			 * 0xB8: Emulate AT keyboard */ 
+
+			case 0xbb: /* T3100e: Read 'Fn' key.
+				      Return it for right Ctrl and right
+				      Alt; on the real T3100e, these keystrokes
+	  			      could only be generated using 'Fn'. */
+			if (romset == ROM_T3100E)
+			{
+				if (pcem_key[0xb8] ||	/* Right Alt */
+				    pcem_key[0x9d])	/* Right Ctrl */
+				{
+					keyboard_at_adddata(0x04);
+				} 
+				else	keyboard_at_adddata(0x00);
+			}
+			break;
+
+			case 0xbc:	/* T3100e: Reset Fn+Key notification */
+			if (romset == ROM_T3100E)
+        			t3100e_notify_set(0x00);
+			break;
                         
                         case 0xc0: /*Read input port*/
+			/* The T3100e returns all bits set except bit 6 which
+			 * is set by t3100e_mono_set() */
+			if (romset == ROM_T3100E)
+				keyboard_at.input_port = (t3100e_mono_get() & 1) ? 0xFF : 0xBF;
+
                         keyboard_at_adddata(keyboard_at.input_port | 4);
                         keyboard_at.input_port = ((keyboard_at.input_port + 1) & 3) | (keyboard_at.input_port & 0xfc);
                         break;
@@ -426,7 +522,8 @@ void keyboard_at_write(uint16_t port, uint8_t val, void *priv)
                         case 0xef: /*??? - sent by AMI486*/
                         break;
                         
-                        case 0xfe: /*Pulse output port - pin 0 selected - x86 reset*/
+                        case 0xf0: case 0xf2: case 0xf4: case 0xf6:
+                        case 0xf8: case 0xfa: case 0xfc: case 0xfe: /*Pulse output port - pin 0 selected - x86 reset*/
                         softresetx86(); /*Pulse reset!*/
                         cpu_set_edx();
                         break;
@@ -504,6 +601,7 @@ static void at_refresh(void *p)
 void keyboard_at_init()
 {
         //return;
+        memset(&keyboard_at, 0, sizeof(keyboard_at));
         io_sethandler(0x0060, 0x0005, keyboard_at_read, NULL, NULL, keyboard_at_write, NULL, NULL,  NULL);
         keyboard_at_reset();
         keyboard_send = keyboard_at_adddata_keyboard;

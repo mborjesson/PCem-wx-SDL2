@@ -1,5 +1,6 @@
 #include "wx-utils.h"
 #include "wx-sdl2.h"
+#include "wx-joystickconfig.h"
 
 #include "ibm.h"
 #include "ide.h"
@@ -44,6 +45,9 @@ extern int pause;
 extern void deviceconfig_open(void* hwnd, device_t *device);
 extern int hdconf_init(void* hdlg);
 extern int hdconf_update(void* hdlg);
+
+static int hdd_controller_selected_has_config(void *hdlg);
+static device_t *hdd_controller_selected_get_device(void *hdlg);
 
 static int mouse_valid(int type, int model)
 {
@@ -142,72 +146,81 @@ static void recalc_snd_list(void* hdlg, int model)
         wx_sendmessage(h, WX_CB_SETCURSEL, settings_sound_to_list[sound_card_current], 0);
 }
 
-static void recalc_hdd_list(void* hdlg, int model, int use_selected_hdd)
+static void recalc_hdd_list(void* hdlg, int model, int use_selected_hdd, int force_ide)
 {
         void* h;
+        char *s;
+        int valid = 0;
+        char old_name[16];
+        int c, d;
 
         h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOHDD"));
 
-        if (models[model].flags & MODEL_HAS_IDE)
+        if (force_ide)
+                strcpy(old_name, "ide");
+        else if (use_selected_hdd)
         {
-                wx_sendmessage(h, WX_CB_RESETCONTENT, 0, 0);
-                wx_sendmessage(h, WX_CB_ADDSTRING, 0, (LONG_PARAM)"Internal IDE");
-                wx_enablewindow(h, FALSE);
-                wx_sendmessage(h, WX_CB_SETCURSEL, 0, 0);
+                c = wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0);
+
+                if (c != -1 && hdd_names[c])
+                        strncpy(old_name, hdd_names[c], sizeof(old_name)-1);
+                else
+                {
+                        if (models[model].flags & MODEL_HAS_IDE)
+                                strcpy(old_name, "none");
+                        else
+                                strcpy(old_name, "ide");
+                }
         }
         else
-        {
-                char *s;
-                int valid = 0;
-                char old_name[16];
-                int c, d;
-
-                if (use_selected_hdd)
-                {
-                        c = wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0);
-
-                        if (c != -1 && hdd_names[c])
-                        strncpy(old_name, hdd_names[c], sizeof(old_name)-1);
-                        else
-                        strcpy(old_name, "none");
-                }
-                else
                 strncpy(old_name, hdd_controller_name, sizeof(old_name)-1);
 
-                wx_sendmessage(h, WX_CB_RESETCONTENT, 0, 0);
-                c = d = 0;
-                while (1)
-                {
-                        s = hdd_controller_get_name(c);
-                        if (s[0] == 0)
+        wx_sendmessage(h, WX_CB_RESETCONTENT, 0, 0);
+        c = d = 0;
+        while (1)
+        {
+                s = hdd_controller_get_name(c);
+                if (s[0] == 0)
                         break;
-                        if ((((hdd_controller_get_flags(c) & DEVICE_AT) && !(models[model].flags & MODEL_AT)) ||
-                             (hdd_controller_get_flags(c) & DEVICE_MCA) != (models[model].flags & MODEL_MCA)) && c)
-                        {
-                                c++;
-                                continue;
-                        }
-                        if (!hdd_controller_available(c))
-                        {
-                                c++;
-                                continue;
-                        }
-                        wx_sendmessage(h, WX_CB_ADDSTRING, 0, (LONG_PARAM)s);
-                        hdd_names[d] = hdd_controller_get_internal_name(c);
-                        if (!strcmp(old_name, hdd_names[d]))
-                        {
-                                wx_sendmessage(h, WX_CB_SETCURSEL, d, 0);
-                                valid = 1;
-                        }
+                if ((((hdd_controller_get_flags(c) & DEVICE_AT) && !(models[model].flags & MODEL_AT)) ||
+                        (hdd_controller_get_flags(c) & DEVICE_MCA) != (models[model].flags & MODEL_MCA)) && c)
+                {
                         c++;
-                        d++;
+                        continue;
                 }
+                if ((((hdd_controller_get_flags(c) & DEVICE_PS1) && models[model].id != ROM_IBMPS1_2011) ||
+                    (!(hdd_controller_get_flags(c) & DEVICE_PS1) && models[model].id == ROM_IBMPS1_2011)) && c)
+                {
+                        c++;
+                        continue;
+                }
+                if (!hdd_controller_available(c))
+                {
+                        c++;
+                        continue;
+                }
+                wx_sendmessage(h, WX_CB_ADDSTRING, 0, (LONG_PARAM)s);
+                hdd_names[d] = hdd_controller_get_internal_name(c);
 
-                if (!valid)
+                if (!strcmp(old_name, hdd_names[d]))
+                {
+                        wx_sendmessage(h, WX_CB_SETCURSEL, d, 0);
+                        valid = 1;
+                }
+                c++;
+                d++;
+        }
+
+        if (!valid)
                 wx_sendmessage(h, WX_CB_SETCURSEL, 0, 0);
 
+        wx_enablewindow(h, TRUE);
+
+        h = wx_getdlgitem(hdlg, WX_ID("IDC_CONFIGUREHDD"));                
+        if (hdd_controller_selected_has_config(hdlg))
                 wx_enablewindow(h, TRUE);
-        }
+        else
+                wx_enablewindow(h, FALSE);
 }
 
 #ifdef USE_NETWORKING
@@ -263,6 +276,7 @@ int config_dlgsave(void* hdlg)
         int temp_fda_type, temp_fdb_type;
         int temp_mouse_type;
         int temp_lpt1_device;
+        int temp_joystick_type;
 #ifdef USE_NETWORKING
         int temp_network_card;
 #endif
@@ -321,8 +335,9 @@ int config_dlgsave(void* hdlg)
         h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBODRB"));
         temp_fdb_type = wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0);
 
-        //              h = wx_getdlgitem(hdlg, ID("IDC_COMBOJOY"));
-        //              temp_joystick_type = wx_sendmessage(h, CB_GETCURSEL, 0, 0);
+        h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOJOY"));
+        temp_joystick_type = wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0);
+        
         h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOMOUSE"));
         temp_mouse_type = settings_list_to_mouse[wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0)];
 
@@ -462,13 +477,14 @@ int config_dlgsave(void* hdlg)
 
         speedchanged();
 
-//                                joystick_type = temp_joystick_type;
-//                                gameport_update_joystick_type();
+        joystick_type = temp_joystick_type;
+        gameport_update_joystick_type();
 
 
         return TRUE;
 }
 
+static int prev_model;
 int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
 {
         char temp_str[256];
@@ -510,6 +526,7 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 c++;
                         }
                         wx_sendmessage(h, WX_CB_SETCURSEL, modeltolist[model], 0);
+                        prev_model = model;
 
                         recalc_vid_list(hdlg, romstomodel[romset]);
 
@@ -632,24 +649,24 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                         else
                                 wx_sendmessage(h, WX_WM_SETTEXT, 0, (LONG_PARAM) "KB");
 
-                        //    h = wx_getdlgitem(hdlg, ID("IDC_COMBOJOY"));
-                        //    c = 0;
-                        //    while (joystick_get_name(c))
-                        //    {
-                        //            wx_sendmessage(h, CB_ADDSTRING, 0, joystick_get_name(c));
-                        //            c++;
-                        //    }
-                        //    wx_enablewindow(h, TRUE);
-                        //    wx_sendmessage(h, CB_SETCURSEL, joystick_type, 0);
-                        //
-                        //    h = wx_getdlgitem(hdlg, ID("IDC_JOY1"));
-                        //    wx_enablewindow(h, (joystick_get_max_joysticks(joystick_type) >= 1) ? TRUE : FALSE);
-                        //    h = wx_getdlgitem(hdlg, ID("IDC_JOY2"));
-                        //    wx_enablewindow(h, (joystick_get_max_joysticks(joystick_type) >= 2) ? TRUE : FALSE);
-                        //    h = wx_getdlgitem(hdlg, ID("IDC_JOY3"));
-                        //    wx_enablewindow(h, (joystick_get_max_joysticks(joystick_type) >= 3) ? TRUE : FALSE);
-                        //    h = wx_getdlgitem(hdlg, ID("IDC_JOY4"));
-                        //    wx_enablewindow(h, (joystick_get_max_joysticks(joystick_type) >= 4) ? TRUE : FALSE);
+                        h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOJOY"));
+                        c = 0;
+                        while (joystick_get_name(c))
+                        {
+                                wx_sendmessage(h, WX_CB_ADDSTRING, 0, (LONG_PARAM)joystick_get_name(c));
+                                c++;
+                        }
+                        wx_enablewindow(h, TRUE);
+                        wx_sendmessage(h, WX_CB_SETCURSEL, joystick_type, 0);
+
+                        h = wx_getdlgitem(hdlg, WX_ID("IDC_JOY1"));
+                        wx_enablewindow(h, (joystick_get_max_joysticks(joystick_type) >= 1) ? TRUE : FALSE);
+                        h = wx_getdlgitem(hdlg, WX_ID("IDC_JOY2"));
+                        wx_enablewindow(h, (joystick_get_max_joysticks(joystick_type) >= 2) ? TRUE : FALSE);
+                        h = wx_getdlgitem(hdlg, WX_ID("IDC_JOY3"));
+                        wx_enablewindow(h, (joystick_get_max_joysticks(joystick_type) >= 3) ? TRUE : FALSE);
+                        h = wx_getdlgitem(hdlg, WX_ID("IDC_JOY4"));
+                        wx_enablewindow(h, (joystick_get_max_joysticks(joystick_type) >= 4) ? TRUE : FALSE);
 
                         h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOWS"));
                         wx_sendmessage(h, WX_CB_ADDSTRING, 0, (LONG_PARAM) "System default");
@@ -711,7 +728,7 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                         }
                         wx_sendmessage(h, WX_CB_SETCURSEL, d, 0);
 
-                        recalc_hdd_list(hdlg, romstomodel[romset], 0);
+                        recalc_hdd_list(hdlg, romstomodel[romset], 0, 0);
 
                         hd_changed = 0;
                         new_cdrom_channel = cdrom_channel;
@@ -735,8 +752,15 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                 {
                         if (wParam == WX_ID("IDC_COMBO1"))
                         {
+                                int force_ide = 0;
+                                
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBO1"));
                                 temp_model = listtomodel[wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0)];
+                                
+                                if ((models[temp_model].flags & MODEL_HAS_IDE) && !(models[prev_model].flags & MODEL_HAS_IDE))
+                                        force_ide = 1;
+                                
+                                prev_model = temp_model;
 
                                 /*Rebuild manufacturer list*/
                                 h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOCPUM"));
@@ -851,7 +875,7 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
 
                                 recalc_vid_list(hdlg, temp_model);
 
-                                recalc_hdd_list(hdlg, temp_model, 1);
+                                recalc_hdd_list(hdlg, temp_model, 1, force_ide);
 
                                 recalc_snd_list(hdlg, temp_model);
 #ifdef USE_NETWORKING
@@ -989,6 +1013,10 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                         {
                                 hdconf_update(hdlg);
                         }
+                        else if (wParam == WX_ID("IDC_CONFIGUREHDD"))
+                        {
+                                deviceconfig_open(hdlg, (void *)hdd_controller_selected_get_device(hdlg));
+                        }
 #ifdef USE_NETWORKING
                         else if (wParam == WX_ID("IDC_COMBO_NETCARD"))
                         {
@@ -1009,51 +1037,54 @@ int config_dlgproc(void* hdlg, int message, INT_PARAM wParam, LONG_PARAM lParam)
                                 deviceconfig_open(hdlg, (void *)network_card_getdevice(temp_network_card));
                         }
 #endif
-                        //
-                        //      case IDC_COMBOJOY:
-                        //      if (HIWORD(wParam) == CBN_SELCHANGE) {
-                        //              h = wx_getdlgitem(hdlg, IDC_COMBOJOY);
-                        //              temp_joystick_type = wx_sendmessage(h, CB_GETCURSEL, 0, 0);
-                        //
-                        //              h = wx_getdlgitem(hdlg, IDC_JOY1);
-                        //              wx_enablewindow(h,
-                        //                              (joystick_get_max_joysticks(temp_joystick_type) >= 1) ?
-                        //                                              TRUE : FALSE);
-                        //              h = wx_getdlgitem(hdlg, IDC_JOY2);
-                        //              wx_enablewindow(h,
-                        //                              (joystick_get_max_joysticks(temp_joystick_type) >= 2) ?
-                        //                                              TRUE : FALSE);
-                        //              h = wx_getdlgitem(hdlg, IDC_JOY3);
-                        //              wx_enablewindow(h,
-                        //                              (joystick_get_max_joysticks(temp_joystick_type) >= 3) ?
-                        //                                              TRUE : FALSE);
-                        //              h = wx_getdlgitem(hdlg, IDC_JOY4);
-                        //              wx_enablewindow(h,
-                        //                              (joystick_get_max_joysticks(temp_joystick_type) >= 4) ?
-                        //                                              TRUE : FALSE);
-                        //      }
-                        //      break;
-                        //
-                        //      case IDC_JOY1:
-                        //      h = wx_getdlgitem(hdlg, IDC_COMBOJOY);
-                        //      temp_joystick_type = wx_sendmessage(h, CB_GETCURSEL, 0, 0);
-                        //      joystickconfig_open(hdlg, 0, temp_joystick_type);
-                        //      break;
-                        //      case IDC_JOY2:
-                        //      h = wx_getdlgitem(hdlg, IDC_COMBOJOY);
-                        //      temp_joystick_type = wx_sendmessage(h, CB_GETCURSEL, 0, 0);
-                        //      joystickconfig_open(hdlg, 1, temp_joystick_type);
-                        //      break;
-                        //      case IDC_JOY3:
-                        //      h = wx_getdlgitem(hdlg, IDC_COMBOJOY);
-                        //      temp_joystick_type = wx_sendmessage(h, CB_GETCURSEL, 0, 0);
-                        //      joystickconfig_open(hdlg, 2, temp_joystick_type);
-                        //      break;
-                        //      case IDC_JOY4:
-                        //      h = wx_getdlgitem(hdlg, IDC_COMBOJOY);
-                        //      temp_joystick_type = wx_sendmessage(h, CB_GETCURSEL, 0, 0);
-                        //      joystickconfig_open(hdlg, 3, temp_joystick_type);
-                        //      break;
+                        else if (wParam == WX_ID("IDC_COMBOJOY"))
+                        {
+                                int temp_joystick_type;
+                                
+                                h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOJOY"));
+                                temp_joystick_type = wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0);
+
+                                h = wx_getdlgitem(hdlg, WX_ID("IDC_JOY1"));
+                                wx_enablewindow(h, (joystick_get_max_joysticks(temp_joystick_type) >= 1) ? TRUE : FALSE);
+                                h = wx_getdlgitem(hdlg, WX_ID("IDC_JOY2"));
+                                wx_enablewindow(h, (joystick_get_max_joysticks(temp_joystick_type) >= 2) ? TRUE : FALSE);
+                                h = wx_getdlgitem(hdlg, WX_ID("IDC_JOY3"));
+                                wx_enablewindow(h, (joystick_get_max_joysticks(temp_joystick_type) >= 3) ? TRUE : FALSE);
+                                h = wx_getdlgitem(hdlg, WX_ID("IDC_JOY4"));
+                                wx_enablewindow(h, (joystick_get_max_joysticks(temp_joystick_type) >= 4) ? TRUE : FALSE);
+                        }
+                        else if (wParam == WX_ID("IDC_JOY1"))
+                        {
+                                int temp_joystick_type;
+                                
+                                h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOJOY"));
+                                temp_joystick_type = wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0);
+                                joystickconfig_open(hdlg, 0, temp_joystick_type);
+                        }
+                        else if (wParam == WX_ID("IDC_JOY2"))
+                        {
+                                int temp_joystick_type;
+                                
+                                h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOJOY"));
+                                temp_joystick_type = wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0);
+                                joystickconfig_open(hdlg, 1, temp_joystick_type);
+                        }
+                        else if (wParam == WX_ID("IDC_JOY3"))
+                        {
+                                int temp_joystick_type;
+                                
+                                h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOJOY"));
+                                temp_joystick_type = wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0);
+                                joystickconfig_open(hdlg, 2, temp_joystick_type);
+                        }
+                        else if (wParam == WX_ID("IDC_JOY4"))
+                        {
+                                int temp_joystick_type;
+                                
+                                h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOJOY"));
+                                temp_joystick_type = wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0);
+                                joystickconfig_open(hdlg, 3, temp_joystick_type);
+                        }
                         return 0;
                 }
         }
@@ -1087,6 +1118,22 @@ static int hdd_controller_selected_is_mfm(void* hdlg)
         if (hdd_names[c])
                 return hdd_controller_is_mfm(hdd_names[c]);
         return 0;
+}
+static int hdd_controller_selected_has_config(void* hdlg)
+{
+        void* h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOHDD"));
+        int c = wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0);
+        if (hdd_names[c])
+                return hdd_controller_has_config(hdd_names[c]);
+        return 0;
+}
+static device_t *hdd_controller_selected_get_device(void *hdlg)
+{
+        void* h = wx_getdlgitem(hdlg, WX_ID("IDC_COMBOHDD"));
+        int c = wx_sendmessage(h, WX_CB_GETCURSEL, 0, 0);
+        if (hdd_names[c])
+                return hdd_controller_get_device(hdd_names[c]);
+        return NULL;
 }
 
 static void check_hd_type(void* hdlg, off64_t sz)
@@ -1521,6 +1568,7 @@ int hdconf_init(void* hdlg)
 int hdconf_update(void* hdlg)
 {
         char s[260];
+        void *h;
 
         int is_mfm = hdd_controller_selected_is_mfm(hdlg);
 
@@ -1560,6 +1608,12 @@ int hdconf_update(void* hdlg)
                         }
                 }
         }
+
+        h = wx_getdlgitem(hdlg, WX_ID("IDC_CONFIGUREHDD"));                
+        if (hdd_controller_selected_has_config(hdlg))
+                wx_enablewindow(h, TRUE);
+        else
+                wx_enablewindow(h, FALSE);
 
         return TRUE;
 }

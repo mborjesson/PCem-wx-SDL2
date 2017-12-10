@@ -15,7 +15,7 @@
 #include "codegen_ops.h"
 #include "codegen_ops_x86.h"
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
 #include <sys/mman.h>
 #include <unistd.h>
 #endif
@@ -1123,7 +1123,8 @@ static uint32_t gen_MEM_CHECK_WRITE_L()
 
 void codegen_init()
 {
-#ifdef __linux__
+        int c;
+#if defined(__linux__) || defined(__APPLE__)
 	void *start;
 	size_t len;
 	long pagesize = sysconf(_SC_PAGESIZE);
@@ -1140,7 +1141,10 @@ void codegen_init()
         memset(codeblock, 0, (BLOCK_SIZE+1) * sizeof(codeblock_t));
         memset(codeblock_hash, 0, HASH_SIZE * sizeof(codeblock_t *));
 
-#ifdef __linux__
+        for (c = 0; c < BLOCK_SIZE; c++)
+                codeblock[c].pc = BLOCK_PC_INVALID;
+
+#if defined(__linux__) || defined(__APPLE__)
 	start = (void *)((long)codeblock & pagemask);
 	len = (((BLOCK_SIZE+1) * sizeof(codeblock_t)) + pagesize) & pagemask;
 	if (mprotect(start, len, PROT_READ | PROT_WRITE | PROT_EXEC) != 0)
@@ -1205,9 +1209,14 @@ void codegen_init()
 
 void codegen_reset()
 {
+        int c;
+        
         memset(codeblock, 0, BLOCK_SIZE * sizeof(codeblock_t));
         memset(codeblock_hash, 0, HASH_SIZE * sizeof(codeblock_t *));
         mem_reset_page_blocks();
+        
+        for (c = 0; c < BLOCK_SIZE; c++)
+                codeblock[c].pc = BLOCK_PC_INVALID;
 }
 
 void dump_block()
@@ -1249,8 +1258,8 @@ static void add_to_block_list(codeblock_t *block)
 
         if (block->next)
         {
-                if (!block->next->pc)
-                        fatal("block->next->pc=0 %p %p %x %x\n", (void *)block->next, (void *)codeblock, block_current, block_pos);
+                if (block->next->pc == BLOCK_PC_INVALID)
+                        fatal("block->next->pc=BLOCK_PC_INVALID %p %p %x %x\n", (void *)block->next, (void *)codeblock, block_current, block_pos);
         }
         
         if (block->page_mask2)
@@ -1321,9 +1330,9 @@ static void delete_block(codeblock_t *block)
         if (block == codeblock_hash[HASH(block->phys)])
                 codeblock_hash[HASH(block->phys)] = NULL;
 
-        if (!block->pc)
+        if (block->pc == BLOCK_PC_INVALID)
                 fatal("Deleting deleted block\n");
-        block->pc = 0;
+        block->pc = BLOCK_PC_INVALID;
 
         codeblock_tree_delete(block);
         remove_from_block_list(block, old_pc);
@@ -1373,7 +1382,7 @@ void codegen_block_init(uint32_t phys_addr)
 
 //        if (block->pc == 0xb00b4ff5)
 //                pclog("Init target block\n");
-        if (block->pc != 0)
+        if (block->pc != BLOCK_PC_INVALID)
         {
 //                pclog("Reuse block : was %08x now %08x\n", block->pc, cs+pc);
                 delete_block(block);
@@ -1414,6 +1423,8 @@ void codegen_block_start_recompile(codeblock_t *block)
 
         if (block->pc != cs + cpu_state.pc || block->was_recompiled)
                 fatal("Recompile to used block!\n");
+
+        block->status = cpu_cur_status;
 
         block_pos = BLOCK_GPF_OFFSET;
         addbyte(0xc7); /*MOV [ESP],0*/
@@ -1474,8 +1485,8 @@ void codegen_block_start_recompile(codeblock_t *block)
         block->TOP = cpu_state.TOP;
         block->was_recompiled = 1;
 
-        codegen_flat_ds = cpu_cur_status & CPU_STATUS_FLATDS;
-        codegen_flat_ss = cpu_cur_status & CPU_STATUS_FLATSS;
+        codegen_flat_ds = !(cpu_cur_status & CPU_STATUS_NOTFLATDS);
+        codegen_flat_ss = !(cpu_cur_status & CPU_STATUS_NOTFLATSS);       
 }
 
 void codegen_block_remove()
@@ -1540,8 +1551,8 @@ void codegen_block_generate_end_mask()
                         if (block->next_2)
                         {
 //                        pclog("  next_2->pc=%08x\n", block->next_2->pc);
-                                if (!block->next_2->pc)
-                                        fatal("block->next_2->pc=0 %p\n", (void *)block->next_2);
+                                if (block->next_2->pc == BLOCK_PC_INVALID)
+                                        fatal("block->next_2->pc=BLOCK_PC_INVALID %p\n", (void *)block->next_2);
                         }
 
                         block->dirty_mask2 = &page_2->dirty_mask[(block->phys_2 >> PAGE_MASK_INDEX_SHIFT) & PAGE_MASK_INDEX_MASK];

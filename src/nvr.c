@@ -7,6 +7,7 @@
 #include "rtc.h"
 #include "paths.h"
 #include "config.h"
+#include "model.h"
 #include "nmi.h"
 
 int oldromset;
@@ -23,11 +24,32 @@ static int rtctime;
 FILE *nvrfopen(char *fn, char *mode)
 {
         char s[512];
-
+        FILE *f;
+                
         strcpy(s, nvr_path);
         put_backslash(s);
+        strcat(s, config_name);
+        strcat(s, ".");
         strcat(s, fn);
-        return fopen(s, mode);
+        pclog("NVR try opening %s\n", s);
+        f = fopen(s, mode);
+        if (f)
+                return f;
+
+        if (mode[0] == 'r')
+        {
+                strcpy(s, nvr_path);
+                put_backslash(s);
+                strcat(s, "default");
+                put_backslash(s);
+                strcat(s, fn);
+                return fopen(s, mode);
+        }
+        else
+        {
+                pclog("Failed to open file '%s' for write\n", s);
+                return NULL;
+        }
 }
 
 void getnvrtime()
@@ -180,7 +202,13 @@ void writenvr(uint16_t addr, uint8_t val, void *priv)
         else
         {
                 nvraddr=val&nvrmask;
-                nmi_mask = ~val & 0x80;
+                /*PS/2 BIOSes will disable NMIs and expect the watchdog timer to still be able
+                  to fire them. I suspect the watchdog is exempt from NMI masking. Currently NMIs
+                  are always enabled for PS/2 machines - this would mean that other peripherals
+                  could fire NMIs regardless of the mask state, but as there aren't any emulated
+                  MCA peripherals that do this it's currently a moot point.*/
+                if (!(models[model].flags & MODEL_MCA))
+                        nmi_mask = ~val & 0x80;
         }
 }
 
@@ -223,6 +251,7 @@ void loadnvr()
                 case ROM_PC2086:      f = nvrfopen("pc2086.nvr",      "rb"); break;
                 case ROM_PC3086:      f = nvrfopen("pc3086.nvr",      "rb"); break;
                 case ROM_IBMAT:       f = nvrfopen("at.nvr",          "rb"); break;
+                case ROM_IBMXT286:    f = nvrfopen("ibmxt286.nvr",    "rb"); break;
                 case ROM_IBMPS1_2011: f = nvrfopen("ibmps1_2011.nvr", "rb"); /*nvrmask = 127; */break;
                 case ROM_IBMPS1_2121: f = nvrfopen("ibmps1_2121.nvr", "rb"); nvrmask = 127; break;
                 case ROM_IBMPS2_M30_286:   f = nvrfopen("ibmps2_m30_286.nvr",   "rb"); /*nvrmask = 127; */break;
@@ -232,11 +261,14 @@ void loadnvr()
                 case ROM_CMDPC30:     f = nvrfopen("cmdpc30.nvr",     "rb"); nvrmask = 127; break;
                 case ROM_AMI286:      f = nvrfopen("ami286.nvr",      "rb"); nvrmask = 127; break;
                 case ROM_AWARD286:    f = nvrfopen("award286.nvr",    "rb"); nvrmask = 127; break;
+                case ROM_GW286CT:     f = nvrfopen("gw286ct.nvr",     "rb"); nvrmask = 127; break;
                 case ROM_SPC4200P:    f = nvrfopen("spc4200p.nvr",    "rb"); nvrmask = 127; break;
+                case ROM_SPC4216P:    f = nvrfopen("spc4216p.nvr",    "rb"); nvrmask = 127; break;
                 case ROM_DELL200:     f = nvrfopen("dell200.nvr",     "rb"); nvrmask = 127; break;
                 case ROM_IBMAT386:    f = nvrfopen("at386.nvr",       "rb"); nvrmask = 127; break;
                 case ROM_DESKPRO_386: f = nvrfopen("deskpro386.nvr",  "rb"); break;
                 case ROM_ACER386:     f = nvrfopen("acer386.nvr",     "rb"); nvrmask = 127; break;
+                case ROM_KMXC02:      f = nvrfopen("kmxc02.nvr",      "rb"); nvrmask = 127; break;
                 case ROM_MEGAPC:      f = nvrfopen("megapc.nvr",      "rb"); nvrmask = 127; break;
                 case ROM_AMI386SX:    f = nvrfopen("ami386.nvr",      "rb"); nvrmask = 127; break;
                 case ROM_AMI486:      f = nvrfopen("ami486.nvr",      "rb"); nvrmask = 127; break;
@@ -250,6 +282,11 @@ void loadnvr()
                 case ROM_DTK386:      f = nvrfopen("dtk386.nvr",      "rb"); nvrmask = 127; break;
                 case ROM_MR386DX_OPTI495:  f = nvrfopen("mr386dx_opti495.nvr",  "rb"); nvrmask = 127; break;
                 case ROM_AMI386DX_OPTI495: f = nvrfopen("ami386dx_opti495.nvr", "rb"); nvrmask = 127; break;
+                case ROM_EPSON_PCAX:       f = nvrfopen("epson_pcax.nvr",       "rb"); nvrmask = 127; break;
+                case ROM_EPSON_PCAX2E:     f = nvrfopen("epson_pcax2e.nvr",     "rb"); nvrmask = 127; break;
+                case ROM_EPSON_PCAX3:      f = nvrfopen("epson_pcax3.nvr",      "rb"); nvrmask = 127; break;
+                case ROM_T3100E:           f = nvrfopen("t3100e.nvr",           "rb"); break;
+
                 default: return;
         }
         if (!f)
@@ -287,6 +324,7 @@ void savenvr()
                 case ROM_PC2086:      f = nvrfopen("pc2086.nvr",      "wb"); break;
                 case ROM_PC3086:      f = nvrfopen("pc3086.nvr",      "wb"); break;
                 case ROM_IBMAT:       f = nvrfopen("at.nvr",          "wb"); break;
+                case ROM_IBMXT286:    f = nvrfopen("ibmxt286.nvr",    "wb"); break;
                 case ROM_IBMPS1_2011: f = nvrfopen("ibmps1_2011.nvr", "wb"); break;
                 case ROM_IBMPS1_2121: f = nvrfopen("ibmps1_2121.nvr", "wb"); break;
                 case ROM_IBMPS2_M30_286:   f = nvrfopen("ibmps2_m30_286.nvr",   "wb"); break;
@@ -296,11 +334,14 @@ void savenvr()
                 case ROM_CMDPC30:     f = nvrfopen("cmdpc30.nvr",     "wb"); break;
                 case ROM_AMI286:      f = nvrfopen("ami286.nvr",      "wb"); break;
                 case ROM_AWARD286:    f = nvrfopen("award286.nvr",    "wb"); break;
+                case ROM_GW286CT:     f = nvrfopen("gw286ct.nvr",     "wb"); break;
                 case ROM_SPC4200P:    f = nvrfopen("spc4200p.nvr",    "wb"); break;
+                case ROM_SPC4216P:    f = nvrfopen("spc4216p.nvr",    "wb"); break;
                 case ROM_DELL200:     f = nvrfopen("dell200.nvr",     "wb"); break;
                 case ROM_IBMAT386:    f = nvrfopen("at386.nvr",       "wb"); break;
                 case ROM_DESKPRO_386: f = nvrfopen("deskpro386.nvr",  "wb"); break;
                 case ROM_ACER386:     f = nvrfopen("acer386.nvr",     "wb"); break;
+                case ROM_KMXC02:      f = nvrfopen("kmxc02.nvr",      "wb"); break;
                 case ROM_MEGAPC:      f = nvrfopen("megapc.nvr",      "wb"); break;
                 case ROM_AMI386SX:    f = nvrfopen("ami386.nvr",      "wb"); break;
                 case ROM_AMI486:      f = nvrfopen("ami486.nvr",      "wb"); break;
@@ -314,6 +355,10 @@ void savenvr()
                 case ROM_DTK386:      f = nvrfopen("dtk386.nvr",      "wb"); break;
                 case ROM_MR386DX_OPTI495:  f = nvrfopen("mr386dx_opti495.nvr",  "wb"); break;
                 case ROM_AMI386DX_OPTI495: f = nvrfopen("ami386dx_opti495.nvr", "wb"); break;
+                case ROM_EPSON_PCAX:       f = nvrfopen("epson_pcax.nvr",       "wb"); break;
+                case ROM_EPSON_PCAX2E:     f = nvrfopen("epson_pcax2e.nvr",     "wb"); break;
+                case ROM_EPSON_PCAX3:      f = nvrfopen("epson_pcax3.nvr",      "wb"); break;
+                case ROM_T3100E:           f = nvrfopen("t3100e.nvr",           "wb"); break;
                 default: return;
         }
         fwrite(nvrram,128,1,f);

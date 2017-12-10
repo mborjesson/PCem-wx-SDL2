@@ -5,7 +5,7 @@
   fbzColorPath
 */
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
 #include <sys/mman.h>
 #include <unistd.h>
 #endif
@@ -1129,10 +1129,14 @@ static inline void voodoo_generate(uint8_t *code_block, voodoo_t *voodoo, voodoo
                                 addbyte(0xfd);
                                 addbyte(0xc8);
                         }
-                        addbyte(0x66); /*PACKUSWB XMM3, XMM1*/
+                        addbyte(0xf3); /*MOVD XMM3, XMM1*/
+                        addbyte(0x0f);
+                        addbyte(0x7e);
+                        addbyte(0xd9);
+                        addbyte(0x66); /*PACKUSWB XMM3, XMM3*/
                         addbyte(0x0f);
                         addbyte(0x67);
-                        addbyte(0xd9);
+                        addbyte(0xdb);
                         if (tca_sub_clocal_1)
                         {
                                 addbyte(0x66); /*MOVD EBX, XMM3*/
@@ -1204,7 +1208,7 @@ static inline void voodoo_generate(uint8_t *code_block, voodoo_t *voodoo, voodoo
                                 addbyte(0x35); /*XOR EAX, 0xff*/
                                 addlong(0xff);
                         }
-                        addbyte(0x8e); /*ADD EAX, 1*/
+                        addbyte(0x83); /*ADD EAX, 1*/
                         addbyte(0xc0);
                         addbyte(1);
                         addbyte(0x0f); /*IMUL EAX, EBX*/
@@ -1457,16 +1461,8 @@ static inline void voodoo_generate(uint8_t *code_block, voodoo_t *voodoo, voodoo
                         addbyte(0xff);
                         addbyte(0x66); /*PADDW XMM1, XMM4*/
                         addbyte(0x0f);
-                        addbyte(0xfc);
+                        addbyte(0xfd);
                         addbyte(0xcc);
-                }
-                if (tc_invert_output)
-                {
-                        addbyte(0x66); /*PXOR XMM1, FF*/
-                        addbyte(0x0f);
-                        addbyte(0xef);
-                        addbyte(0x0d);
-                        addlong((uint32_t)&xmm_ff_w);
                 }
         
                 addbyte(0x66); /*PACKUSWB XMM0, XMM0*/
@@ -1481,6 +1477,14 @@ static inline void voodoo_generate(uint8_t *code_block, voodoo_t *voodoo, voodoo
                 addbyte(0x0f);
                 addbyte(0x67);
                 addbyte(0xc9);
+                if (tc_invert_output)
+                {
+                        addbyte(0x66); /*PXOR XMM1, FF*/
+                        addbyte(0x0f);
+                        addbyte(0xef);
+                        addbyte(0x0d);
+                        addlong((uint32_t)&xmm_ff_b);
+                }
         
                 if (tca_zero_other)
                 {
@@ -1658,7 +1662,7 @@ static inline void voodoo_generate(uint8_t *code_block, voodoo_t *voodoo, voodoo
                 addbyte(0xc0);
         }
 
-        if (params->alphaMode & ((1 << 0) | (1 << 4)))
+        if ((params->alphaMode & ((1 << 0) | (1 << 4))) || (!(cc_mselect == 0 && cc_reverse_blend == 0) && (cc_mselect == CC_MSELECT_AOTHER || cc_mselect == CC_MSELECT_ALOCAL)))
         {
                 /*EBX = a_other*/
                 switch (a_sel)
@@ -1823,7 +1827,6 @@ static inline void voodoo_generate(uint8_t *code_block, voodoo_t *voodoo, voodoo
                 {
                         addbyte(0xf6); /*TEST state->tex_a, 0x80*/
                         addbyte(0x87);
-                        addbyte(0x23);
                         addlong(offsetof(voodoo_state_t, tex_a));
                         addbyte(0x80);
                         addbyte(0x74);/*JZ !cc_localselect*/
@@ -1833,7 +1836,8 @@ static inline void voodoo_generate(uint8_t *code_block, voodoo_t *voodoo, voodoo
                                 addbyte(0x6e);
                                 addbyte(0x8e);
                                 addlong(offsetof(voodoo_params_t, color0));
-                                /*JMP +*/
+                                addbyte(0xeb); /*JMP +*/
+                                addbyte(8+5+4+4);
                         /*!cc_localselect:*/
                                 addbyte(0xf3); /*MOVDQU XMM1, ib*/ /* ir, ig and ib must be in same dqword!*/
                                 addbyte(0x0f);
@@ -3278,7 +3282,7 @@ voodoo_recomp++;
 static void voodoo_codegen_init(voodoo_t *voodoo)
 {
         int c;
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
 	void *start;
 	size_t len;
 	long pagesize = sysconf(_SC_PAGESIZE);
@@ -3291,7 +3295,7 @@ static void voodoo_codegen_init(voodoo_t *voodoo)
         voodoo->codegen_data = malloc(sizeof(voodoo_x86_data_t) * BLOCK_NUM*2);
 #endif
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
 	start = (void *)((long)voodoo->codegen_data & pagemask);
 	len = ((sizeof(voodoo_x86_data_t) * BLOCK_NUM*2) + pagesize) & pagemask;
 	if (mprotect(start, len, PROT_READ | PROT_WRITE | PROT_EXEC) != 0)

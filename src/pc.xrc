@@ -31,6 +31,7 @@
 	<ids-range name="IDM_VID_SCALE_MODE" start="1300" />
 	<ids-range name="IDM_VID_RENDER_DRIVER" start="1400" />
 	<ids-range name="IDM_SND_BUF" start="2000" />
+	<ids-range name="IDM_SND_GAIN" start="2100" />
 	<ids-range name="IDM_VID_GL3_INPUT_STRETCH" start="3000" />
 	<ids-range name="IDM_VID_GL3_INPUT_SCALE" start="3100" />
 	<ids-range name="IDM_VID_GL3_SHADER_REFRESH_RATE" start="3200" />
@@ -394,6 +395,49 @@
 					<radio>1</radio>
 				</object>
 			</object>
+			<object class="wxMenu">
+				<label>_Output level</label>
+				<object class="wxMenuItem" name="IDM_SND_GAIN[0]">
+					<label>_Normal</label>
+					<radio>1</radio>
+				</object>
+				<object class="wxMenuItem" name="IDM_SND_GAIN[1]">
+					<label>+_2 dB</label>
+					<radio>1</radio>
+				</object>
+				<object class="wxMenuItem" name="IDM_SND_GAIN[2]">
+					<label>+_4 dB</label>
+					<radio>1</radio>
+				</object>
+				<object class="wxMenuItem" name="IDM_SND_GAIN[3]">
+					<label>+_6 dB</label>
+					<radio>1</radio>
+				</object>
+				<object class="wxMenuItem" name="IDM_SND_GAIN[4]">
+					<label>+_8 dB</label>
+					<radio>1</radio>
+				</object>
+				<object class="wxMenuItem" name="IDM_SND_GAIN[5]">
+					<label>+_10 dB</label>
+					<radio>1</radio>
+				</object>
+				<object class="wxMenuItem" name="IDM_SND_GAIN[6]">
+					<label>+12 dB</label>
+					<radio>1</radio>
+				</object>
+				<object class="wxMenuItem" name="IDM_SND_GAIN[7]">
+					<label>+14 dB</label>
+					<radio>1</radio>
+				</object>
+				<object class="wxMenuItem" name="IDM_SND_GAIN[8]">
+					<label>+16 dB</label>
+					<radio>1</radio>
+				</object>
+				<object class="wxMenuItem" name="IDM_SND_GAIN[9]">
+					<label>+18 dB</label>
+					<radio>1</radio>
+				</object>
+</object>
 		</object>
 		<object class="wxMenu">
 			<label>Misc</label>
@@ -964,7 +1008,7 @@
 									<border>0</border>
 									<object class="wxFlexGridSizer">
 										<rows>0</rows>
-										<cols>2</cols>
+										<cols>3</cols>
 										<vgap>0</vgap>
 										<hgap>0</hgap>
 										<growablecols>1</growablecols>
@@ -1000,6 +1044,15 @@
 										</object>
 										<object class="sizeritem">
 											<option>0</option>
+											<flag>wxALL</flag>
+											<border>5</border>
+											<object class="wxBitmapButton" name="IDC_CONFIGUREHDD">
+												<bitmap>icons/16x16/setting_tools.png</bitmap>
+												<default>0</default>
+											</object>
+										</object>
+										<object class="sizeritem">
+											<option>0</option>
 											<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
 											<border>5</border>
 											<object class="wxStaticText">
@@ -1026,6 +1079,12 @@
 													</object>
 												</object>
 											</object>
+										</object>
+										<object class="spacer">
+											<option>1</option>
+											<flag>wxEXPAND</flag>
+											<border>5</border>
+											<size>0,0</size>
 										</object>
 										<object class="sizeritem">
 											<option>0</option>
@@ -1055,6 +1114,12 @@
 													</object>
 												</object>
 											</object>
+										</object>
+										<object class="spacer">
+											<option>1</option>
+											<flag>wxEXPAND</flag>
+											<border>5</border>
+											<size>0,0</size>
 										</object>
 									</object>
 								</object>
@@ -1914,6 +1979,102 @@
 												<size>350,-1</size>
 												<value></value>
 												<content />
+											</object>
+										</object>
+									</object>
+								</object>
+							</object>
+						</object>
+					</object>
+					<object class="notebookpage">
+						<selected>0</selected>
+						<bitmap>icons/32x32/joystick.png</bitmap>
+						<object class="wxPanel">
+							<style>wxTAB_TRAVERSAL</style>
+							<object class="wxFlexGridSizer">
+								<rows>2</rows>
+								<cols>0</cols>
+								<vgap>0</vgap>
+								<hgap>0</hgap>
+								<growablecols></growablecols>
+								<growablerows></growablerows>
+								<object class="sizeritem">
+									<object class="wxFlexGridSizer">
+										<rows>0</rows>
+										<cols>4</cols>
+										<vgap>0</vgap>
+										<hgap>0</hgap>
+										<growablecols>1</growablecols>
+										<growablerows></growablerows>
+										<object class="sizeritem">
+											<option>0</option>
+											<flag>wxALL | wxALIGN_CENTER_VERTICAL</flag>
+											<border>5</border>
+											<object class="wxStaticText">
+												<size>80,-1</size>
+												<label>Joystick:</label>
+												<wrap>-1</wrap>
+											</object>
+										</object>
+										<object class="sizeritem">
+											<option>1</option>
+											<flag>wxEXPAND</flag>
+											<border>5</border>
+											<object class="wxBoxSizer">
+												<orient>wxHORIZONTAL</orient>
+												<object class="sizeritem">
+													<option>0</option>
+													<flag>wxALL</flag>
+													<border>5</border>
+													<object class="wxComboBox" name="IDC_COMBOJOY">
+														<style>wxCB_DROPDOWN|wxCB_READONLY</style>
+														<size>350,-1</size>
+														<value></value>
+														<content />
+													</object>
+												</object>
+											</object>
+										</object>
+									</object>
+								</object>
+								<object class="sizeritem">
+									<object class="wxGridSizer">
+										<rows>0</rows>
+										<cols>4</cols>
+										<object class="sizeritem">
+											<option>0</option>
+											<flag>wxALL</flag>
+											<border>5</border>
+											<object class="wxButton" name="IDC_JOY1">
+												<label>Joystick 1...</label>
+												<default>1</default>
+											</object>
+										</object>
+										<object class="sizeritem">
+											<option>0</option>
+											<flag>wxALL</flag>
+											<border>5</border>
+											<object class="wxButton" name="IDC_JOY2">
+												<label>Joystick 2...</label>
+												<default>1</default>
+											</object>
+										</object>
+										<object class="sizeritem">
+											<option>0</option>
+											<flag>wxALL</flag>
+											<border>5</border>
+											<object class="wxButton" name="IDC_JOY3">
+												<label>Joystick 3...</label>
+												<default>1</default>
+											</object>
+										</object>
+										<object class="sizeritem">
+											<option>0</option>
+											<flag>wxALL</flag>
+											<border>5</border>
+											<object class="wxButton" name="IDC_JOY4">
+												<label>Joystick 4...</label>
+												<default>1</default>
 											</object>
 										</object>
 									</object>

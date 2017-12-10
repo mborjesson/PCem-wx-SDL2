@@ -24,19 +24,19 @@ else
    AC_MSG_RESULT([no])
 fi
 
-AC_MSG_CHECKING([whether to use the wxWidgets-based GUI])
-AC_ARG_ENABLE(wx,
-	      AC_HELP_STRING([--enable-wx], [use wxWidgets GUI]))
-if test "$enable_wx" = "yes"; then
+AC_MSG_CHECKING([whether to enable networking])
+AC_ARG_ENABLE(networking,
+	      AC_HELP_STRING([--enable-networking], [enable networking]))
+if test "$enable_networking" = "yes"; then
    AC_MSG_RESULT([yes])
 else
    AC_MSG_RESULT([no])
 fi
 
-AC_MSG_CHECKING([whether to enable networking])
-AC_ARG_ENABLE(networking,
-	      AC_HELP_STRING([--enable-networking], [enable networking]))
-if test "$enable_networking" = "yes"; then
+AC_MSG_CHECKING([whether to use ALSA for MIDI output])
+AC_ARG_ENABLE(alsa,
+	      AC_HELP_STRING([--enable-alsa], [use ALSA for MIDI]))
+if test "$enable_alsa" = "yes"; then
    AC_MSG_RESULT([yes])
 else
    AC_MSG_RESULT([no])
@@ -60,55 +60,83 @@ esac
 AM_CONDITIONAL(CPU_I386, test "$CPU" = "i386")
 AM_CONDITIONAL(CPU_X86_64, test "$CPU" = "x86_64")
 
+AC_MSG_CHECKING([for off64_t])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>]],[[off64_t n=0;]])],[has_lfs="yes"],[has_lfs="no"])
+AC_MSG_RESULT($has_lfs)
+
 #AC_MSG_CHECKING([for libz])
 #AX_CHECK_ZLIB
 
-AM_CONDITIONAL(OS_WIN, test "$OS" = "win")
-AM_CONDITIONAL(OS_LINUX, test "$OS" = "linux")
-
 AM_CONDITIONAL(USE_WX, test "$enable_wx" = "yes")
 AM_CONDITIONAL(USE_NETWORKING, test "$enable_networking" = "yes")
+AM_CONDITIONAL(USE_ALSA, test "$enable_alsa" = "yes")
 
-if test "$enable_wx" != "yes"; then
-   # Do not run test for Allegro with Win32/MinGW version, as binary builds have
-   # `allegro-config' missing.
-   # NOTE: For the following Autoconf macro to be supported, you need to extract
-   #       allegro.m4 from the DOS/Windows Allegro sources (the file is contained
-   #       in `misc') and copy it to this directory or MSYS's `/share/aclocal'.
-   if test "$OS" != "win"; then
-      AC_CONFIG_MACRO_DIR([./])
-      AM_PATH_ALLEGRO(, , AC_MSG_ERROR(building PCem requires Allegro to be installed))
-   fi
-else
-   SDL_VERSION=2.0.1
-   AM_PATH_SDL2($SDL_VERSION,
-      :,
-      AC_MSG_ERROR([*** SDL version $SDL_VERSION not found!])
-   )
-   AM_OPTIONS_WXCONFIG
-   reqwx=3.0.0
-   AM_PATH_WXCONFIG($reqwx, wxWin=1)
-   if test "$wxWin" != 1; then
-      AC_MSG_ERROR([
-         wxWidgets must be installed on your system.
+AM_CONDITIONAL(HAS_OFF64T, test "$has_lfs" = "yes")
+
+SDL_VERSION=2.0.1
+AM_PATH_SDL2($SDL_VERSION,
+   :,
+   AC_MSG_ERROR([*** SDL version $SDL_VERSION not found!])
+)
+
+AM_OPTIONS_WXCONFIG
+reqwx=3.0.0
+AM_PATH_WXCONFIG($reqwx, wxWin=1)
+if test "$wxWin" != 1; then
+   AC_MSG_ERROR([
+      wxWidgets must be installed on your system.
  
-         Please check that wx-config is in path, the directory
-         where wxWidgets libraries are installed (returned by
-         'wx-config --libs' or 'wx-config --static --libs' command)
-         is in LD_LIBRARY_PATH or equivalent variable and
-         wxWidgets version is $reqwx or above.
-         ])
-   fi
-   AC_CHECK_LIB([GL], [glGetError], [], \
-      [echo "You need to install the OpenGL library."
-       exit -1])
-   LIBS="$LIBS $WX_LIBS $SDL_LIBS"
+      Please check that wx-config is in path, the directory
+      where wxWidgets libraries are installed (returned by
+      'wx-config --libs' or 'wx-config --static --libs' command)
+      is in LD_LIBRARY_PATH or equivalent variable and
+      wxWidgets version is $reqwx or above.
+      ])
 fi
 
-AC_CHECK_LIB([openal], [alGetError], [], \
-	[echo "You need to install the OpenAL library."
+if test "$enable_alsa" == "yes"; then
+    AC_CHECK_LIB(asound, snd_pcm_open,
+        [],
+        [echo "You need to install the ALSA library."
 	 exit -1])
+fi
 
 AC_CHECK_LIB([pthread], [pthread_create])
+
+build_macosx="no"
+build_linux="no"
+build_win="no"
+
+case "$host" in
+    *-*-darwin*)
+       LIBS="$LIBS -framework OpenGL"
+       LIBS="$LIBS -framework OpenAL"
+       build_macosx="yes"
+       ;;
+    *-*-cygwin* | *-*-mingw32*)
+       AC_CHECK_LIB([GL], [glGetError], [], \
+           [echo "You need to install the OpenGL library."
+           exit -1])
+       AC_CHECK_LIB([openal], [alGetError], [], \
+	   [echo "You need to install the OpenAL library."
+	   exit -1])
+       build_win="yes"
+       ;;    
+    *)
+       AC_CHECK_LIB([GL], [glGetError], [], \
+           [echo "You need to install the OpenGL library."
+           exit -1])
+       AC_CHECK_LIB([openal], [alGetError], [], \
+	   [echo "You need to install the OpenAL library."
+	   exit -1])
+       build_linux="yes"
+       ;;
+esac
+
+LIBS="$LIBS $WX_LIBS $SDL_LIBS"
+
+AM_CONDITIONAL(OS_LINUX, [test "$build_linux" = "yes"])
+AM_CONDITIONAL(OS_WINDOWS, [test "$build_win" = "yes"])
+AM_CONDITIONAL(OS_MACOSX, [test "$build_macosx" = "yes"])
 
 AC_OUTPUT([Makefile src/Makefile])

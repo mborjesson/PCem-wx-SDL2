@@ -798,7 +798,10 @@ void s3_out(uint16_t addr, uint8_t val, void *p)
                 
                 case 0x3C6: case 0x3C7: case 0x3C8: case 0x3C9:
 //                pclog("Write RAMDAC %04X %02X %04X:%04X\n", addr, val, CS, pc);
-                sdac_ramdac_out(addr, val, &s3->ramdac, svga);
+                if (s3->chip == S3_TRIO32 || s3->chip == S3_TRIO64)
+                        svga_out(addr, val, svga);
+                else
+                        sdac_ramdac_out(addr, val, &s3->ramdac, svga);
                 return;
 
                 case 0x3D4:
@@ -818,7 +821,7 @@ void s3_out(uint16_t addr, uint8_t val, void *p)
                         s3->ma_ext = (s3->ma_ext & 0x1c) | ((val & 0x30) >> 4);
                         break;
                         case 0x32:
-                        svga->vrammask = (val & 0x40) ? 0x3ffff : s3->vram_mask;
+                        svga->vram_display_mask = (val & 0x40) ? 0x3ffff : s3->vram_mask;
                         break;
                                                 
                         case 0x50:
@@ -933,6 +936,8 @@ uint8_t s3_in(uint16_t addr, void *p)
                 
                 case 0x3c6: case 0x3c7: case 0x3c8: case 0x3c9:
 //                pclog("Read RAMDAC %04X  %04X:%04X\n", addr, CS, pc);
+                if (s3->chip == S3_TRIO32 || s3->chip == S3_TRIO64)
+                        return svga_in(addr, svga);
                 return sdac_ramdac_in(addr, &s3->ramdac, svga);
 
                 case 0x3d4:
@@ -1034,7 +1039,14 @@ void s3_updatemapping(s3_t *s3)
         }
 
 //        pclog("Update mapping - bank %02X ", svga->gdcreg[6] & 0xc);
-        switch (svga->gdcreg[6] & 0xc) /*Banked framebuffer*/
+        /*Banked framebuffer*/
+        if (svga->crtc[0x31] & 0x08) /*Enhanced mode mappings*/
+        {
+                /*Enhanced mapping forces 64kb at 0xa0000*/
+                mem_mapping_set_addr(&svga->mapping, 0xa0000, 0x10000);
+                svga->banked_mask = 0xffff;
+        }
+        else switch (svga->gdcreg[6] & 0xc) /*VGA mapping*/
         {
                 case 0x0: /*128k at A0000*/
                 mem_mapping_set_addr(&svga->mapping, 0xa0000, 0x20000);
@@ -2215,6 +2227,31 @@ static void *s3_init(char *bios_fn, int chip)
                    s3_hwcursor_draw,
                    NULL);
 
+        svga->decode_mask = (4 << 20) - 1;
+        switch (vram)
+        {
+                case 0: /*512kb*/
+                svga->vram_mask = (1 << 19) - 1;
+                svga->vram_max = 2 << 20;
+                break;
+                case 1: /*1MB*/
+                /*VRAM in first MB, mirrored in 2nd MB, 3rd and 4th MBs are open bus*/
+                /*This works with the #9 9FX BIOS, and matches how my real Trio64 behaves,
+                  but does not work with the Phoenix EDO BIOS. Possibly an FPM/EDO difference?*/
+                svga->vram_mask = (1 << 20) - 1;
+                svga->vram_max = 2 << 20;
+                break;
+                case 2: default: /*2MB*/
+                /*VRAM in first 2 MB, 3rd and 4th MBs are open bus*/
+                svga->vram_mask = (2 << 20) - 1;
+                svga->vram_max = 2 << 20;
+                break;
+                case 4: /*4MB*/
+                svga->vram_mask = (4 << 20) - 1;
+                svga->vram_max = 4 << 20;
+                break;
+        }
+                
         if (PCI)
                 svga->crtc[0x36] = 2 | (3 << 2) | (1 << 4) | (vram_sizes[vram] << 5);
         else
@@ -2309,6 +2346,8 @@ void *s3_phoenix_trio64_init()
         s3->id = 0xe1; /*Trio64*/
         s3->id_ext = s3->id_ext_pci = 0x11;
         s3->packed_mmio = 1;
+        if (device_get_config_int("memory") == 1)
+                s3->svga.vram_max = 1 << 20; /*Phoenix BIOS does not expect VRAM to be mirrored*/
 
         s3->getclock = s3_trio64_getclock;
         s3->getclock_p = s3;
@@ -2465,10 +2504,6 @@ static device_config_t s3_phoenix_trio64_config[] =
                 .type = CONFIG_SELECTION,
                 .selection =
                 {
-                        {
-                                .description = "512 KB",
-                                .value = 0
-                        },
                         {
                                 .description = "1 MB",
                                 .value = 1

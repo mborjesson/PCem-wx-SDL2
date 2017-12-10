@@ -233,7 +233,6 @@ void initpc(int argc, char *argv[])
         //char *p;
 //        char *config_file = NULL;
         int c;
-//        allegro_init();
 
         for (c = 1; c < argc; c++)
         {
@@ -250,9 +249,22 @@ void initpc(int argc, char *argv[])
                 }
                 else if (!strcasecmp(argv[c], "--config"))
                 {
+                        int d;
+                        
                         if ((c+1) == argc)
                                 break;
                         strncpy(config_file_default, argv[c+1], 256);
+                        strcpy(config_name, get_filename(config_file_default));
+                        
+                        for (d = 0; d < strlen(config_name); d++)
+                        {
+                                if (config_name[d] == '.')
+                                {
+                                        config_name[d] = 0;
+                                        break;
+                                }
+                        }
+
                         config_override = 1;
                         c++;
                 }
@@ -657,6 +669,7 @@ void loadconfig(char *fn)
         window_remember = config_get_int(CFG_GLOBAL, NULL, "window_remember", 0);
 
         sound_buf_len = config_get_int(CFG_GLOBAL, NULL, "sound_buf_len", 200);
+        sound_gain = config_get_int(CFG_GLOBAL, NULL, "sound_gain", 0);
         
         GAMEBLASTER = config_get_int(CFG_MACHINE, NULL, "gameblaster", 0);
         GUS = config_get_int(CFG_MACHINE, NULL, "gus", 0);
@@ -828,6 +841,7 @@ void saveconfig(char *fn)
         config_set_int(CFG_GLOBAL, NULL, "window_remember", window_remember);
 
         config_set_int(CFG_GLOBAL, NULL, "sound_buf_len", sound_buf_len);
+        config_set_int(CFG_GLOBAL, NULL, "sound_gain", sound_gain);
         
         config_set_int(CFG_MACHINE, NULL, "gameblaster", GAMEBLASTER);
         config_set_int(CFG_MACHINE, NULL, "gus", GUS);

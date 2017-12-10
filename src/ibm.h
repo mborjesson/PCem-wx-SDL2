@@ -5,9 +5,9 @@
 
 #define READFLASH_FDC 0
 #define READFLASH_HDC 4
-#define readflash_set(offset, drive) readflash |= 1<<(offset+drive)
-#define readflash_clear(offset, drive) readflash &= ~(1<<(offset+drive))
-#define readflash_get(offset, drive) ((readflash&(1<<(offset+drive))) != 0)
+#define readflash_set(offset, drive) readflash |= 1<<((offset)+(drive))
+#define readflash_clear(offset, drive) readflash &= ~(1<<((offset)+(drive)))
+#define readflash_get(offset, drive) ((readflash&(1<<((offset)+(drive)))) != 0)
 
 /*Memory*/
 uint8_t *ram;
@@ -175,11 +175,19 @@ struct
 
 extern uint32_t cpu_cur_status;
 
+/*The flags below must match in both cpu_cur_status and block->status for a block
+  to be valid*/
 #define CPU_STATUS_USE32   (1 << 0)
 #define CPU_STATUS_STACK32 (1 << 1)
-#define CPU_STATUS_FLATDS  (1 << 2)
-#define CPU_STATUS_FLATSS  (1 << 3)
+#define CPU_STATUS_PMODE   (1 << 2)
+#define CPU_STATUS_V86     (1 << 3)
+#define CPU_STATUS_FLAGS 0xffff
 
+/*If the flags below are set in cpu_cur_status, they must be set in block->status.
+  Otherwise they are ignored*/
+#define CPU_STATUS_NOTFLATDS  (1 << 16)
+#define CPU_STATUS_NOTFLATSS  (1 << 17)
+#define CPU_STATUS_MASK 0xffff0000
 
 #define COMPILE_TIME_ASSERT(expr) typedef char COMP_TIME_ASSERT[(expr) ? 1 : 0];
 
@@ -328,7 +336,7 @@ typedef struct DMA
         int wp;
         uint8_t m,mode[4];
         uint8_t page[4];
-        uint8_t stat;
+        uint8_t stat, stat_rq;
         uint8_t command;
         
         int xfr_command, xfr_channel;
@@ -370,7 +378,7 @@ char discfns[2][256];
 int driveempty[2];
 
 #define MDA ((gfxcard==GFX_MDA || gfxcard==GFX_HERCULES || gfxcard==GFX_INCOLOR || gfxcard==GFX_GENIUS) && (romset<ROM_TANDY || romset>=ROM_IBMAT))
-#define VGA ((gfxcard>=GFX_TVGA || romset==ROM_ACER386) && gfxcard!=GFX_COLORPLUS && gfxcard!=GFX_INCOLOR && gfxcard!=GFX_WY700 && gfxcard!=GFX_GENIUS && romset!=ROM_PC1640 && romset!=ROM_PC1512 && romset!=ROM_TANDY && romset!=ROM_PC200)
+#define VGA ((gfxcard>=GFX_TVGA || romset==ROM_ACER386) && gfxcard!=GFX_COLORPLUS && gfxcard!=GFX_INCOLOR && gfxcard!=GFX_WY700 && gfxcard!=GFX_GENIUS && romset!=ROM_PC1640 && romset!=ROM_PC1512 && romset!=ROM_TANDY && romset!=ROM_PC200 && romset != ROM_T3100E)
 #define PCJR (romset == ROM_IBMPCJR)
 #define AMIBIOS (romset==ROM_AMI386SX || romset==ROM_AMI486 || romset == ROM_WIN486)
 
@@ -405,11 +413,14 @@ enum
         ROM_CMDPC30,
         ROM_AMI286,
         ROM_AWARD286,
+        ROM_GW286CT,
         ROM_SPC4200P,
+        ROM_SPC4216P,
         ROM_DELL200,
         ROM_MISC286,
         ROM_IBMAT386,
         ROM_ACER386,
+        ROM_KMXC02,
         ROM_MEGAPC,
         ROM_AMI386SX,
         ROM_AMI486,
@@ -428,6 +439,12 @@ enum
 	ROM_IBMPS2_M50,
 	ROM_IBMPS2_M55SX,
 	ROM_IBMPS2_M80,
+        ROM_ATARIPC3,
+        ROM_IBMXT286,
+        ROM_EPSON_PCAX,
+        ROM_EPSON_PCAX2E,
+        ROM_EPSON_PCAX3,
+        ROM_T3100E,
                 	
         ROM_MAX
 };
@@ -580,3 +597,5 @@ void saveconfig(char *fn);
 void saveconfig_global_only();
 
 #define UNUSED(x) (void)x
+
+#define MIN(a, b) ((a) < (b) ? (a) : (b))

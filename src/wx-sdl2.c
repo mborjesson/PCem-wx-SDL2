@@ -27,6 +27,8 @@
 #include "model.h"
 #include "mouse.h"
 #include "nvr.h"
+#include "plat-joystick.h"
+#include "plat-midi.h"
 #include "sound.h"
 #include "thread.h"
 #include "disc.h"
@@ -404,7 +406,7 @@ int wx_setupmenu(void* data)
         sprintf(menuitem, "IDM_SND_BUF[%d]", (int)(log(sound_buf_len/MIN_SND_BUF)/log(2)));
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
 
-        sprintf(menuitem, "IDM_SND_BUF[%d]", (int)(log(sound_buf_len/MIN_SND_BUF)/log(2)));
+        sprintf(menuitem, "IDM_SND_GAIN[%d]", (int)(sound_gain / 2));
         wx_checkmenuitem(menu, WX_ID(menuitem), WX_MB_CHECKED);
 
         sprintf(menuitem, "IDM_VID_SCALE_MODE[%d]", video_scale_mode);
@@ -512,6 +514,7 @@ int pc_main(int argc, char** argv)
         display_init();
 #endif
         sdl_video_init();
+        joystick_init();
 
         return TRUE;
 }
@@ -632,6 +635,7 @@ int start_emulation(void* params)
 
         loadbios();
         resetpchard();
+        midi_init();
 
         display_start(params);
         mainthreadh = SDL_CreateThread(mainthread, "Main Thread", NULL);
@@ -682,6 +686,8 @@ int stop_emulation()
         endblit();
         SDL_DestroyMutex(ghMutex);
 
+        midi_close();
+        
         pclog("Emulation stopped.\n");
 
         wx_close_status(ghwnd);
@@ -1021,6 +1027,12 @@ int wx_handle_command(void* hwnd, int wParam, int checked)
         else if (ID_RANGE("IDM_SND_BUF[start]", "IDM_SND_BUF[end]"))
         {
                 sound_buf_len = MIN_SND_BUF*1<<(wParam - wx_xrcid("IDM_SND_BUF[start]"));
+                wx_checkmenuitem(menu, wParam, WX_MB_CHECKED);
+                saveconfig(NULL);
+        }
+        else if (ID_RANGE("IDM_SND_GAIN[start]", "IDM_SND_GAIN[end]"))
+        {
+                sound_gain = 2 * (wParam - wx_xrcid("IDM_SND_GAIN[start]"));
                 wx_checkmenuitem(menu, wParam, WX_MB_CHECKED);
                 saveconfig(NULL);
         }

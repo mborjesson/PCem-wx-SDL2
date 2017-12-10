@@ -22,7 +22,7 @@
 
 #include "hdd_esdi.h"
 
-#define ESDI_TIME (2000 * TIMER_USEC)
+#define ESDI_TIME (500 * TIMER_USEC)
 
 #define CMD_ADAPTER 0
 
@@ -110,6 +110,7 @@ typedef struct esdi_t
 #define CMD_READ_VERIFY    0x03
 #define CMD_WRITE_VERIFY   0x04
 #define CMD_SEEK           0x05
+#define CMD_GET_DEV_STATUS 0x08
 #define CMD_GET_DEV_CONFIG 0x09
 #define CMD_GET_POS_INFO   0x0a
 
@@ -355,6 +356,25 @@ static void device_not_present(esdi_t *esdi)
         esdi_set_irq(esdi);
 }
 
+static void rba_out_of_range(esdi_t *esdi)
+{
+        esdi->status_len = 9;
+        esdi->status_data[0] = esdi->command | STATUS_LEN(9) | esdi->cmd_dev;
+        esdi->status_data[1] = 0x0e01; /*Command block error, invalid parameter*/
+        esdi->status_data[2] = 0x0007; /*RBA out of range*/
+        esdi->status_data[3] = 0;
+        esdi->status_data[4] = 0;
+        esdi->status_data[5] = 0;
+        esdi->status_data[6] = 0;                        
+        esdi->status_data[7] = 0;                       
+        esdi->status_data[8] = 0;
+
+        esdi->status = STATUS_IRQ | STATUS_STATUS_OUT_FULL;
+        esdi->irq_status = esdi->cmd_dev | IRQ_CMD_COMPLETE_FAILURE;
+        esdi->irq_in_progress = 1;
+        esdi_set_irq(esdi);
+}
+
 #define ESDI_ADAPTER_ONLY() do \
         {                                                 \
                 if (esdi->cmd_dev != ATTN_HOST_ADAPTER)   \
@@ -412,6 +432,12 @@ static void esdi_callback(void *p)
 
                         esdi->sector_pos = 0;
                         esdi->sector_count = esdi->cmd_data[1];
+                        
+                        if ((esdi->rba + esdi->sector_count) >= hdd_file->sectors)
+                        {
+                                rba_out_of_range(esdi);
+                                return;
+                        }
                                 
                         esdi->status = STATUS_IRQ | STATUS_CMD_IN_PROGRESS | STATUS_TRANSFER_REQ;
                         esdi->irq_status = esdi->cmd_dev | IRQ_DATA_TRANSFER_READY;
@@ -437,6 +463,7 @@ static void esdi_callback(void *p)
                                         if (esdi->rba >= hdd_file->sectors)
                                                 fatal("Read past end of drive\n");
                                         hdd_read_sectors(hdd_file, esdi->rba, 1, esdi->data);
+                                        readflash_set(READFLASH_HDC, esdi->cmd_dev == ATTN_DEVICE_0 ? 0 : 1);
                                 }
 //                                pclog("Read sector %i %i %08x\n", esdi->sector_pos, esdi->data_pos, esdi->rba*512);
                                 while (esdi->data_pos < 256)
@@ -491,6 +518,12 @@ static void esdi_callback(void *p)
                         esdi->sector_pos = 0;
                         esdi->sector_count = esdi->cmd_data[1];
                                 
+                        if ((esdi->rba + esdi->sector_count) >= hdd_file->sectors)
+                        {
+                                rba_out_of_range(esdi);
+                                return;
+                        }
+
                         esdi->status = STATUS_IRQ | STATUS_CMD_IN_PROGRESS | STATUS_TRANSFER_REQ;
                         esdi->irq_status = esdi->cmd_dev | IRQ_DATA_TRANSFER_READY;
                         esdi->irq_in_progress = 1;
@@ -559,6 +592,12 @@ static void esdi_callback(void *p)
                         return;
                 }
 
+                if ((esdi->rba + esdi->sector_count) >= hdd_file->sectors)
+                {
+                        rba_out_of_range(esdi);
+                        return;
+                }
+
                 esdi->status = STATUS_IRQ;
                 esdi->irq_status = esdi->cmd_dev | IRQ_CMD_COMPLETE_SUCCESS;
                 esdi->irq_in_progress = 1;
@@ -580,6 +619,37 @@ static void esdi_callback(void *p)
                 esdi_set_irq(esdi);
                 break;
 
+                case CMD_GET_DEV_STATUS:
+                ESDI_DRIVE_ONLY();
+
+                if (!hdd_file->f)
+                {
+                        device_not_present(esdi);
+                        return;
+                }
+
+                if (esdi->status_pos)
+                        fatal("Status send in progress\n");
+                if ((esdi->status & STATUS_IRQ) || esdi->irq_in_progress)
+                        fatal("IRQ in progress %02x %i\n", esdi->status, esdi->irq_in_progress);
+
+                esdi->status_len = 9;
+                esdi->status_data[0] = CMD_GET_DEV_STATUS | STATUS_LEN(9) | STATUS_DEVICE_HOST_ADAPTER;
+                esdi->status_data[1] = 0x0000; /*Error bits*/
+                esdi->status_data[2] = 0x1900; /*Device status*/
+                esdi->status_data[3] = 0; /*ESDI Standard Status*/
+                esdi->status_data[4] = 0; /*ESDI Vendor Unique Status*/
+                esdi->status_data[5] = 0;
+                esdi->status_data[6] = 0;
+                esdi->status_data[7] = 0;
+                esdi->status_data[8] = 0;
+                
+                esdi->status = STATUS_IRQ | STATUS_STATUS_OUT_FULL;
+                esdi->irq_status = esdi->cmd_dev | IRQ_CMD_COMPLETE_SUCCESS;
+                esdi->irq_in_progress = 1;
+                esdi_set_irq(esdi);
+                break;
+
                 case CMD_GET_DEV_CONFIG:
                 ESDI_DRIVE_ONLY();
 
@@ -595,7 +665,7 @@ static void esdi_callback(void *p)
                         fatal("IRQ in progress %02x %i\n", esdi->status, esdi->irq_in_progress);
 
                 esdi->status_len = 6;
-                esdi->status_data[0] = CMD_GET_POS_INFO | STATUS_LEN(6) | STATUS_DEVICE_HOST_ADAPTER;
+                esdi->status_data[0] = CMD_GET_DEV_CONFIG | STATUS_LEN(6) | STATUS_DEVICE_HOST_ADAPTER;
                 esdi->status_data[1] = 0x10; /*Zero defect*/
                 esdi->status_data[2] = hdd_file->sectors & 0xffff;
                 esdi->status_data[3] = hdd_file->sectors >> 16;

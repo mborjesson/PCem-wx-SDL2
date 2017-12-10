@@ -468,12 +468,12 @@ void mach64_recalctimings(svga_t *svga)
                         break;
                 }
 
-                svga->vrammask = mach64->vram_mask;
+                svga->vram_display_mask = mach64->vram_mask;
 //                pclog("mach64_recalctimings : frame %i,%i disp %i,%i vsync at %i rowoffset %i pixel clock %f MA %08X\n", svga->htotal, svga->vtotal, svga->hdisp, svga->dispend, svga->vsyncstart, svga->rowoffset, svga->clock, svga->ma);
         }
         else
         {
-                svga->vrammask = (mach64->regs[0x36] & 0x01) ? mach64->vram_mask : 0x3ffff;
+                svga->vram_display_mask = (mach64->regs[0x36] & 0x01) ? mach64->vram_mask : 0x3ffff;
         }
 }
 
@@ -3210,7 +3210,10 @@ uint8_t mach64_pci_read(int func, int addr, void *p)
                 case 0x12: return mach64->linear_base >> 16;
                 case 0x13: return mach64->linear_base >> 24;
 
-                case 0x14: return 0x01; /*Block decoded IO address*/
+                case 0x14:
+                if (mach64->type == MACH64_VT2)
+                        return 0x01; /*Block decoded IO address*/
+                return 0;
                 case 0x15: return mach64->block_decoded_io >> 8;
                 case 0x16: return mach64->block_decoded_io >> 16;
                 case 0x17: return mach64->block_decoded_io >> 24;

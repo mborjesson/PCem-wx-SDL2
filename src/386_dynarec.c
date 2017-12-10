@@ -10,6 +10,7 @@
 #include "codegen.h"
 #include "cpu.h"
 #include "fdc.h"
+#include "nmi.h"
 #include "pic.h"
 #include "timer.h"
 
@@ -387,7 +388,7 @@ static void prefetch_flush()
 #define PREFETCH_RUN(instr_cycles, bytes, modrm, reads, reads_l, writes, writes_l, ea32) \
         do { if (cpu_prefetch_cycles) prefetch_run(instr_cycles, bytes, modrm, reads, reads_l, writes, writes_l, ea32); } while (0)
 
-#define PREFETCH_PREFIX() prefetch_prefixes++
+#define PREFETCH_PREFIX() do { if (cpu_prefetch_cycles) prefetch_prefixes++; } while (0)
 #define PREFETCH_FLUSH() prefetch_flush()
 
 
@@ -492,14 +493,14 @@ void exec386_dynarec(int cycs)
         int tempi;
         int cycdiff;
         int oldcyc;
-
+        int cyc_period = cycs / 2000; /*5us*/
 //output = 3;
         cycles_main += cycs;
         while (cycles_main > 0)
         {
                 int cycles_start;
                 
-                cycles += 1000;
+                cycles += cyc_period;
                 cycles_start = cycles;
 
                 timer_start_period(cycles << TIMER_SHIFT);
@@ -560,7 +561,9 @@ void exec386_dynarec(int cycs)
                                         CPU_BLOCK_END();
                                 if (trap)
                                         CPU_BLOCK_END();
-
+                                if (nmi && nmi_enable && nmi_mask)
+                                        CPU_BLOCK_END();
+                                        
                                 ins++;
                                 insc++;
                                 
@@ -586,7 +589,8 @@ void exec386_dynarec(int cycs)
                           and physical address. The physical address check will
                           also catch any page faults at this stage*/
                         valid_block = (block->pc == cs + cpu_state.pc) && (block->_cs == cs) &&
-                                      (block->phys == phys_addr) && (block->status == cpu_cur_status);
+                                      (block->phys == phys_addr) && !((block->status ^ cpu_cur_status) & CPU_STATUS_FLAGS) &&
+                                      ((block->status & cpu_cur_status & CPU_STATUS_MASK) == (cpu_cur_status & CPU_STATUS_MASK));
                         if (!valid_block)
                         {
                                 uint64_t mask = (uint64_t)1 << ((phys_addr >> PAGE_MASK_SHIFT) & PAGE_MASK_MASK);
@@ -598,7 +602,8 @@ void exec386_dynarec(int cycs)
                                         if (new_block)
                                         {
                                                 valid_block = (new_block->pc == cs + cpu_state.pc) && (new_block->_cs == cs) &&
-                                                                (new_block->phys == phys_addr) && (new_block->status == cpu_cur_status);
+                                                                (new_block->phys == phys_addr) && !((new_block->status ^ cpu_cur_status) & CPU_STATUS_FLAGS) &&
+                                                                ((new_block->status & cpu_cur_status & CPU_STATUS_MASK) == (cpu_cur_status & CPU_STATUS_MASK));
                                                 if (valid_block)
                                                         block = new_block;
                                         }
@@ -609,7 +614,7 @@ void exec386_dynarec(int cycs)
                         {
                                 codegen_check_flush(page, page->dirty_mask[(phys_addr >> 10) & 3], phys_addr);
                                 page->dirty_mask[(phys_addr >> 10) & 3] = 0;
-                                if (!block->pc)
+                                if (block->pc == BLOCK_PC_INVALID)
                                         valid_block = 0;
                         }
                         if (valid_block && block->page_mask2)
@@ -629,7 +634,7 @@ void exec386_dynarec(int cycs)
                                 {
                                         codegen_check_flush(page_2, page_2->dirty_mask[(phys_addr_2 >> 10) & 3], phys_addr_2);
                                         page_2->dirty_mask[(phys_addr_2 >> 10) & 3] = 0;
-                                        if (!block->pc)
+                                        if (block->pc == BLOCK_PC_INVALID)
                                                 valid_block = 0;
                                 }
                         }
@@ -719,6 +724,8 @@ inrecomp=0;
                                 if (trap)
                                         CPU_BLOCK_END();
 
+                                if (nmi && nmi_enable && nmi_mask)
+                                        CPU_BLOCK_END();
 
                                 if (cpu_state.abrt)
                                 {
@@ -795,6 +802,8 @@ inrecomp=0;
                                 if (trap)
                                         CPU_BLOCK_END();
 
+                                if (nmi && nmi_enable && nmi_mask)
+                                        CPU_BLOCK_END();
 
                                 if (cpu_state.abrt)
                                 {
@@ -867,6 +876,19 @@ inrecomp=0;
                                 flags&=~T_FLAG;
                                 cpu_state.pc=readmemw(0,addr);
                                 loadcs(readmemw(0,addr+2));
+                        }
+                }
+                else if (nmi && nmi_enable && nmi_mask)
+                {
+                        cpu_state.oldpc = cpu_state.pc;
+                        oldcs = CS;
+//                        pclog("NMI\n");
+                        x86_int(2);
+                        nmi_enable = 0;
+                        if (nmi_auto_clear)
+                        {
+                                nmi_auto_clear = 0;
+                                nmi = 0;
                         }
                 }
                 else if ((flags&I_FLAG) && pic_intpending)

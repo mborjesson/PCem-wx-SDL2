@@ -41,6 +41,7 @@
 #include "vid_tvga.h"
 #include "vid_vga.h"
 #include "vid_wy700.h"
+#include "vid_t3100e.h"
 
 typedef struct
 {
@@ -311,6 +312,10 @@ void video_init()
                 case ROM_IBMPS1_2121:
                 device_add(&ps1_m2121_svga_device);
                 return;
+
+		case ROM_T3100E:
+                device_add(&t3100e_device);
+                return;
         }
         device_add(video_cards[video_old_to_new(gfxcard)].device);
 }
@@ -318,8 +323,8 @@ void video_init()
 
 BITMAP *buffer32;
 
-uint8_t fontdat[256][8];
-uint8_t fontdatm[256][16];
+uint8_t fontdat[2048][8];
+uint8_t fontdatm[2048][16];
 uint8_t fontdatw[512][32];	/* Wyse700 font */
 uint8_t fontdat8x12[256][16];	/* MDSI Genius font */
 
@@ -329,6 +334,8 @@ void loadfont(char *s, int format)
 {
         FILE *f=romfopen(s,"rb");
         int c,d;
+        
+        pclog("loadfont %i %s %p\n", format, s, f);
         if (!f)
 	{
 		return;
@@ -412,6 +419,36 @@ void loadfont(char *s, int format)
                         }
                 }
 		break;
+		case 5: /* Toshiba 3100e */
+		for (d = 0; d < 2048; d += 512)	/* Four languages... */
+		{
+	                for (c = d; c < d+256; c++)
+                	{
+                       		fread(&fontdatm[c][8], 1, 8, f);
+                	}
+                	for (c = d+256; c < d+512; c++)
+                	{
+                        	fread(&fontdatm[c][8], 1, 8, f);
+                	}
+	                for (c = d; c < d+256; c++)
+                	{
+                        	fread(&fontdatm[c][0], 1, 8, f);
+                	}
+                	for (c = d+256; c < d+512; c++)
+                	{
+                        	fread(&fontdatm[c][0], 1, 8, f);
+                	}
+			fseek(f, 4096, SEEK_CUR);	/* Skip blank section */
+	                for (c = d; c < d+256; c++)
+                	{
+                       		fread(&fontdat[c][0], 1, 8, f);
+                	}
+                	for (c = d+256; c < d+512; c++)
+                	{
+                        	fread(&fontdat[c][0], 1, 8, f);
+                	}
+		}
+                break;
 
         }
         fclose(f);

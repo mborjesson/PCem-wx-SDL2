@@ -554,7 +554,7 @@ void et4000w32p_mmu_write(uint32_t addr, uint8_t val, void *p)
                 }
                 else
                 {
-                        if ((addr&0x1fff) + et4000->mmu.base[bank] < svga->vram_limit)
+                        if ((addr&0x1fff) + et4000->mmu.base[bank] < svga->vram_max)
                         {
                                 svga->vram[(addr & 0x1fff) + et4000->mmu.base[bank]] = val;
                                 svga->changedvram[((addr & 0x1fff) + et4000->mmu.base[bank]) >> 12] = changeframecount;
@@ -614,7 +614,7 @@ uint8_t et4000w32p_mmu_read(uint32_t addr, void *p)
                         /*???*/
                         return temp;
                 }
-                if ((addr&0x1fff) + et4000->mmu.base[bank] >= svga->vram_limit)
+                if ((addr&0x1fff) + et4000->mmu.base[bank] >= svga->vram_max)
                         return 0xff;
                 return svga->vram[(addr&0x1fff) + et4000->mmu.base[bank]];
                 
@@ -1085,7 +1085,6 @@ static void et4000w32p_io_set(et4000w32p_t *et4000)
 uint8_t et4000w32p_pci_read(int func, int addr, void *p)
 {
         et4000w32p_t *et4000 = (et4000w32p_t *)p;
-        svga_t *svga = &et4000->svga;
 
 //        pclog("ET4000 PCI read %08X\n", addr);
 
@@ -1110,8 +1109,8 @@ uint8_t et4000w32p_pci_read(int func, int addr, void *p)
                 
                 case 0x10: return 0x00; /*Linear frame buffer address*/
                 case 0x11: return 0x00;
-                case 0x12: return svga->crtc[0x5a] & 0x80;
-                case 0x13: return svga->crtc[0x59];
+                case 0x12: return 0x00;
+                case 0x13: return et4000->pci_regs[0x13];
 
                 case 0x30: return et4000->pci_regs[0x30] & 0x01; /*BIOS ROM address*/
                 case 0x31: return 0x00;
@@ -1137,7 +1136,8 @@ void et4000w32p_pci_write(int func, int addr, uint8_t val, void *p)
                 break;
 
                 case 0x13: 
-                et4000->linearbase = val << 24; 
+                et4000->linearbase = val << 24;
+                et4000->pci_regs[0x13] = val;
                 et4000w32p_recalcmapping(et4000); 
                 break;
 
