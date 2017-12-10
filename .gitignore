@@ -15,3 +15,10 @@ pclog.txt
 pcem.log
 autom4te.cache
 roms/tolower.sh
+src/.deps
+config.log
+config.status
+Makefile
+src/Makefile
+pcem
+src/pcem
